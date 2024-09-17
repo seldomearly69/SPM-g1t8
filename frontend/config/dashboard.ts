@@ -12,6 +12,38 @@ export const dashboardConfig: DashboardConfig = {
       disabled: true,
     },
   ],
+  loggedOutNav: [
+    {
+      title: "Home",
+      href: "/",
+    },
+    {
+      title: "Login",
+      href: "/login",
+    },
+  ],
+  loggedInNav: [
+    {
+      title: "Home",
+      href: "/dashboard",
+    },
+    {
+      title: "My Schedule",
+      href: "/schedule",
+    },
+    {
+      title: "Apply for WFH",
+      href: "/apply",
+    },
+    {
+      title: "Manage Arrangements",
+      href: "/manage",
+    },
+    {
+      title: "Logout",
+      href: "/logout",
+    },
+  ],
   sidebarNav: [
     {
       title: "Overview",

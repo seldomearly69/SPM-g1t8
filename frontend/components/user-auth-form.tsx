@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/frontend/lib/utils";
-import { userAuthSchema } from "@/frontend/lib/validations/auth";
+import { cn } from "@/lib/utils";
+import { userAuthSchema } from "@/lib/validations/auth";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +10,6 @@ import { buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
 import { redirect, useSearchParams } from "next/navigation";
 import { useState } from "react";
-
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -74,9 +73,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         type="button"
         className={cn(buttonVariants({ variant: "outline" }))}
         onClick={() => {
-          setIsGitHubLoading(true)
-          signIn("github", {callbackUrl: "/dashboard"})}
-        }
+          setIsGitHubLoading(true);
+          signIn("github", { callbackUrl: "/dashboard" });
+        }}
         disabled={isLoading || isGitHubLoading}
       >
         Github

@@ -1,12 +1,8 @@
 export type DashboardConfig = {
   mainNav: MainNavItem[];
+  loggedOutNav: NavbarItem[];
+  loggedInNav: NavbarItem[];
   sidebarNav: SidebarNavItem[];
-};
-
-export type NavItem = {
-  title: string;
-  href: string;
-  disabled?: boolean;
 };
 
 export type MainNavItem = NavItem;
@@ -25,6 +21,15 @@ export type SidebarNavItem = {
       href?: string;
     }
 );
+
+export type NavbarItem = {
+  title: string;
+  href: string;
+  disabled?: boolean;
+  external?: boolean;
+  icon?: keyof typeof Icons;
+  image?: string;
+};
 
 export type DaysInWeekProps = {
   locale?: Locale;
@@ -51,11 +56,11 @@ export type MonthlyBodyProps<DayData> = {
     ex: [0,6] would remove sunday and saturday from rendering
   */
   omitDays?: number[];
-  events: (DayData & { date: Date})[];
+  events: (DayData & { date: Date })[];
   children: ReactNode;
 };
 
-export export type EventType = {
+export type EventType = {
   date: Date;
   title: string;
   type: string;
@@ -65,5 +70,4 @@ export type DefaultEventItemProps = {
   title: string;
   date: Date;
   type: string;
-
 };
