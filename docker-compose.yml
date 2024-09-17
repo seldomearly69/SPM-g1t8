@@ -6,13 +6,35 @@ services:
 #################################
   db:
     container_name: db
-    build: ./database
+    build: ./backend/database
     ports: 
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      - internal_network
+#################################
+# Authentication
+#################################
+  authentication:
+    container_name: authentication
+    build: ./backend/authentication
+    ports: 
+      - "5000:5000"
+    env_file:
+      - .env
+    networks:
+      - internal_network
+    environment:
+      PYTHONUNBUFFERED: 1
 
 
 volumes:
   pgdata:
     driver: local
+
+networks:
+  internal_network:
+    driver: bridge
