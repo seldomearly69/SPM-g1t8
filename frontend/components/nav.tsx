@@ -4,6 +4,7 @@ import { SidebarNavItem } from "@/types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface DashboardNavProps {
   items: SidebarNavItem[];
@@ -13,19 +14,33 @@ export function DashboardNav({ items }: DashboardNavProps) {
   const path = usePathname();
 
   return (
-    <nav className="grid items-start gap-2">
+    <nav className="grid items-start gap-3 pl-4 border-r-2 border-gray-300 pr-4">
       {items.map((item, index) => {
+        const isActive = item.href === path;
         return (
           item.href && (
-            <Link key={index} href={item.href}>
-              <span
-                className={cn(
-                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                <span>{item.title}</span>
-              </span>
-            </Link>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+            >
+              <Link href={item.href}>
+                <span
+                  className={cn(
+                    "group flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ease-in-out",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "hover:bg-accent hover:text-accent-foreground",
+                    "border-l-4",
+                    isActive ? "border-primary" : "border-transparent"
+                  )}
+                >
+                  {item.icon && <item.icon className="mr-3 h-5 w-5" />}
+                  <span>{item.title}</span>
+                </span>
+              </Link>
+            </motion.div>
           )
         );
       })}

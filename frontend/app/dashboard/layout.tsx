@@ -13,7 +13,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col space-y-6">
       <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="container flex justify-between items-center">
+        <div className="w-full flex justify-between items-center">
           <MainNav items={dashboardConfig.loggedInNav} />
         </div>
       </header>
