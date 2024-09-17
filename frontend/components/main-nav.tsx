@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/frontend/lib/utils";
 import { MainNavItem } from "@/types";
 import Link from "next/link";
 import * as React from "react";
