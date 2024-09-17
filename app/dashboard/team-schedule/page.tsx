@@ -1,93 +1,92 @@
 "use client"
 
+import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar";
 import { useState, useEffect } from "react"
-// import { Calendar } from "@/components/ui/calendar"
-// import { Badge } from "@/components/ui/badge"
-// import { Card } from "@/components/ui/card"
+import {
+  startOfMonth,
+  addMonths,
+  addHours,
+  subHours,
+  addDays,
+  subDays,
+  format
+} from 'date-fns';
+import { EventType } from "@/types";
 
-// Mock data - replace with actual API call
-const mockTeamSchedule = [
-  { date: "2023-05-01", schedules: [
-    { name: "Alice", type: "office" },
-    { name: "Bob", type: "wfh" },
-    { name: "Charlie", type: "office" },
-  ]},
-  { date: "2023-05-02", schedules: [
-    { name: "Alice", type: "wfh" },
-    { name: "Bob", type: "office" },
-    { name: "Charlie", type: "wfh" },
-  ]},
-  // ... more dates
+
+const mockSchedule = [
+  { date: new Date("2024-09-01"), title: "3/7" , type: "AM"},
+  { date: new Date("2024-09-01"), title: "2/7" , type: "PM"},
+  { date: new Date("2024-09-01"), title: "4/7" , type: "Full"},
+  { date: new Date("2024-05-04"), title: "wfh" , type: "AM"},
+  { date: new Date("2024-05-05"), title: "office" , type: "AM"},
+  { date: new Date("2024-05-06"), title: "wfh" , type: "AM"},
+  { date: new Date("2023-05-07"), title: "office" , type: "AM"},
+  { date: new Date("2023-05-08"), title: "wfh" , type: "AM"},
+  { date: new Date("2023-05-09"), title: "office" , type: "AM"},
+  { date: new Date("2023-05-10"), title: "wfh" , type: "AM"},
 ]
 
+const mockAvailability = [
+  { employee_name: "John Doe", department: "Engineering", availability: "Office", type: "AM", is_pending: false },
+  { employee_name: "Jane Smith", department: "Marketing", availability: "Office", type: "AM", is_pending: false },
+  { employee_name: "Alice Johnson", department: "Sales", availability: "Office", type: "AM", is_pending: false },
+  { employee_name: "Bob Brown", department: "Engineering", availability: "Office", type: "AM", is_pending: false },
+  { employee_name: "Charlie Davis", department: "Marketing", availability: "Office", type: "AM", is_pending: false },
+  { employee_name: "Diana White", department: "Sales", availability: "Office", type: "AM", is_pending:true },
+  { employee_name: "Eve Green", department: "Engineering", availability: "Office", type: "AM", is_pending: false },    
+]
+
+
 export default function TeamSchedulePage() {
-  const [teamSchedule, setTeamSchedule] = useState(mockTeamSchedule)
+  const [teamSchedule, setTeamSchedule] = useState(mockSchedule)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
-  useEffect(() => {
-    // TODO: Fetch actual team schedule data from API
-    // setTeamSchedule(await fetchTeamSchedule())
-  }, [])
 
-  const getDateContent = (date: Date) => {
-    const scheduleItem = teamSchedule.find(item => item.date === date.toISOString().split('T')[0])
-    if (scheduleItem) {
-      const wfhCount = scheduleItem.schedules.filter(s => s.type === "wfh").length
-      return (
-        <Badge variant="outline">
-          {wfhCount}/{scheduleItem.schedules.length} WFH
-        </Badge>
-      )
-    }
-    return null
-  }
 
-  const getSelectedDateSchedule = () => {
-    return teamSchedule.find(item => item.date === selectedDate?.toISOString().split('T')[0])
-  }
+
+
+
+   
+  let [currentMonth, setCurrentMonth] = useState<Date>(
+    startOfMonth(new Date())
+  );
+
 
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Team Schedule</h2>
-      <div className="grid gap-6 md:grid-cols-2">
+
         <div>
-          {/* <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="rounded-md border"
-            components={{
-              DayContent: ({ date }) => (
-                <>
-                  {date.getDate()}
-                  {getDateContent(date)}
-                </>
-              ),
-            }}
-          /> */}
+          <MonthlyCalendar
+            currentMonth={selectedDate || new Date()}
+            onCurrentMonthChange={setSelectedDate}
+          >
+            <MonthlyNav/>
+            <MonthlyBody
+            events={teamSchedule}
+           >
+            <MonthlyDay<EventType>
+                
+                renderDay={data =>
+                  data.map((item, index) => (
+                    <DefaultMonthlyEventItem
+                      key={index}
+                      title={item.title}
+                      date={item.date}
+                      type={item.type}
+                    />
+                  ))
+                }
+            />
+           </MonthlyBody>
+        
+          </MonthlyCalendar>
         </div>
         <div>
-          <h3 className="text-xl font-semibold mb-4">Team Details</h3>
-          {/* {selectedDate && getSelectedDateSchedule() && (
-            <Card className="p-4">
-              <h4 className="font-semibold mb-2">{selectedDate.toDateString()}</h4>
-              <ul className="space-y-2">
-                {getSelectedDateSchedule()?.schedules.map((schedule, index) => (
-                  <li key={index} className="flex justify-between items-center">
-                    <span>{schedule.name}</span>
-                    <Badge variant={schedule.type === "wfh" ? "secondary" : "default"}>
-                      {schedule.type === "wfh" ? "WFH" : "Office"}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )} */}
-          {selectedDate && !getSelectedDateSchedule() && (
-            <p>No team schedule information available for this date.</p>
-          )}
+        
         </div>
       </div>
-    </div>
+
   )
 }
