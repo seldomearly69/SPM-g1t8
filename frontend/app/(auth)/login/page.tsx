@@ -10,23 +10,25 @@ export default function LoginPage() {
         href="/"
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "absolute left-4 top-4"
+          "absolute left-8 top-8 text-xl"
         )}
       >
         <>Back</>
       </Link>
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-light">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-8 sm:w-[450px]">
+        <div className="flex flex-col space-y-4 text-center">
+          <h1 className="text-4xl font-semibold tracking-light">
             Welcome back
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Enter your email to sign in to your account
           </p>
         </div>
         <UserAuthForm />
-        <p>
-          <Link href="/register">Don't have an account? Sign Up</Link>
+        <p className="text-lg">
+          <Link href="/register" className="text-lg">
+            Don't have an account? Sign Up
+          </Link>
         </p>
       </div>
     </div>
