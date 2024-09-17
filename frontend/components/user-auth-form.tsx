@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { userAuthSchema } from "@/lib/validations/auth";
+import { cn } from "@/frontend/lib/utils";
+import { userAuthSchema } from "@/frontend/lib/validations/auth";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
