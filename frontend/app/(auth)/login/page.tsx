@@ -43,7 +43,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-[750px] space-y-12"
+          className="w-full max-w-[600px] space-y-12"
         >
           <div className="flex flex-col space-y-8 text-center">
             <Link href="/" className="mx-auto">
