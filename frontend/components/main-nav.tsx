@@ -13,7 +13,7 @@ interface MainNavProps {
   children?: React.ReactNode;
 }
 
-export function MainNav({ items, children }: MainNavProps) {
+export function MainNav({ items }: MainNavProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   return (
     <motion.div

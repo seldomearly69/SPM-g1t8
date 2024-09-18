@@ -51,7 +51,7 @@ const BreadcrumbSeparator = ({
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
 
 const BreadcrumbEllipsis = React.forwardRef<HTMLSpanElement, React.ComponentPropsWithoutRef<"span">>(({ className, ...props }, ref) => (
-    <span ref={ref} {...props} />
+    <span ref={ref} className={cn("inline-flex items-center gap-1.5", className)} {...props} />
 ))
 
 BreadcrumbEllipsis.displayName = "BreadcrumbEllipsis"

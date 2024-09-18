@@ -1,22 +1,7 @@
 "use client";
 
-import {
-  DefaultMonthlyEventItem,
-  MonthlyBody,
-  MonthlyCalendar,
-  MonthlyDay,
-  MonthlyNav,
-} from "@/components/monthly-calendar";
-import { useState, useEffect } from "react";
-import {
-  startOfMonth,
-  addMonths,
-  addHours,
-  subHours,
-  addDays,
-  subDays,
-  format,
-} from "date-fns";
+import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar";
+import { useState} from "react"
 import { EventType } from "@/types";
 import { motion } from "framer-motion";
 
@@ -33,57 +18,16 @@ const mockSchedule = [
   { date: new Date("2023-05-10"), title: "wfh", type: "AM" },
 ];
 
-const mockAvailability = [
-  {
-    employee_name: "John Doe",
-    department: "Engineering",
-    availability: "Office",
-    type: "AM",
-    is_pending: false,
-  },
-  {
-    employee_name: "Jane Smith",
-    department: "Marketing",
-    availability: "Office",
-    type: "AM",
-    is_pending: false,
-  },
-  {
-    employee_name: "Alice Johnson",
-    department: "Sales",
-    availability: "Office",
-    type: "AM",
-    is_pending: false,
-  },
-  {
-    employee_name: "Bob Brown",
-    department: "Engineering",
-    availability: "Office",
-    type: "AM",
-    is_pending: false,
-  },
-  {
-    employee_name: "Charlie Davis",
-    department: "Marketing",
-    availability: "Office",
-    type: "AM",
-    is_pending: false,
-  },
-  {
-    employee_name: "Diana White",
-    department: "Sales",
-    availability: "Office",
-    type: "AM",
-    is_pending: true,
-  },
-  {
-    employee_name: "Eve Green",
-    department: "Engineering",
-    availability: "Office",
-    type: "AM",
-    is_pending: false,
-  },
-];
+// const mockAvailability = [
+//   { employee_name: "John Doe", department: "Engineering", availability: "Office", type: "AM", is_pending: false },
+//   { employee_name: "Jane Smith", department: "Marketing", availability: "Office", type: "AM", is_pending: false },
+//   { employee_name: "Alice Johnson", department: "Sales", availability: "Office", type: "AM", is_pending: false },
+//   { employee_name: "Bob Brown", department: "Engineering", availability: "Office", type: "AM", is_pending: false },
+//   { employee_name: "Charlie Davis", department: "Marketing", availability: "Office", type: "AM", is_pending: false },
+//   { employee_name: "Diana White", department: "Sales", availability: "Office", type: "AM", is_pending:true },
+//   { employee_name: "Eve Green", department: "Engineering", availability: "Office", type: "AM", is_pending: false },    
+// ]
+
 
 export default function TeamSchedulePage() {
   const [teamSchedule, setTeamSchedule] = useState(mockSchedule);
@@ -91,9 +35,15 @@ export default function TeamSchedulePage() {
     new Date()
   );
 
-  let [currentMonth, setCurrentMonth] = useState<Date>(
-    startOfMonth(new Date())
-  );
+
+
+
+
+
+   
+  // let [currentMonth, setCurrentMonth] = useState<Date>(
+  //   startOfMonth(new Date())
+  // );
 
   return (
     <motion.div

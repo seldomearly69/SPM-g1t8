@@ -24,16 +24,20 @@ const AlertDialogPortal = ({
   );
 };
 
+AlertDialogPortal.displayName = AlertDialogPrimitive.Portal.displayName;
+
 const AlertDialogOverlay = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
->(({ className, children, ...props }, ref) => (
+>(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     ref={ref}
     className={cn("fixed inset-0 bg-black bg-opacity-50", className)}
     {...props}
   />
 ));
+
+AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
 
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
@@ -51,6 +55,8 @@ const AlertDialogContent = React.forwardRef<
     />
   </AlertDialogPortal>
 ));
+
+AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
 
 const AlertDialogHeader = ({
   className,
@@ -80,6 +86,8 @@ const AlertDialogTitle = React.forwardRef<
   />
 ));
 
+AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName;
+
 const AlertDialogDescription = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
@@ -90,6 +98,8 @@ const AlertDialogDescription = React.forwardRef<
     {...props}
   />
 ));
+
+AlertDialogDescription.displayName = AlertDialogPrimitive.Description.displayName;
 
 const AlertDialogCancel = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
@@ -102,6 +112,8 @@ const AlertDialogCancel = React.forwardRef<
   />
 ));
 
+AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
+
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
@@ -112,6 +124,8 @@ const AlertDialogAction = React.forwardRef<
     {...props}
   />
 ));
+
+AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 
 export {
   AlertDialog,

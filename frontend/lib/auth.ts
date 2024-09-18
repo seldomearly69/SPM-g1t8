@@ -1,7 +1,5 @@
 import { NextAuthOptions } from "next-auth";
-import EmailProvider from "next-auth/providers/email";
-import GitHubProvider from "next-auth/providers/github";
-import { db } from "./db";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -11,12 +9,21 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   providers: [
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET
-
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials) => {
+        console.log("credentials", credentials)
+        if (credentials.email === "liawjunyi5000@gmail.com" && credentials.password === "asdf") {
+          console.log("credentials", credentials)
+          return { id: "1", name: "User", email: "user@example.com" };
+        }
+        return null;
+      },
     }),
-   
   ],
   callbacks: {
     async session({ token, session }) {
@@ -33,27 +40,27 @@ export const authOptions: NextAuthOptions = {
 
     async jwt({ token, user }) {
    
-      const dbUser = await db.user.findFirst({
-        where: {
-          email: token.email,
-        },
-      });
+      // const dbUser = await db.user.findFirst({
+      //   where: {
+      //     email: token.email,
+      //   },
+      // });
  
      
-      if (!dbUser) {
+      
         if (user) {
           token.id = user?.id;
           
-        }
+    
         
         return token;
       }
 
       return {
-        id: dbUser.id,
-        name: dbUser.name,
-        email: dbUser.email,
-        picture: dbUser.image,
+        id: 1,
+        name: "User",
+        email: "liawjunyi5000@gmail.com",
+        picture: "https://avatars.githubusercontent.com/u/1234567890?v=4",
       };
     },
   },
