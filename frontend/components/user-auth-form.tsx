@@ -6,10 +6,12 @@ import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
-import { redirect, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { Label } from "./ui/label";
+import { useRouter } from "next/navigation";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -26,22 +28,27 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   async function onSubmit(data: FormData) {
+    console.log("data", data)
     setIsLoading(true);
 
-    const signInResult = await signIn("email", {
-      email: data.email.toLowerCase(),
+    const signInResult = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
       redirect: false,
-      callbackUrl: searchParams?.get("from") || "/dashboard",
+      callbackUrl:  searchParams.get("callbackUrl") || "/dashboard",
     });
 
     setIsLoading(false);
 
-    if (!signInResult?.ok) {
-      console.log("something went wrong");
+    if (signInResult?.ok) {
+        router.push(signInResult.url || "/dashboard");
+        console.log("Sign in success:", signInResult.url);
     } else {
-      console.log("register success");
+      console.error("Sign in failed:", signInResult?.error);
+      // Handle error (e.g., show error message to user)
     }
   }
 
@@ -49,8 +56,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     <div className={cn("grid gap-6", className)} {...props}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-6">
-          <div className="grid gap-1">
-            Email
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               placeholder="johndoe@example.com"
@@ -58,7 +65,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               {...register("email")}
             />
           </div>
-          <button className={cn(buttonVariants())}>Sign In with Email</button>
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label htmlFor="password">Password</Label>
+            </div>
+            <Input id="password" type="password"   {...register("password")} required />
+          </div>
+
+          <Button onClick={() => console.log(errors)} type="submit" disabled={isLoading}>Sign In with Email</Button>
         </div>
       </form>
       <div className="relative">
@@ -73,9 +87,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         type="button"
         className={cn(buttonVariants({ variant: "outline" }))}
         onClick={() => {
-          setIsGitHubLoading(true);
-          signIn("github", { callbackUrl: "/dashboard" });
-        }}
+          setIsGitHubLoading(true)
+          signIn("github", {callbackUrl: "/dashboard"})}
+        }
         disabled={isLoading || isGitHubLoading}
       >
         Github

@@ -30,6 +30,7 @@ const DropdownMenuContent = React.forwardRef<
     />
   </DropdownMenuPrimitive.Portal>
 ));
+DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
@@ -60,6 +61,7 @@ const DropdownMenuSeparator = React.forwardRef<
   />
 ));
 
+DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
 export {
   DropdownMenu,
   DropdownMenuTrigger,

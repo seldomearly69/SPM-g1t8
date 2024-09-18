@@ -1,4 +1,4 @@
-import { BodyState, DefaultEventItemProps, EventType, MonthlyBodyProps, MonthlyDayProps, OmittedDaysProps } from '@/types';
+import { BodyState, DefaultEventItemProps, MonthlyBodyProps, MonthlyDayProps, OmittedDaysProps } from '@/types';
 import {
     eachDayOfInterval,
     startOfMonth,
@@ -41,8 +41,8 @@ export const MonthlyCalendar = ({
   onCurrentMonthChange,
   children,
 }: Props) => {
-  let monthStart = startOfMonth(currentMonth);
-  let days = eachDayOfInterval({
+  const monthStart = startOfMonth(currentMonth);
+  const days = eachDayOfInterval({
     start: monthStart,
     end: endOfMonth(monthStart),
   });
@@ -62,7 +62,7 @@ export const MonthlyCalendar = ({
 };
 
 export const MonthlyNav = () => {
-  let { locale, currentMonth, onCurrentMonthChange } = useMonthlyCalendar();
+  const { locale, currentMonth, onCurrentMonthChange } = useMonthlyCalendar();
 
   return (
     <div className="flex justify-end mb-4">
@@ -112,11 +112,11 @@ export const handleOmittedDays = ({
   // omit the padding if an omitted day was before the start of the month
   let firstDayOfMonth = getDay(daysToRender[0]) as number;
   if (omitDays) {
-    let subtractOmittedDays = omitDays.filter(day => day < firstDayOfMonth)
+    const subtractOmittedDays = omitDays.filter(day => day < firstDayOfMonth)
       .length;
     firstDayOfMonth = firstDayOfMonth - subtractOmittedDays;
   }
-  let padding = new Array(firstDayOfMonth).fill(0);
+  const padding = new Array(firstDayOfMonth).fill(0);
 
   return { headings, daysToRender, padding };
 };
@@ -140,21 +140,21 @@ export function MonthlyBody<DayData>({
     events,
     children,
   }: MonthlyBodyProps<DayData>) {
-    let { days, locale } = useMonthlyCalendar();
-    let { headings, daysToRender, padding } = handleOmittedDays({
+    const { days, locale } = useMonthlyCalendar();
+    const { headings, daysToRender, padding } = handleOmittedDays({
       days,
       omitDays,
       locale,
     });
    
-    let headingClassName =
+    const headingClassName =
       'border-b-2 p-2 border-r-2 lg:block hidden';
 
     return (
       <div className="bg-white border-l-2 border-t-2">
         <div
           className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ${
-            //@ts-ignore
+            //@ts-expect-error -- headings.length is not known at compile time
             headingClasses[`l${headings.length}`]
           }`}
         >
@@ -192,9 +192,9 @@ export function MonthlyBody<DayData>({
 
 
 export function MonthlyDay<DayData>({ renderDay}: MonthlyDayProps<DayData>) {
-    let { locale } = useMonthlyCalendar();
-    let { day, events } = useMonthlyBody<DayData>()
-    let dayNumber = format(day, 'd', { locale });
+    const { locale } = useMonthlyCalendar();
+    const { day, events } = useMonthlyBody<DayData>()
+    const dayNumber = format(day, 'd', { locale });
     return (
       <div
         title={`Events for day ${dayNumber}`}
@@ -216,7 +216,6 @@ export function MonthlyDay<DayData>({ renderDay}: MonthlyDayProps<DayData>) {
 
 export const DefaultMonthlyEventItem = ({
     title,
-    date,
     type,
 
   }: DefaultEventItemProps) => {
