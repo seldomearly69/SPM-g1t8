@@ -6,7 +6,7 @@ services:
 #################################
   db:
     container_name: db
-    build: ./backend/database
+    build: ./database
     ports: 
       - "5432:5432"
     volumes:
@@ -20,9 +20,23 @@ services:
 #################################
   authentication:
     container_name: authentication
-    build: ./backend/authentication
+    build: ./authentication
     ports: 
-      - "5000:5000"
+      - "5001:5001"
+    env_file:
+      - .env
+    networks:
+      - internal_network
+    environment:
+      PYTHONUNBUFFERED: 1
+#################################
+# Requests
+#################################
+  requests:
+    container_name: requests
+    build: ./requests
+    ports: 
+      - "5002:5002"
     env_file:
       - .env
     networks:

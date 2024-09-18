@@ -1,0 +1,9 @@
+Flask==2.2.5                
+Flask-Cors==4.0.0
+psycopg2-binary==2.9.9
+Flask-GraphQL==2.0.1          
+SQLAlchemy==1.4.46             
+Flask-SQLAlchemy==2.5.1      
+graphene==2.1.8               
+graphene-sqlalchemy==2.3.0
+graphql-core==2.3.2
