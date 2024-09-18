@@ -3,6 +3,7 @@
 import { MainNav } from "@/components/main-nav";
 import { DashboardNav } from "@/components/nav";
 import { dashboardConfig } from "@/config/dashboard";
+import Footer from "@/components/Footer";
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
@@ -23,6 +24,7 @@ export default async function DashboardLayout({
         </aside>
         <main>{children}</main>
       </div>
+      <Footer />
     </div>
   );
 }
