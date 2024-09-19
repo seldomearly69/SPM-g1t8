@@ -22,6 +22,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<FormData>({
     resolver: zodResolver(userAuthSchema),
   });
@@ -30,33 +31,30 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-
-
   async function onSubmit(data: FormData) {
-      console.log("data", data)
-      setIsLoading(true);
-     
-      const signInResult = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl:  searchParams.get("callbackUrl") || "/dashboard",
-      });
+    console.log("data", data);
+    setIsLoading(true);
 
-      setIsLoading(false);
-  
-      if (signInResult?.ok) {
-          router.push(signInResult.url || "/dashboard");
-          console.log("Sign in success:", signInResult.url);
-      } else {
-        console.error("Sign in failed:", signInResult?.error);
-        // Handle error (e.g., show error message to user)
-      }
-  
-     
+    const signInResult = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+      callbackUrl: searchParams?.get("callbackUrl") || "/dashboard",
+    });
+
+    setIsLoading(false);
+
+    if (signInResult?.ok) {
+      router.push(signInResult.url || "/dashboard");
+      console.log("Sign in success:", signInResult.url);
+    } else {
+      // Set error for password field
+      setError("password", {
+        type: "manual",
+        message: "Invalid email or password",
+      });
     }
-   
- 
+  }
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -70,15 +68,32 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               type="email"
               {...register("email")}
             />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email.message}</p>
+            )}
           </div>
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
             </div>
-            <Input id="password" type="password"   {...register("password")} required />
+            <Input
+              id="password"
+              type="password"
+              {...register("password")}
+              required
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
+            )}
           </div>
 
-          <Button onClick={() => console.log(errors)} type="submit" disabled={isLoading}>Sign In with Email</Button>
+          <Button
+            onClick={() => console.log(errors)}
+            type="submit"
+            disabled={isLoading}
+          >
+            Sign In with Email
+          </Button>
         </div>
       </form>
       <div className="relative">
@@ -93,9 +108,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         type="button"
         className={cn(buttonVariants({ variant: "outline" }))}
         onClick={() => {
-          setIsGitHubLoading(true)
-          signIn("github", {callbackUrl: "/dashboard"})}
-        }
+          setIsGitHubLoading(true);
+          signIn("github", { callbackUrl: "/dashboard" });
+        }}
         disabled={isLoading || isGitHubLoading}
       >
         Github

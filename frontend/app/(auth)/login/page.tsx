@@ -9,7 +9,7 @@ export default function LoginPage() {
     hidden: { opacity: 0 },
     visible: (i = 1) => ({
       opacity: 1,
-      transition: { staggerChildren: 0.12, delayChildren: 0.04 * i },
+      transition: { staggerChildren: 0.08, delayChildren: 0.02 * i },
     }),
   };
 
@@ -19,38 +19,59 @@ export default function LoginPage() {
       x: 0,
       transition: {
         type: "spring",
-        damping: 12,
-        stiffness: 100,
+        damping: 15,
+        stiffness: 150,
       },
     },
     hidden: {
       opacity: 0,
-      x: 20,
+      x: 10,
       transition: {
         type: "spring",
-        damping: 12,
-        stiffness: 100,
+        damping: 15,
+        stiffness: 150,
+      },
+    },
+  };
+
+  const fastChild = {
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        type: "spring",
+        damping: 15,
+        stiffness: 250,
+      },
+    },
+    hidden: {
+      opacity: 0,
+      x: 10,
+      transition: {
+        type: "spring",
+        damping: 15,
+        stiffness: 250,
       },
     },
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200">
-      <div className=" flex-grow flex items-center justify-center">
+      <div className="flex-grow flex items-center justify-center">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-[600px] space-y-12"
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-[600px] space-y-8"
         >
-          <div className="flex flex-col space-y-8 text-center">
+          <div className="flex flex-col space-y-6 text-center">
             <Link href="/" className="mx-auto">
               <motion.img
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.03 }}
                 src="/assets/images/logo.png"
                 alt="FlexiWork Logo"
-                width={200}
-                height={200}
+                width={180}
+                height={180}
                 className="cursor-pointer p-0 m-0"
               />
             </Link>
@@ -58,7 +79,7 @@ export default function LoginPage() {
               variants={container}
               initial="hidden"
               animate="visible"
-              className="text-6xl font-semibold tracking-light"
+              className="text-5xl font-semibold tracking-light"
             >
               {Array.from("Welcome back").map((letter, index) => (
                 <motion.span key={index} variants={child}>
@@ -70,11 +91,11 @@ export default function LoginPage() {
               variants={container}
               initial="hidden"
               animate="visible"
-              className="text-2xl text-muted-foreground"
+              className="text-xl text-muted-foreground"
             >
               {Array.from("Enter your email to sign in to your account").map(
                 (letter, index) => (
-                  <motion.span key={index} variants={child}>
+                  <motion.span key={index} variants={fastChild}>
                     {letter === " " ? "\u00A0" : letter}
                   </motion.span>
                 )
@@ -84,8 +105,8 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="scale-110"
+            transition={{ delay: 0.2 }}
+            className="scale-105"
           >
             <UserAuthForm />
           </motion.div>
