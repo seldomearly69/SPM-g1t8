@@ -67,7 +67,7 @@ class Request(SQLAlchemyObjectType):
         model = RequestModel
 
 
-class ScheduleType(graphene.ObjectType):
+class OwnSchedule(graphene.ObjectType):
     staff_id = graphene.Int()
     role = graphene.Int()
     reporting_manager = graphene.Int()
@@ -75,13 +75,22 @@ class ScheduleType(graphene.ObjectType):
     year = graphene.Int()
     schedule = graphene.Field(graphene.JSONString)  # Use JSON for flexibility
 
-class Query(graphene.ObjectType):
-    own_schedule = graphene.Field(ScheduleType, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
+class TeamSchedule(graphene.ObjectType):
+    month = graphene.Int()
+    year = graphene.Int()
+    team_schedule = graphene.List(OwnSchedule)  # A list of schedules for each team member
 
+class Query(graphene.ObjectType):
+    own_schedule = graphene.Field(OwnSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
+    team_schedule = graphene.Field(TeamSchedule, month=graphene.Int(), year=graphene.Int(), team_member_ids=graphene.List(graphene.Int), filter_by_name=graphene.String())
+    
     def resolve_own_schedule(self, info, month, year, staff_id):
         # Extract the staff_id from the request context (if the user is authenticated and it's available)
         # Here, we'll assume you pass `staff_id` in the request for simplicity.
         return resolve_own_schedule(month, year, staff_id)
+
+    def resolve_team_schedule(self, info, month, year, team_member_ids=None, filter_by_name=None):
+        return resolve_team_schedule(month, year, team_member_ids, filter_by_name)
 
 schema = graphene.Schema(query=Query)
 
@@ -152,8 +161,6 @@ def resolve_own_schedule(month, year, staff_id):
         "year": year,
         "schedule": schedule
     }
-
-app.add_url_rule('/get_team_schedule', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))
 
 def resolve_team_schedule(month, year, team_member_ids=None, filter_by_name=None):
     # Query team members (optional: filtered by name)
