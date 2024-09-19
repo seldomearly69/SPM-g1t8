@@ -17,32 +17,11 @@ export const dashboardConfig: DashboardConfig = {
       title: "Home",
       href: "/",
     },
-    {
-      title: "Login",
-      href: "/login",
-    },
+   
   ],
   loggedInNav: [
-    {
-      title: "Home",
-      href: "/dashboard",
-    },
-    {
-      title: "My Schedule",
-      href: "/schedule",
-    },
-    {
-      title: "Apply for WFH",
-      href: "/apply",
-    },
-    {
-      title: "Manage Arrangements",
-      href: "/manage",
-    },
-    {
-      title: "Logout",
-      href: "/logout",
-    },
+ 
+    
   ],
   sidebarNav: [
     {
@@ -63,7 +42,7 @@ export const dashboardConfig: DashboardConfig = {
     {
       title: "Apply for WFH",
       href: "/dashboard/apply",
-      icon: "file-plus",
+      icon: "filePlus",
     },
     {
       title: "Manage Arrangements",

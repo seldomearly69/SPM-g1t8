@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter as FontSans } from "next/font/google"
+import localFont from "next/font/local"
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+
+const fontHeading = localFont({
+  src: "../fonts/CalSans-SemiBold.woff2",
+  variable: "--font-heading",
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,7 +28,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200`}
+        className={cn(
+          "min-h-screen bg-background from-gray-100 via-blue-50 to-gray-200 font-sans antialiased",
+          fontSans.variable,
+          fontHeading.variable)}
       >
         {children}
       </body>

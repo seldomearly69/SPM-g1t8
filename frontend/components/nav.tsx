@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Icons } from "@/components/icons"
 
 interface DashboardNavProps {
   items: SidebarNavItem[];
@@ -16,6 +17,8 @@ export function DashboardNav({ items }: DashboardNavProps) {
   return (
     <nav className="grid items-start gap-3 pl-4 border-r-2 border-gray-300 pr-4">
       {items.map((item, index) => {
+        const Icon = Icons[item.icon || "arrowRight"]
+
         const isActive = item.href === path;
         return (
           item.href && (
@@ -36,7 +39,7 @@ export function DashboardNav({ items }: DashboardNavProps) {
                     isActive ? "border-primary" : "border-transparent"
                   )}
                 >
-                  {item.icon && <item.icon className="mr-3 h-5 w-5" />}
+                  <Icon className="mr-2 h-4 w-4" />
                   <span>{item.title}</span>
                 </span>
               </Link>
