@@ -1,15 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoggedInLandingPage from "@/components/LoggedInLandingPage";
 import LoggedOutLandingPage from "@/components/LoggedOutLandingPage";
 
 export default function LandingPage() {
-  // Simulate logged-in state using a static boolean
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user);
+        }
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch session:", error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div>{isLoggedIn ? <LoggedInLandingPage /> : <LoggedOutLandingPage />}</div>
+    <div>
+      {user ? <LoggedInLandingPage user={user} /> : <LoggedOutLandingPage />}
+    </div>
   );
 }

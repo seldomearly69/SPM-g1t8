@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google"
-import localFont from "next/font/local"
+import { Inter as FontSans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -13,7 +12,7 @@ const fontSans = FontSans({
 const fontHeading = localFont({
   src: "../fonts/CalSans-SemiBold.woff2",
   variable: "--font-heading",
-})
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -31,7 +30,8 @@ export default function RootLayout({
         className={cn(
           "min-h-screen bg-background from-gray-100 via-blue-50 to-gray-200 font-sans antialiased",
           fontSans.variable,
-          fontHeading.variable)}
+          fontHeading.variable
+        )}
       >
         {children}
       </body>
