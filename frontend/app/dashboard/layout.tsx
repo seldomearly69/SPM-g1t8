@@ -14,11 +14,10 @@ interface DashboardLayoutProps {
 export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
-
-  const user = await getCurrentUser()
-  console.log("user", user)
+  const user = await getCurrentUser();
+  console.log("userfff", user);
   if (!user) {
-    return notFound()
+    return notFound();
   }
 
   return (
@@ -27,14 +26,16 @@ export default async function DashboardLayout({
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }} className="w-full flex h-16 justify-between items-center pr-6 py-4">
+          transition={{ duration: 0.5 }}
+          className="w-full flex h-16 justify-between items-center pr-6 py-4"
+        >
           <MainNav items={dashboardConfig.loggedInNav} />
           <UserAccountNav
-              user={{
-                name: "user.name",
-                image: "user.image",
-                email: "user.email",
-              }}
+            user={{
+              name: "user.name",
+              image: "user.image",
+              email: "user.email",
+            }}
           />
         </motion.div>
       </header>

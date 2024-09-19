@@ -32,7 +32,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const router = useRouter();
 
   async function onSubmit(data: FormData) {
-    console.log("data", data);
     setIsLoading(true);
 
     const signInResult = await signIn("credentials", {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { signOut } from "next-auth/react";
 
 export default function LoggedInLandingPage({ user }: { user: any }) {
   const [userData, setUserData] = useState<any>(null);
@@ -70,15 +71,16 @@ export default function LoggedInLandingPage({ user }: { user: any }) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
         >
-          <Link href="/logout">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-red-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </motion.button>
-          </Link>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 bg-red-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
+            onClick={() =>
+              signOut({ callbackUrl: `${window.location.origin}/login` })
+            }
+          >
+            Logout
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>
