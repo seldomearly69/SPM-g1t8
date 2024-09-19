@@ -1,3 +1,4 @@
+const { fontFamily } = require("tailwindcss/defaultTheme")
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -37,10 +38,10 @@ module.exports = {
           foreground: "hsl(var(--popover-foreground))",
         }
       },
-      // fontFamily: {
-      //   sans: ["var(--font-sans)", ...fontFamily.sans],
-      //   heading: ["var(--font-heading)", ...fontFamily.sans],
-      // },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+        heading: ["var(--font-heading)", ...fontFamily.sans],
+      },
     },
   },
   plugins: [],

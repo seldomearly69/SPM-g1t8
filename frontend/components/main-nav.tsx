@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { cn } from "@/lib/utils";
 import { MainNavItem } from "@/types";
@@ -7,6 +7,8 @@ import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { UserAccountNav } from "./user-account-nav";
+import { useSelectedLayoutSegment } from "next/navigation";
 
 interface MainNavProps {
   items?: MainNavItem[];
@@ -15,12 +17,13 @@ interface MainNavProps {
 
 export function MainNav({ items }: MainNavProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const segment = useSelectedLayoutSegment()
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex justify-between items-center w-full py-2 bg-white shadow-md pr-6"
+      className="flex gap-6 md:gap-10"
     >
       <Link href="/" className="flex items-center">
         <Image
@@ -42,13 +45,18 @@ export function MainNav({ items }: MainNavProps) {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Link
-                href={item.href || "#"}
-                className={cn(
-                  "text-lg font-medium hover:text-primary transition-colors"
-                )}
-              >
-                {item.title}
-              </Link>
+              key={index}
+              href={item.disabled ? "#" : item.href}
+              className={cn(
+                "flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm",
+                item.href.startsWith(`/${segment}`)
+                  ? "text-foreground"
+                  : "text-foreground/60",
+                item.disabled && "cursor-not-allowed opacity-80"
+              )}
+            >
+              {item.title}
+            </Link>
             </motion.div>
           ))}
         </nav>

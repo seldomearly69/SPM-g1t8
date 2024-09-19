@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar";
 import { useState} from "react"

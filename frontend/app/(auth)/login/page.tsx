@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200">
-      <div className="container flex-grow flex items-center justify-center">
+      <div className=" flex-grow flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
