@@ -38,6 +38,7 @@ conn = connect_to_db()
 
 @app.route('/authenticate', methods = ["POST"])
 def authenticate():
+
     cur = conn.cursor()
     data = request.get_json()
     email = data["email"]
@@ -46,15 +47,21 @@ def authenticate():
     sha256_hash = hashlib.sha256()
     sha256_hash.update(password.encode('utf-8'))
 
-    cur.execute("SELECT password FROM users WHERE email = %s", (email,))
+    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
     result = cur.fetchone()
-
-    if result and sha256_hash.hexdigest() == result[0]:
-        return "Ok", 200
+    print(result[9], sha256_hash.hexdigest())
+    if result and sha256_hash.hexdigest() == result[9]:
+        return jsonify({
+            "staff_id": result[0],
+            "name": result[1] + " " + result[2],
+            "email": result[6],
+            "reporting_manager": result[7],
+            "role": result[8]
+        }), 200
     elif result:
-        return "Wrong password", 401
+        return jsonify({"Error": "Wrong password"}), 403
     else:
-        return "Email does not exist", 404
+        return jsonify({"Error": "Email does not exist"}), 404
 
 
 if __name__ == '__main__':
