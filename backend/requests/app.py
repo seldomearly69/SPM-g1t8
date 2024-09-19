@@ -153,5 +153,94 @@ def resolve_own_schedule(month, year, staff_id):
         "schedule": schedule
     }
 
+app.add_url_rule('/get_team_schedule', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))
+
+def resolve_team_schedule(month, year, team_member_ids=None, filter_by_name=None):
+    # Query team members (optional: filtered by name)
+    team_members_query = db.session.query(
+        User.staff_id, User.staff_fname, User.staff_lname
+    )
+    
+    # Apply filtering by team member IDs (if provided)
+    if team_member_ids:
+        team_members_query = team_members_query.filter(User.staff_id.in_(team_member_ids))
+
+    # Apply name filter (if provided)
+    if filter_by_name:
+        team_members_query = team_members_query.filter(
+            (User.staff_fname + " " + User.staff_lname).ilike(f'%{filter_by_name}%')
+        )
+
+    # Execute the query to get the team members
+    team_members = team_members_query.all()
+
+    # Get all approved requests for the team members in the given month and year
+    requests = RequestModel.query.filter(
+        RequestModel.month == month,
+        RequestModel.year == year,
+        RequestModel.status == 'approved',
+        RequestModel.requesting_staff.in_([member.staff_id for member in team_members])
+    ).all()
+
+    # Create a mapping of requests by staff member and day
+    schedules_by_staff = defaultdict(lambda: defaultdict(lambda: {"AM": None, "PM": None, "FULL": None}))
+    for request in requests:
+        if request.type == "AM" or request.type == "PM":
+            schedules_by_staff[request.requesting_staff][request.day][request.type] = request
+        elif request.type == "FULL":
+            schedules_by_staff[request.requesting_staff][request.day]["FULL"] = request
+
+    # Create the team schedule
+    team_schedule = []
+    days_in_current_month = days_in_month[month]
+
+    for member in team_members:
+        staff_schedule = []
+        for day in range(1, days_in_current_month + 1):
+            date_str = f"{year:04d}-{month:02d}-{day:02d}"
+            day_requests = schedules_by_staff[member.staff_id][day]
+
+            # If neither AM nor PM requests, add a default "Office" for the day
+            if not day_requests["AM"] and not day_requests["PM"]:
+                staff_schedule.append({
+                    "date": date_str,
+                    "availability": "Office",
+                    "type": "FULL"
+                })
+            # Handle FULL day request
+            elif day_requests["FULL"]:
+                staff_schedule.append({
+                    "date": date_str,
+                    "availability": "On Leave",  # Assuming FULL day means leave
+                    "type": "FULL"
+                })
+            else:
+                # Handle AM request if it exists
+                staff_schedule.append({
+                    "date": date_str,
+                    "availability": "WFH" if day_requests["AM"] else "Office",
+                    "type": "AM"
+                })
+                # Handle PM request if it exists
+                staff_schedule.append({
+                    "date": date_str,
+                    "availability": "WFH" if day_requests["PM"] else "Office",
+                    "type": "PM"
+                })
+
+        # Add staff schedule to the team schedule
+        team_schedule.append({
+            "staff_id": member.staff_id,
+            "staff_name": f"{member.staff_fname} {member.staff_lname}",
+            "schedule": staff_schedule
+        })
+
+    # Return the team schedule as a JSON-like Python dict
+    return {
+        "month": month,
+        "year": year,
+        "team_schedule": team_schedule
+    }
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
