@@ -12,10 +12,6 @@ POSTGRES_USER=os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD=os.getenv("POSTGRES_PASSWORD")
 POSTGRES_DB=os.getenv("POSTGRES_DB")
 
-print(POSTGRES_USER)
-print(POSTGRES_PASSWORD)
-print(POSTGRES_DB)
-
 def connect_to_db():
     max_retries = 30
     retries = 0
@@ -62,4 +58,4 @@ def authenticate():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

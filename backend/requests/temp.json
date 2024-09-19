@@ -1,0 +1,13 @@
+{
+    "month": 8,
+    "year": 10,
+    "staff_id": 130002,
+    "role": 2,
+    "reporting_manager": 130002,
+    "schedule": {
+        "1": "AM",
+        "2": "PM",
+        "3": "FULL",
+        "4": null
+    }
+}
