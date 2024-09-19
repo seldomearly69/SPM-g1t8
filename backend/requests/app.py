@@ -104,7 +104,7 @@ def resolve_own_schedule(month, year, staff_id):
         RequestModel.month == month,
         RequestModel.year == year,
         RequestModel.requesting_staff == staff_id,
-        RequestModel.status == 'approved'
+        RequestModel.status.in_(['approved', 'pending'])
     ).all()
     print(f"Requests for staff_id={staff_id}, month={month}, year={year}: {requests}")
     # Create a mapping of request days to request details, distinguishing between AM, PM, and FULL
@@ -130,26 +130,30 @@ def resolve_own_schedule(month, year, staff_id):
             schedule.append({
                 "date": date_str,
                 "availability": "Office",
-                "type": "FULL"
+                "type": "FULL",
+                "is_pending": False
             })
         # Handle FULL day request
         elif day_requests["FULL"]:
             schedule.append({
                 "date": date_str,
-                "availability": "office",  # Assuming FULL day means office
-                "type": "FULL"
+                "availability": "wfh",  # Assuming FULL day means office
+                "type": "FULL",
+                "is_pending": False if day_requests["FULL"].status == "approved" else True
             })
         else:
             # Handle AM request if it exists
             schedule.append({
                 "date": date_str,
                 "availability": "wfh" if day_requests["AM"] else "Office",  # Assuming AM request means WFH
-                "type": "AM"
+                "type": "AM",
+                "is_pending": True if day_requests["AM"] and day_requests["AM"].status == "pending" else False
             })
             schedule.append({
                 "date": date_str,
                 "availability": "wfh" if day_requests["PM"] else "Office",  # Assuming PM request means WFH
-                "type": "PM"
+                "type": "PM",
+                "is_pending": True if day_requests["PM"] and day_requests["PM"].status == "pending" else False
             })
                 
 
