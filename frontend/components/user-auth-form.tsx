@@ -30,27 +30,33 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+
+
   async function onSubmit(data: FormData) {
-    console.log("data", data)
-    setIsLoading(true);
+      console.log("data", data)
+      setIsLoading(true);
+     
+      const signInResult = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+        callbackUrl:  searchParams.get("callbackUrl") || "/dashboard",
+      });
 
-    const signInResult = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-      callbackUrl:  searchParams.get("callbackUrl") || "/dashboard",
-    });
-
-    setIsLoading(false);
-
-    if (signInResult?.ok) {
-        router.push(signInResult.url || "/dashboard");
-        console.log("Sign in success:", signInResult.url);
-    } else {
-      console.error("Sign in failed:", signInResult?.error);
-      // Handle error (e.g., show error message to user)
+      setIsLoading(false);
+  
+      if (signInResult?.ok) {
+          router.push(signInResult.url || "/dashboard");
+          console.log("Sign in success:", signInResult.url);
+      } else {
+        console.error("Sign in failed:", signInResult?.error);
+        // Handle error (e.g., show error message to user)
+      }
+  
+     
     }
-  }
+   
+ 
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>

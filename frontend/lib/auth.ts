@@ -1,3 +1,4 @@
+import { authenticateUser } from "@/service/auth";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -17,17 +18,19 @@ export const authOptions: NextAuthOptions = {
       },
       authorize: async (credentials) => {
         console.log("credentials", credentials)
-        if (credentials.email === "liawjunyi5000@gmail.com" && credentials.password === "asdf") {
-          console.log("credentials", credentials)
-          return { id: "1", name: "User", email: "user@example.com" };
+        const response = await authenticateUser(credentials.email, credentials.password)
+
+        if (response.ok) {
+          const data = await response.json()
+          return data
         }
-        return null;
+        return null
       },
     }),
   ],
   callbacks: {
     async session({ token, session }) {
-    console.log(token, session)
+      console.log(token, session)
       if (token) {
         session.user.id = token.id;
         session.user.name = token.name;
@@ -39,14 +42,15 @@ export const authOptions: NextAuthOptions = {
     },
 
     async jwt({ token, user }) {
-   
+      console.log("token", token)
+      console.log("user", user)
       // const dbUser = await db.user.findFirst({
       //   where: {
       //     email: token.email,
       //   },
       // });
  
-     
+      
       
         if (user) {
           token.id = user?.id;
