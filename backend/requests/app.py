@@ -2,6 +2,7 @@ from collections import defaultdict
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
+from sqlalchemy import or_
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
 import os, json, ast
@@ -94,11 +95,6 @@ class OwnSchedule(graphene.ObjectType):
     year = graphene.Int()
     schedule = graphene.Field(JSON)  # Use JSON for flexibility
 
-class TeamSchedule(graphene.ObjectType):
-    reporting_manager = graphene.Int()
-    team_count = graphene.Int()
-    team_schedule = graphene.List(OwnSchedule)  # A list of schedules for each team member
-
 class Availability(graphene.ObjectType):
     name = graphene.String()
     department = graphene.String()
@@ -110,6 +106,11 @@ class DaySchedule(graphene.ObjectType):
     type = graphene.String()
     available_count = graphene.Int()
     availability = graphene.List(Availability)
+
+class TeamSchedule(graphene.ObjectType):
+    reporting_manager = graphene.Int()
+    team_count = graphene.Int()
+    team_schedule = graphene.List(DaySchedule)  # A list of schedules for each team member
 
 class Query(graphene.ObjectType):
     own_schedule = graphene.Field(OwnSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
@@ -198,75 +199,75 @@ def resolve_own_schedule(month, year, staff_id):
     }
 
 def resolve_team_schedule(month, year, staff_id):
-    manager = User.query.filter(User.staff_id == staff_id).fetchone().reporting_manager
+    manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
     # Get all approved requests for the team members in the given month and year
+    team_members = User.query.filter(or_(User.reporting_manager == manager, User.staff_id == manager)).all()
+    print(team_members)
     requests = RequestModel.query.filter(
         RequestModel.month == month,
         RequestModel.year == year,
-        RequestModel.status == 'approved',
-        RequestModel.approving_manager == manager
+        RequestModel.status.in_(['approved', 'pending']),
+        or_(
+        RequestModel.approving_manager == manager, 
+        RequestModel.requesting_staff == manager
+    )
     ).all()
+    print(requests)
 
-    return {"requests": requests}
-    # # Create a mapping of requests by staff member and day
-    # schedules_by_staff = defaultdict(lambda: defaultdict(lambda: {"AM": None, "PM": None, "FULL": None}))
-    # for request in requests:
-    #     if request.type == "AM" or request.type == "PM":
-    #         schedules_by_staff[request.requesting_staff][request.day][request.type] = request
-    #     elif request.type == "FULL":
-    #         schedules_by_staff[request.requesting_staff][request.day]["FULL"] = request
+    # Create a mapping of requests by staff member and day
+    schedules_by_staff = defaultdict(lambda: defaultdict(lambda: {"AM": None, "PM": None, "FULL": None}))
+    for request in requests:
+        if request.type == "AM" or request.type == "PM":
+            schedules_by_staff[request.requesting_staff][request.day][request.type] = request
+        elif request.type == "FULL":
+            schedules_by_staff[request.requesting_staff][request.day]["AM"] = request
+            schedules_by_staff[request.requesting_staff][request.day]["PM"] = request
 
-    # # Create the team schedule
-    # team_schedule = []
-    # days_in_current_month = days_in_month[month]
+    # Create the team schedule
+    team_schedule = []
+    days_in_current_month = days_in_month[month]
+    print(schedules_by_staff)
+    
+    for day in range(1, days_in_current_month+1):
 
-    # for member in team_members:
-    #     staff_schedule = []
-    #     for day in range(1, days_in_current_month + 1):
-    #         date_str = f"{year:04d}-{month:02d}-{day:02d}"
-    #         day_requests = schedules_by_staff[member.staff_id][day]
+        for period in ["AM","PM"]:
 
-    #         # If neither AM nor PM requests, add a default "Office" for the day
-    #         if not day_requests["AM"] and not day_requests["PM"]:
-    #             staff_schedule.append({
-    #                 "date": date_str,
-    #                 "availability": "Office",
-    #                 "type": "FULL"
-    #             })
-    #         # Handle FULL day request
-    #         elif day_requests["FULL"]:
-    #             staff_schedule.append({
-    #                 "date": date_str,
-    #                 "availability": "On Leave",  # Assuming FULL day means leave
-    #                 "type": "FULL"
-    #             })
-    #         else:
-    #             # Handle AM request if it exists
-    #             staff_schedule.append({
-    #                 "date": date_str,
-    #                 "availability": "WFH" if day_requests["AM"] else "Office",
-    #                 "type": "AM"
-    #             })
-    #             # Handle PM request if it exists
-    #             staff_schedule.append({
-    #                 "date": date_str,
-    #                 "availability": "WFH" if day_requests["PM"] else "Office",
-    #                 "type": "PM"
-    #             })
+            team_availability = []
+            count = len(team_members)
+            
+            for member in team_members:
+                request = schedules_by_staff[member.staff_id][day][period]
+                if request:
+                    count -= 1
+                    availability = "wfh"
+                    if request.status == "pending":
+                        is_pending = True
+                    else:
+                        
+                        is_pending = False
+                else:
+                    availability = "office"
+                    is_pending = False
+                    
+                team_availability.append({
+                    "name": member.staff_fname + " " + member.staff_lname,
+                    "department": member.dept,
+                    "availability": availability,
+                    "is_pending": is_pending
+                })
 
-    #     # Add staff schedule to the team schedule
-    #     team_schedule.append({
-    #         "staff_id": member.staff_id,
-    #         "staff_name": f"{member.staff_fname} {member.staff_lname}",
-    #         "schedule": staff_schedule
-    #     })
+            team_schedule.append({
+                "date": f"{year:04d}-{month:02d}-{day:02d}",
+                "type": period,
+                "available_count": count,
+                "availability": team_availability
+            })
+    return {
+        "reporting_manager" : manager,
+        "team_count": len(team_members),
+        "team_schedule": team_schedule
+    }
 
-    # # Return the team schedule as a JSON-like Python dict
-    # return {
-    #     "month": month,
-    #     "year": year,
-    #     "team_schedule": team_schedule
-    # }
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
