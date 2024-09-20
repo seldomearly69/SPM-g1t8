@@ -1,21 +1,33 @@
 "use client"
 
+import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar"
+import { EventType } from "@/types"
+import { format, startOfMonth, subHours } from "date-fns"
 import { useState, useEffect } from "react"
 // import { Calendar } from "@/components/ui/calendar"
 // import { Badge } from "@/components/ui/badge"
 
 // Mock data - replace with actual API call
 const mockSchedule = [
-  { date: "2023-05-01", type: "office" },
-  { date: "2023-05-02", type: "wfh" },
-  { date: "2023-05-03", type: "office" },
-  { date: "2023-05-04", type: "wfh" },
-  { date: "2023-05-05", type: "office" },
+  { date: new Date("2024-09-01"), title: "office" , type: "Full"},
+  { date: subHours(new Date(), 2), title: "wfh" , type: "AM"},
+  { date: new Date(), title: "office" , type: "AM"},
+  { date: new Date("2024-05-04"), title: "wfh" , type: "AM"},
+  { date: new Date("2024-05-05"), title: "office" , type: "AM"},
+  { date: new Date("2024-05-06"), title: "wfh" , type: "AM"},
+  { date: new Date("2023-05-07"), title: "office" , type: "AM"},
+  { date: new Date("2023-05-08"), title: "wfh" , type: "AM"},
+  { date: new Date("2023-05-09"), title: "office" , type: "AM"},
+  { date: new Date("2023-05-10"), title: "wfh" , type: "AM"},
 ]
 
 export default function MySchedulePage() {
+  
   const [schedule, setSchedule] = useState(mockSchedule)
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  
+  const [currentMonth, setCurrentMonth] = useState<Date>(
+    startOfMonth(new Date())
+  );
 
   useEffect(() => {
     // TODO: Fetch actual schedule data from API
@@ -37,37 +49,31 @@ export default function MySchedulePage() {
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">My Schedule</h2>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          {/* <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="rounded-md border"
-            components={{
-              DayContent: ({ date }) => (
-                <>
-                  {date.getDate()}
-                  {getDateContent(date)}
-                </>
-              ),
-            }}
-          /> */}
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Schedule Details</h3>
-          {selectedDate && (
-            <div>
-              <p>Selected Date: {selectedDate.toDateString()}</p>
-              {getDateContent(selectedDate) ? (
-                <p>Work Type: {getDateContent(selectedDate)}</p>
-              ) : (
-                <p>No schedule information available for this date.</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+      <div>
+        <MonthlyCalendar
+          currentMonth={currentMonth}
+          onCurrentMonthChange={setCurrentMonth}
+        >
+            <MonthlyNav/>
+          <MonthlyBody events={schedule} >
+          
+            <MonthlyDay<EventType>
+              renderDay={data =>
+                data.map((item, index) => (
+                  <DefaultMonthlyEventItem
+                    key={index}
+                    title={item.title}
+                    date={item.date}
+                    type={item.type}
+                  />
+                ))
+          }
+          />
+        </MonthlyBody>
+        
+        </MonthlyCalendar>
+    </div>
+       
     </div>
   )
-}
+} 

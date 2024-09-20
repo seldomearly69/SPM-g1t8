@@ -22,6 +22,7 @@ export const authOptions: NextAuthOptions = {
 
         if (response.ok) {
           const data = await response.json()
+          console.log("data", data)
           return data
         }
         return null

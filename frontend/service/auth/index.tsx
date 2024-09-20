@@ -9,7 +9,5 @@ export async function authenticateUser(email: string, password: string) {
             }
         });
 
-        console.log("response", response)
-       
         return response;
 }
