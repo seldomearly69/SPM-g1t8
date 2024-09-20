@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
-import { useState, useEffect } from "react";
 
 import {
   DropdownMenu,
@@ -18,25 +17,7 @@ interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: Pick<User, "name" | "image" | "email">;
 }
 
-export function UserAccountNav() {
-  const [user, setUser] = useState<UserAccountNavProps["user"] | null>(null);
-
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.user) {
-          setUser(data.user);
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to fetch session:", error);
-      });
-  }, []);
-
-  if (!user) {
-    return null; // Or a loading spinner
-  }
+export function UserAccountNav({ user }: UserAccountNavProps) {
 
   return (
     <DropdownMenu>

@@ -71,3 +71,23 @@ export type DefaultEventItemProps = {
   date: Date;
   type: string;
 };
+
+export type Request = {
+  id: number;
+  staff_id: number;
+  employee_name: string;
+  department: string;
+  date: string;
+  type: "AM" | "PM" | "full";
+  requested_on: string;
+  status: string;
+  remarks: string;
+};
+
+export type Availability = {
+  employee_name: string;
+  department: string;
+  availability: string;
+  type: "AM" | "PM" | "full";
+  is_pending: boolean;
+}
