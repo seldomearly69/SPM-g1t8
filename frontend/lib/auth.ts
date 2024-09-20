@@ -17,56 +17,39 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        console.log("credentials", credentials)
-        const response = await authenticateUser(credentials.email, credentials.password)
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const response = await authenticateUser(
+          credentials.email,
+          credentials.password
+        );
 
         if (response.ok) {
-          const data = await response.json()
-          console.log("data", data)
-          return data
+          const user = await response.json();
+          return user;
         }
-        return null
+        return null;
       },
     }),
   ],
   callbacks: {
-    async session({ token, session }) {
-      console.log(token, session)
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.staff_id;
+        token.name = user.name;
+        token.email = user.email;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.email = token.email;
-        session.user.image = token.picture;
+        session.user.role = token.role;
       }
-
       return session;
-    },
-
-    async jwt({ token, user }) {
-      console.log("token", token)
-      console.log("user", user)
-      // const dbUser = await db.user.findFirst({
-      //   where: {
-      //     email: token.email,
-      //   },
-      // });
- 
-      
-      
-        if (user) {
-          token.id = user?.id;
-          
-    
-        
-        return token;
-      }
-
-      return {
-        id: 1,
-        name: "User",
-        email: "liawjunyi5000@gmail.com",
-        picture: "https://avatars.githubusercontent.com/u/1234567890?v=4",
-      };
     },
   },
 };

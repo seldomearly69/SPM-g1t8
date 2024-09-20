@@ -1,9 +1,18 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { signOut } from "next-auth/react";
 
-export default function LoggedInLandingPage() {
-  const user = useState("Alexander");
+export default function LoggedInLandingPage({ user }: { user: any }) {
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    setUserData(user);
+  }, [user]);
+
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200 min-h-screen flex items-center justify-center p-4">
@@ -19,7 +28,7 @@ export default function LoggedInLandingPage() {
           </span>
           <br />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-700 via-indigo-600 to-blue-600">
-            {user[0]}
+            {userData.name}
           </span>
         </h2>
         <motion.div
@@ -28,7 +37,7 @@ export default function LoggedInLandingPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <Link href="/dashboard">
+          <Link href="/dashboard/my-schedule">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -37,7 +46,7 @@ export default function LoggedInLandingPage() {
               My Schedule
             </motion.button>
           </Link>
-          <Link href="/profile">
+          <Link href="/dashboard/manage">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -46,7 +55,7 @@ export default function LoggedInLandingPage() {
               Manage Arrangements
             </motion.button>
           </Link>
-          <Link href="/schedule">
+          <Link href="/dashboard/apply">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -62,15 +71,16 @@ export default function LoggedInLandingPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
         >
-          <Link href="/logout">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-red-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </motion.button>
-          </Link>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 bg-red-600 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-red-700 transition-colors"
+            onClick={() =>
+              signOut({ callbackUrl: `${window.location.origin}/login` })
+            }
+          >
+            Logout
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>
