@@ -38,7 +38,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       email: data.email,
       password: data.password,
       redirect: false,
-      callbackUrl: searchParams?.get("callbackUrl") || "/dashboard",
+      callbackUrl: searchParams?.get("callbackUrl") || "/",
     });
 
     setIsLoading(false);
@@ -108,7 +108,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         className={cn(buttonVariants({ variant: "outline" }))}
         onClick={() => {
           setIsGitHubLoading(true);
-          signIn("github", { callbackUrl: "/dashboard" });
+          signIn("github", { callbackUrl: "/" });
         }}
         disabled={isLoading || isGitHubLoading}
       >
