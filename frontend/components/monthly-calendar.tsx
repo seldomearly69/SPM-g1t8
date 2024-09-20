@@ -14,6 +14,7 @@ import {
 import React, { ReactNode, useContext } from 'react';
 import { daysInWeek } from '@/lib/utils';
 import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 
 type CalendarState = {
   days: Date[];
@@ -140,6 +141,7 @@ export function MonthlyBody<DayData>({
     events,
     children,
   }: MonthlyBodyProps<DayData>) {
+    console.log(events)
     const { days, locale } = useMonthlyCalendar();
     const { headings, daysToRender, padding } = handleOmittedDays({
       days,
@@ -215,16 +217,19 @@ export function MonthlyDay<DayData>({ renderDay}: MonthlyDayProps<DayData>) {
 
 
 export const DefaultMonthlyEventItem = ({
-    title,
+    availability,
     type,
+    is_pending
 
   }: DefaultEventItemProps) => {
     return (
       <li className="py-2">
-        <div className="flex text-sm flex-1 justify-between">
-          <h3 className="font-medium">{title}</h3>
-          <p className="text-gray-500">{type}</p>
-        </div>
+        <Badge variant={is_pending ? "secondary" : "default"} className="w-full">
+          <div className="flex text-sm flex-1 justify-between">
+            <h3 className="font-medium">{availability}</h3>
+            <p className="text-gray-500">{type}</p>
+          </div>
+        </Badge>
       </li>
     );
   };

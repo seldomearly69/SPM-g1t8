@@ -56,20 +56,22 @@ export type MonthlyBodyProps<DayData> = {
     ex: [0,6] would remove sunday and saturday from rendering
   */
   omitDays?: number[];
-  events: (DayData & { date: Date })[];
+  events: (DayData & { date: string | Date })[];
   children: ReactNode;
 };
 
 export type EventType = {
   date: Date;
-  title: string;
+  availability: string;
   type: string;
+  is_pending: boolean;
 };
 
 export type DefaultEventItemProps = {
-  title: string;
+  availability: string;
   date: Date;
   type: string;
+  is_pending: boolean;
 };
 
 export type Request = {

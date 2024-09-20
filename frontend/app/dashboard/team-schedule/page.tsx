@@ -1,24 +1,26 @@
 "use client"
 
 import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar";
-import { useState} from "react"
+import { useEffect, useState} from "react"
 import { Availability, EventType } from "@/types";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DataTable } from "@/components/data-table";
 import { availability_columns } from "@/components/columns";
+import { getTeamSchedule } from "@/service/schedule";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const mockSchedule = [
-  { date: new Date("2024-09-01"), title: "3/7", type: "AM" },
-  { date: new Date("2024-09-01"), title: "2/7", type: "PM" },
-  { date: new Date("2024-09-01"), title: "4/7", type: "Full" },
-  { date: new Date("2024-05-04"), title: "wfh", type: "AM" },
-  { date: new Date("2024-05-05"), title: "office", type: "AM" },
-  { date: new Date("2024-05-06"), title: "wfh", type: "AM" },
-  { date: new Date("2023-05-07"), title: "office", type: "AM" },
-  { date: new Date("2023-05-08"), title: "wfh", type: "AM" },
-  { date: new Date("2023-05-09"), title: "office", type: "AM" },
-  { date: new Date("2023-05-10"), title: "wfh", type: "AM" },
+  { date: new Date("2024-09-01"), availability: "3/7", type: "AM" },
+  { date: new Date("2024-09-01"), availability: "2/7", type: "PM" },
+  { date: new Date("2024-09-01"), availability: "4/7", type: "Full" },
+  { date: new Date("2024-05-04"), availability: "wfh", type: "AM" },
+  { date: new Date("2024-05-05"), availability: "office", type: "AM" },
+  { date: new Date("2024-05-06"), availability: "wfh", type: "AM" },
+  { date: new Date("2023-05-07"), availability: "office", type: "AM" },
+  { date: new Date("2023-05-08"), availability: "wfh", type: "AM" },
+  { date: new Date("2023-05-09"), availability: "office", type: "AM" },
+  { date: new Date("2023-05-10"), availability: "wfh", type: "AM" },
 ];
 
 const mockAvailability = [
@@ -41,17 +43,19 @@ export default function TeamSchedulePage() {
 
 
   const handleDialogOpen = async (open: boolean) => {
-    if (open && !dialogData) {
+    if (open ) {
       try {
-        const response = await fetch('/api/your-endpoint');
-        const data = await response.json();
-        console.log(data)
+        const response = await getTeamSchedule();
+       
         setDialogData(mockAvailability as Availability[]);
+        console.log(dialogData)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     }
   };
+
+  
 
 
    
@@ -99,17 +103,18 @@ export default function TeamSchedulePage() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
                       <DefaultMonthlyEventItem
-                        title={item.title}
+                        availability={item.availability}
                         date={item.date}
                         type={item.type}
+                        is_pending={item.is_pending}
                       />
                     </motion.div>
                   ))
                 }
               />
               </DialogTrigger>
-              <DialogContent className="max-w-[90vw] w-fit max-h-[90vh]">
-                <DialogHeader>
+              <DialogContent className="w-full max-w-[95vw] h-[90vh] p-0 sm:p-6">
+                <DialogHeader className="p-4 sm:p-0">
                   <DialogTitle>
                       {dialogData ? (
                           <></>
@@ -118,18 +123,17 @@ export default function TeamSchedulePage() {
                           )}
                   </DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                
-                <DataTable columns={availability_columns} data={dialogData} />
-                  
-                </DialogDescription>
+                <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0">
+                  <DataTable columns={availability_columns} data={dialogData ? dialogData : []} />
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               </DialogContent>
             </Dialog>
            
           </MonthlyBody>
         </MonthlyCalendar>
       </motion.div>
-      <div></div>
+   
     </motion.div>
   );
 }

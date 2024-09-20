@@ -5,7 +5,7 @@ import { Input } from "./ui/input"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
 import { Button } from "./ui/button"
 import { Cross2Icon } from "@radix-ui/react-icons"
-import { statuses } from "@/config/request"
+import { availability, department, schedule_status } from "@/config/request"
 
 
 interface DataTableToolbarProps<TData> {
@@ -22,9 +22,9 @@ export function DataTableToolbar<TData>({
         <div className="flex flex-1 items-center space-x-2">
           <Input
             placeholder="Filter tasks..."
-            value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+            value={(table.getColumn("employee_name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("title")?.setFilterValue(event.target.value)
+              table.getColumn("employee_name")?.setFilterValue(event.target.value)
             }
             className="h-8 w-[150px] lg:w-[250px]"
           />
@@ -32,7 +32,21 @@ export function DataTableToolbar<TData>({
             <DataTableFacetedFilter
               column={table.getColumn("status")}
               title="Status"
-              options={statuses}
+              options={schedule_status}
+            />
+          )}
+          {table.getColumn("department") && (
+            <DataTableFacetedFilter
+              column={table.getColumn("department")}
+              title="Department"
+              options={department}
+            />
+          )}
+          {table.getColumn("availability") && (
+            <DataTableFacetedFilter
+              column={table.getColumn("availability")}
+              title="Availability"
+              options={availability}
             />
           )}
         

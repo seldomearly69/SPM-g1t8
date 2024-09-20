@@ -1,6 +1,7 @@
 "use client"
 
 import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar"
+import { getOwnSchedule } from "@/service/schedule"
 import { EventType } from "@/types"
 import {  startOfMonth, subHours } from "date-fns"
 import { useState, useEffect } from "react"
@@ -9,16 +10,16 @@ import { useState, useEffect } from "react"
 
 // Mock data - replace with actual API call
 const mockSchedule = [
-  { date: new Date("2024-09-01"), title: "office" , type: "Full"},
-  { date: subHours(new Date(), 2), title: "wfh" , type: "AM"},
-  { date: new Date(), title: "office" , type: "AM"},
-  { date: new Date("2024-05-04"), title: "wfh" , type: "AM"},
-  { date: new Date("2024-05-05"), title: "office" , type: "AM"},
-  { date: new Date("2024-05-06"), title: "wfh" , type: "AM"},
-  { date: new Date("2023-05-07"), title: "office" , type: "AM"},
-  { date: new Date("2023-05-08"), title: "wfh" , type: "AM"},
-  { date: new Date("2023-05-09"), title: "office" , type: "AM"},
-  { date: new Date("2023-05-10"), title: "wfh" , type: "AM"},
+  { date: "2024-09-01", availability: "office" , type: "Full", is_pending: true},
+  { date: subHours(new Date(), 2), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date(), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2024-05-04"), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date("2024-05-05"), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2024-05-06"), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-07"), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-08"), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-09"), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-10"), availability: "wfh" , type: "AM", is_pending: false},
 ]
 
 export default function MySchedulePage() {
@@ -30,8 +31,11 @@ export default function MySchedulePage() {
   );
 
   useEffect(() => {
-    // TODO: Fetch actual schedule data from API
-    // setSchedule(await fetchSchedule())
+    const fetchSchedule = async () => {
+      const data = await getOwnSchedule();
+      console.log(data.data.ownSchedule.schedule)
+    };
+    fetchSchedule();
   }, [])
 
  
@@ -52,9 +56,10 @@ export default function MySchedulePage() {
                 data.map((item, index) => (
                   <DefaultMonthlyEventItem
                     key={index}
-                    title={item.title}
+                    availability={item.availability}
                     date={item.date}
                     type={item.type}
+                    is_pending={item.is_pending}
                   />
                 ))
           }
