@@ -6,6 +6,7 @@ from sqlalchemy import or_
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
 import os, json, ast
+from flask_cors import CORS
 
 days_in_month = {
     1: 31,   # January
@@ -23,6 +24,7 @@ days_in_month = {
 }
 
 app = Flask(__name__)
+CORS(app)
 
 POSTGRES_USER=os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD=os.getenv("POSTGRES_PASSWORD")
