@@ -13,7 +13,6 @@ import {
     Image,
     Laptop,
     Loader2,
-    LucideProps,
     Moon,
     MoreVertical,
     Pizza,
@@ -30,7 +29,7 @@ import {
   } from "lucide-react"
   
   
-  export const Icons = {
+  export const Icons: any = {
     logo: Command,
     close: X,
     spinner: Loader2,

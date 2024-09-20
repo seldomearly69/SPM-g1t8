@@ -45,6 +45,7 @@ export default function TeamSchedulePage() {
       try {
         const response = await fetch('/api/your-endpoint');
         const data = await response.json();
+        console.log(data)
         setDialogData(mockAvailability as Availability[]);
       } catch (error) {
         console.error("Error fetching data:", error);

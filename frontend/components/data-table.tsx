@@ -1,9 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ColumnDef, flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getFilteredRowModel, getSortedRowModel } from "@tanstack/react-table"
-
-import { Button } from "@/components/ui/button"
+import { ColumnDef, flexRender, useReactTable, getCoreRowModel } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DataTableToolbar } from "./data-table-toolbar"
 

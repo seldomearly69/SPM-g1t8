@@ -4,8 +4,6 @@ import { Button } from "./ui/button"
 import { Availability,  Request } from "@/types"
 import { Check, X } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
-import { Label } from "./ui/label"
-import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { useState } from "react"
 import { Badge } from "./ui/badge"
@@ -45,7 +43,7 @@ export const request_columns: ColumnDef<Request>[] = [
     // }
 ]
 
-export const individual_request_columns: ColumnDef<IndivdualRequest>[] = [
+export const individual_request_columns: ColumnDef<Request>[] = [
     {
         accessorKey: "id",
         header: "ID",

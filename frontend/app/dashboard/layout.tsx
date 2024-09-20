@@ -15,7 +15,6 @@ export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
   const user = await getCurrentUser();
-  console.log("userfff", user);
   if (!user) {
     return notFound();
   }
@@ -32,9 +31,7 @@ export default async function DashboardLayout({
           <MainNav items={dashboardConfig.loggedInNav} />
           <UserAccountNav
             user={{
-              name: "user.name",
-              image: "user.image",
-              email: "user.email",
+              email: user.email,
             }}
           />
         </motion.div>

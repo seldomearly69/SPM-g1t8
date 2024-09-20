@@ -2,7 +2,7 @@
 
 import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar"
 import { EventType } from "@/types"
-import { format, startOfMonth, subHours } from "date-fns"
+import {  startOfMonth, subHours } from "date-fns"
 import { useState, useEffect } from "react"
 // import { Calendar } from "@/components/ui/calendar"
 // import { Badge } from "@/components/ui/badge"
@@ -34,17 +34,7 @@ export default function MySchedulePage() {
     // setSchedule(await fetchSchedule())
   }, [])
 
-  const getDateContent = (date: Date) => {
-    const scheduleItem = schedule.find(item => item.date === date.toISOString().split('T')[0])
-    // if (scheduleItem) {
-    //   return (
-        // <Badge variant={scheduleItem.type === "wfh" ? "secondary" : "default"}>
-        //   {scheduleItem.type === "wfh" ? "WFH" : "Office"}
-        // </Badge>
-    //   )
-    // }
-    return null
-  }
+ 
 
   return (
     <div className="max-w-4xl mx-auto">
