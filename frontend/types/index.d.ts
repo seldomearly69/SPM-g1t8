@@ -56,18 +56,40 @@ export type MonthlyBodyProps<DayData> = {
     ex: [0,6] would remove sunday and saturday from rendering
   */
   omitDays?: number[];
-  events: (DayData & { date: Date })[];
+  events: (DayData & { date: string | Date })[];
   children: ReactNode;
 };
 
 export type EventType = {
   date: Date;
-  title: string;
+  availability: string;
   type: string;
+  is_pending: boolean;
 };
 
 export type DefaultEventItemProps = {
-  title: string;
+  availability: string;
   date: Date;
   type: string;
+  is_pending: boolean;
 };
+
+export type Request = {
+  id: number;
+  staff_id: number;
+  employee_name: string;
+  department: string;
+  date: string;
+  type: "AM" | "PM" | "full";
+  requested_on: string;
+  status: string;
+  remarks: string;
+};
+
+export type Availability = {
+  employee_name: string;
+  department: string;
+  availability: string;
+  type: "AM" | "PM" | "full";
+  is_pending: boolean;
+}

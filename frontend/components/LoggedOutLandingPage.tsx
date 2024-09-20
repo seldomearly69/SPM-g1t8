@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
 
 export default function LoggedOutLandingPage() {
   // const { data: session } = useSession();

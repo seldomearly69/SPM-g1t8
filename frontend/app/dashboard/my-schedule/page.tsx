@@ -1,73 +1,74 @@
 "use client"
 
+import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "@/components/monthly-calendar"
+import { getOwnSchedule } from "@/service/schedule"
+import { EventType } from "@/types"
+import {  startOfMonth, subHours } from "date-fns"
 import { useState, useEffect } from "react"
 // import { Calendar } from "@/components/ui/calendar"
 // import { Badge } from "@/components/ui/badge"
 
 // Mock data - replace with actual API call
 const mockSchedule = [
-  { date: "2023-05-01", type: "office" },
-  { date: "2023-05-02", type: "wfh" },
-  { date: "2023-05-03", type: "office" },
-  { date: "2023-05-04", type: "wfh" },
-  { date: "2023-05-05", type: "office" },
+  { date: "2024-09-01", availability: "office" , type: "Full", is_pending: true},
+  { date: subHours(new Date(), 2), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date(), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2024-05-04"), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date("2024-05-05"), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2024-05-06"), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-07"), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-08"), availability: "wfh" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-09"), availability: "office" , type: "AM", is_pending: false},
+  { date: new Date("2023-05-10"), availability: "wfh" , type: "AM", is_pending: false},
 ]
 
 export default function MySchedulePage() {
+  
   const [schedule, setSchedule] = useState(mockSchedule)
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  
+  const [currentMonth, setCurrentMonth] = useState<Date>(
+    startOfMonth(new Date())
+  );
 
   useEffect(() => {
-    // TODO: Fetch actual schedule data from API
-    // setSchedule(await fetchSchedule())
+    const fetchSchedule = async () => {
+      const data = await getOwnSchedule();
+      console.log(data.data.ownSchedule.schedule)
+    };
+    fetchSchedule();
   }, [])
 
-  const getDateContent = (date: Date) => {
-    const scheduleItem = schedule.find(item => item.date === date.toISOString().split('T')[0])
-    // if (scheduleItem) {
-    //   return (
-        // <Badge variant={scheduleItem.type === "wfh" ? "secondary" : "default"}>
-        //   {scheduleItem.type === "wfh" ? "WFH" : "Office"}
-        // </Badge>
-    //   )
-    // }
-    return null
-  }
+ 
 
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">My Schedule</h2>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          {/* <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="rounded-md border"
-            components={{
-              DayContent: ({ date }) => (
-                <>
-                  {date.getDate()}
-                  {getDateContent(date)}
-                </>
-              ),
-            }}
-          /> */}
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Schedule Details</h3>
-          {selectedDate && (
-            <div>
-              <p>Selected Date: {selectedDate.toDateString()}</p>
-              {getDateContent(selectedDate) ? (
-                <p>Work Type: {getDateContent(selectedDate)}</p>
-              ) : (
-                <p>No schedule information available for this date.</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+      <div>
+        <MonthlyCalendar
+          currentMonth={currentMonth}
+          onCurrentMonthChange={setCurrentMonth}
+        >
+            <MonthlyNav/>
+          <MonthlyBody events={schedule} >
+          
+            <MonthlyDay<EventType>
+              renderDay={data =>
+                data.map((item, index) => (
+                  <DefaultMonthlyEventItem
+                    key={index}
+                    availability={item.availability}
+                    date={item.date}
+                    type={item.type}
+                    is_pending={item.is_pending}
+                  />
+                ))
+          }
+          />
+        </MonthlyBody>
+        
+        </MonthlyCalendar>
+    </div>
+       
     </div>
   )
-}
+} 
