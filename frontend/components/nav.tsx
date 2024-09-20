@@ -5,21 +5,46 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Icons } from "@/components/icons"
+import { Icons } from "@/components/icons";
+import { useState, useEffect } from "react";
 
 interface DashboardNavProps {
-  items: SidebarNavItem[];
+  sideBarNav: {
+    common: SidebarNavItem[];
+    roleSpecific: {
+      [key: number]: SidebarNavItem[];
+    };
+  };
+  currentUser: {
+    role?: number;
+  } | null;
 }
 
-export function DashboardNav({ items }: DashboardNavProps) {
+export function DashboardNav({ sideBarNav, currentUser }: DashboardNavProps) {
   const path = usePathname();
+  const [navItems, setNavItems] = useState<SidebarNavItem[]>([]);
+
+  console.log("SIDE " + sideBarNav);
+  const roles = sideBarNav.roleSpecific;
+
+  console.log("CURR", JSON.stringify(currentUser, null, 2));
+
+  useEffect(() => {
+    const items = [...sideBarNav.common];
+    if (
+      currentUser &&
+      currentUser.role !== undefined &&
+      sideBarNav.roleSpecific[currentUser.role]
+    ) {
+      items.push(...sideBarNav.roleSpecific[currentUser.role]);
+    }
+    setNavItems(items);
+  }, [sideBarNav, currentUser]);
 
   return (
-    <nav className="grid items-start gap-3 pl-4 border-r-2 border-gray-300 pr-4">
-      {items.map((item, index) => {
-        const Icon = Icons[item.icon || "arrowRight"]
-
-        const isActive = item.href === path;
+    <nav className="grid items-start gap-2">
+      {navItems.map((item, index) => {
+        const Icon = Icons[item.icon || "arrowRight"];
         return (
           item.href && (
             <motion.div
@@ -28,15 +53,12 @@ export function DashboardNav({ items }: DashboardNavProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <Link href={item.href}>
+              <Link href={item.disabled ? "#" : item.href}>
                 <span
                   className={cn(
-                    "group flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ease-in-out",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "hover:bg-accent hover:text-accent-foreground",
-                    "border-l-4",
-                    isActive ? "border-primary" : "border-transparent"
+                    "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    path === item.href ? "bg-accent" : "transparent",
+                    item.disabled && "cursor-not-allowed opacity-80"
                   )}
                 >
                   <Icon className="mr-2 h-4 w-4" />

@@ -2,25 +2,23 @@ export type DashboardConfig = {
   mainNav: MainNavItem[];
   loggedOutNav: NavbarItem[];
   loggedInNav: NavbarItem[];
-  sidebarNav: SidebarNavItem[];
+  sidebarNav: {
+    common: SidebarNavItem[];
+    roleSpecific: {
+      [key: number]: SidebarNavItem[];
+    };
+  };
 };
 
 export type MainNavItem = NavItem;
 
 export type SidebarNavItem = {
   title: string;
+  href: string;
   disabled?: boolean;
   external?: boolean;
   icon?: keyof typeof Icons;
-} & (
-  | {
-      href: string;
-      items?: never;
-    }
-  | {
-      href?: string;
-    }
-);
+};
 
 export type NavbarItem = {
   title: string;
@@ -92,4 +90,4 @@ export type Availability = {
   availability: string;
   type: "AM" | "PM" | "full";
   is_pending: boolean;
-}
+};

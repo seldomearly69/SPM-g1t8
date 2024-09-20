@@ -17,37 +17,45 @@ export const dashboardConfig: DashboardConfig = {
       title: "Home",
       href: "/",
     },
-   
   ],
-  loggedInNav: [
- 
-    
-  ],
-  sidebarNav: [
-    {
-      title: "Overview",
-      href: "/dashboard",
-      icon: "home",
+  loggedInNav: [],
+  sidebarNav: {
+    common: [
+      {
+        title: "Overview",
+        href: "/dashboard",
+        icon: "home",
+      },
+      {
+        title: "Apply for WFH",
+        href: "/dashboard/apply",
+        icon: "filePlus",
+      },
+      {
+        title: "Manage Arrangements",
+        href: "/dashboard/manage",
+        icon: "settings",
+      },
+      {
+        title: "My Schedule",
+        href: "/dashboard/my-schedule",
+        icon: "calendar",
+      },
+      {
+        title: "Team Schedule",
+        href: "/dashboard/team-schedule",
+        icon: "users",
+      },
+    ],
+    roleSpecific: {
+      1: [
+        {
+          title: "View Overall Schedule",
+          href: "/overall-schedule",
+          icon: "calendar",
+        },
+      ],
+      2: [],
     },
-    {
-      title: "Team Schedule",
-      href: "/dashboard/team-schedule",
-      icon: "users",
-    },
-    {
-      title: "My Schedule",
-      href: "/dashboard/my-schedule",
-      icon: "calendar",
-    },
-    {
-      title: "Apply for WFH",
-      href: "/dashboard/apply",
-      icon: "filePlus",
-    },
-    {
-      title: "Manage Arrangements",
-      href: "/dashboard/manage",
-      icon: "settings",
-    },
-  ],
+  },
 };
