@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Badge } from "./ui/badge"
 import { CheckIcon, PlusCircledIcon } from "@radix-ui/react-icons"
 import { Separator } from "./ui/separator"
+import React from "react"
 
 interface DataTableFacetedFilterProps<TData, TValue> {
     column?: Column<TData, TValue>
@@ -22,9 +23,19 @@ export function DataTableFacetedFilter<TData, TValue>({
     title,
     options,
   }: DataTableFacetedFilterProps<TData, TValue>) {
-    const facets = column?.getFacetedUniqueValues()
+   
+    const facets = React.useMemo(() => {
+      try {
+        return column?.getFacetedUniqueValues();
+      } catch (error) {
+        console.error("Error getting faceted values:", error);
+        return new Map();
+      }
+    }, [column]);
+    
     const selectedValues = new Set(column?.getFilterValue() as string[])
-  
+    
+
     return (
       <Popover>
         <PopoverTrigger asChild>

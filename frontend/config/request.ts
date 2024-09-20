@@ -1,12 +1,7 @@
 import { CheckCircledIcon, CrossCircledIcon, QuestionMarkCircledIcon, StopwatchIcon } from "@radix-ui/react-icons";
 import { CircleIcon } from "lucide-react";
 
-export const statuses = [
-    {
-      value: "backlog",
-      label: "Backlog",
-      icon: QuestionMarkCircledIcon,
-    },
+export const request_status = [
     {
       value: "pending",
       label: "Pending",
@@ -23,3 +18,49 @@ export const statuses = [
       icon: CrossCircledIcon,
     },
   ]
+
+export const schedule_status = [
+    {
+        value: "pending",
+        label: "Pending",
+        icon: StopwatchIcon,
+    },
+    {
+      value: "confirmed",
+      label: "Confirmed",
+      icon: CheckCircledIcon,
+    },
+]
+
+
+export const availability = [
+    {
+        value: "office",
+        label: "Office",
+        icon: CircleIcon,
+    },
+    {
+        value: "wfh",
+        label: "WFH",
+        icon: CircleIcon,
+    }
+]
+
+export const department = [
+    {
+        value: "sales",
+        label: "Sales",
+        icon: CircleIcon,
+    },
+    {
+        value: "marketing",
+        label: "Marketing",
+        icon: CircleIcon,
+    },
+    {
+        value: "engineering",
+        label: "Engineering",
+        icon: CircleIcon,
+    },
+    
+]

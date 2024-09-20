@@ -1,7 +1,19 @@
 "use client"
 
 import * as React from "react"
-import { ColumnDef, flexRender, useReactTable, getCoreRowModel } from "@tanstack/react-table"
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+    VisibilityState,
+    flexRender,
+    getCoreRowModel,
+    getFacetedRowModel,
+    getFacetedUniqueValues,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable, } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DataTableToolbar } from "./data-table-toolbar"
 
@@ -14,9 +26,31 @@ interface DataTableProps<TData, TValue> {
 
 
 export function DataTable<TData, TValue>({ columns, data, onRowClick  }: DataTableProps<TData, TValue>) {
+    const [rowSelection, setRowSelection] = React.useState({})
+    const [columnVisibility, setColumnVisibility] =
+        React.useState<VisibilityState>({})
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+    const [sorting, setSorting] = React.useState<SortingState>([])
+
     const table = useReactTable({
         data,
         columns,
+        state: {
+            sorting,
+            columnVisibility,
+            rowSelection,
+            columnFilters,
+          },
+        enableRowSelection: true,
+        onRowSelectionChange: setRowSelection,
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        onColumnVisibilityChange: setColumnVisibility,
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFacetedRowModel: getFacetedRowModel(),
+        getFacetedUniqueValues: getFacetedUniqueValues(),
         getCoreRowModel: getCoreRowModel(),
     })
     return (
