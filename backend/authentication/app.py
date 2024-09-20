@@ -49,7 +49,6 @@ def authenticate():
 
     cur.execute("SELECT * FROM users WHERE email = %s", (email,))
     result = cur.fetchone()
-    print(result[9], sha256_hash.hexdigest())
     if result and sha256_hash.hexdigest() == result[9]:
         return jsonify({
             "staff_id": result[0],
