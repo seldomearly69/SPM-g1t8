@@ -7,20 +7,20 @@ import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DataTable } from "@/components/data-table";
 import { availability_columns } from "@/components/columns";
-import { getTeamSchedule } from "@/service/schedule";
+import { getTeamDetails, getTeamSchedule } from "@/service/schedule";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const mockSchedule = [
-  { date: new Date("2024-09-01"), availability: "3/7", type: "AM" },
-  { date: new Date("2024-09-01"), availability: "2/7", type: "PM" },
-  { date: new Date("2024-09-01"), availability: "4/7", type: "Full" },
-  { date: new Date("2024-05-04"), availability: "wfh", type: "AM" },
-  { date: new Date("2024-05-05"), availability: "office", type: "AM" },
-  { date: new Date("2024-05-06"), availability: "wfh", type: "AM" },
-  { date: new Date("2023-05-07"), availability: "office", type: "AM" },
-  { date: new Date("2023-05-08"), availability: "wfh", type: "AM" },
-  { date: new Date("2023-05-09"), availability: "office", type: "AM" },
-  { date: new Date("2023-05-10"), availability: "wfh", type: "AM" },
+  { date: new Date("2024-09-01"), availableCount: "3/7", type: "AM" },
+  { date: new Date("2024-09-01"), availableCount: "2/7", type: "PM" },
+  { date: new Date("2024-09-01"), availableCount: "4/7", type: "Full" },
+  { date: new Date("2024-05-04"), availableCount: "wfh", type: "AM" },
+  { date: new Date("2024-05-05"), availableCount: "office", type: "AM" },
+  { date: new Date("2024-05-06"), availableCount: "wfh", type: "AM" },
+  { date: new Date("2023-05-07"), availableCount: "office", type: "AM" },
+  { date: new Date("2023-05-08"), availableCount: "wfh", type: "AM" },
+  { date: new Date("2023-05-09"), availableCount: "office", type: "AM" },
+  { date: new Date("2023-05-10"), availableCount: "wfh", type: "AM" },
 ];
 
 const mockAvailability = [
@@ -36,7 +36,7 @@ const mockAvailability = [
 
 export default function TeamSchedulePage() {
   const [teamSchedule, setTeamSchedule] = useState(mockSchedule);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+  const [selectedDate, setSelectedDate] = useState<Date>(
     new Date()
   );
   const [dialogData, setDialogData] = useState<Availability[]>([]);
@@ -45,9 +45,9 @@ export default function TeamSchedulePage() {
   const handleDialogOpen = async (open: boolean) => {
     if (open ) {
       try {
-        const response = await getTeamSchedule();
-       
-        setDialogData(mockAvailability as Availability[]);
+        const response = await getTeamDetails(selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), 140001);
+        console.log(response)
+        setDialogData(response.data.teamSchedule.teamSchedule[0].availability);
         console.log(dialogData)
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -55,7 +55,14 @@ export default function TeamSchedulePage() {
     }
   };
 
-  
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      const data = await getTeamSchedule(selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), 140001);
+      console.log(data.data.teamSchedule.schedule)
+      setTeamSchedule(data.data.teamSchedule.teamSchedule)
+    };
+    fetchSchedule();
+  }, [selectedDate])
 
 
    
@@ -96,19 +103,13 @@ export default function TeamSchedulePage() {
                 <MonthlyDay<EventType>
                 renderDay={(data) =>
                   data.map((item, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
                       <DefaultMonthlyEventItem
-                        availability={item.availability}
+                        availability={item.availableCount}
                         date={item.date}
                         type={item.type}
                         is_pending={item.is_pending}
                       />
-                    </motion.div>
+                   
                   ))
                 }
               />

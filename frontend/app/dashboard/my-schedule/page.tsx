@@ -30,13 +30,15 @@ export default function MySchedulePage() {
     startOfMonth(new Date())
   );
 
+
   useEffect(() => {
     const fetchSchedule = async () => {
-      const data = await getOwnSchedule();
+      const data = await getOwnSchedule(currentMonth.getMonth() + 1, currentMonth.getFullYear(), 130002);
       console.log(data.data.ownSchedule.schedule)
+      setSchedule(data.data.ownSchedule.schedule)
     };
     fetchSchedule();
-  }, [])
+  }, [currentMonth])
 
  
 

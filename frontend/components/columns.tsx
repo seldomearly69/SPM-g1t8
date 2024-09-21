@@ -106,7 +106,7 @@ export const individual_request_columns: ColumnDef<Request>[] = [
 
 export const availability_columns: ColumnDef<Availability>[] = [
     {
-        accessorKey: "employee_name",
+        accessorKey: "name",
         header: "Employee Name",
     },
     {
