@@ -9,9 +9,11 @@ import * as z from "zod";
 import { Button, buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { Toast } from "./ui/toast";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -30,6 +32,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast()
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -52,8 +55,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         type: "manual",
         message: "Invalid email or password",
       });
+      toast({
+        title: "Authentication Error",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive",
+      });
     }
   }
+
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -67,9 +76,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               type="email"
               {...register("email")}
             />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
           </div>
           <div className="grid gap-2">
             <div className="flex items-center">
@@ -81,9 +87,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               {...register("password")}
               required
             />
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
-            )}
           </div>
 
           <Button
