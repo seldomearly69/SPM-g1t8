@@ -1,4 +1,4 @@
-import { BodyState, DefaultEventItemProps, MonthlyBodyProps, MonthlyDayProps, OmittedDaysProps } from '@/types';
+import { BodyState, DefaultEventItemProps, MonthlyBodyProps, MonthlyDayProps, OmittedDaysProps, TeamEventItemProps } from '@/types';
 import {
     eachDayOfInterval,
     startOfMonth,
@@ -12,7 +12,7 @@ import {
     isSameDay
   } from 'date-fns';
 import React, { ReactNode, useContext } from 'react';
-import { daysInWeek } from '@/lib/utils';
+import { cn, daysInWeek } from '@/lib/utils';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 
@@ -150,7 +150,7 @@ export function MonthlyBody<DayData>({
     });
    
     const headingClassName =
-      'border-b-2 p-2 border-r-2 lg:block hidden';
+      'border-b-2 p-2 border-r-2 lg:flex justify-center items-center hidden';
 
     return (
       <div className="bg-white border-l-2 border-t-2">
@@ -163,7 +163,7 @@ export function MonthlyBody<DayData>({
           {headings.map(day => (
             <div
               key={day.day}
-              className={headingClassName}
+              className={cn(headingClassName, "text-sm font-bold")}
               title="Day of Week"
             >
               {day.label}
@@ -230,6 +230,21 @@ export const DefaultMonthlyEventItem = ({
             <p className="text-gray-500">{type}</p>
           </div>
         </Badge>
+      </li>
+    );
+  };
+
+export const TeamMonthlyEventItem = ({
+    availability,
+    type,
+
+  }: TeamEventItemProps) => {
+    return (
+      <li className="py-2">
+          <div className="flex text-sm flex-1 justify-between">
+            <h3 className="font-medium">{availability}</h3>
+            <p className="text-gray-500">{type}</p>
+          </div>
       </li>
     );
   };

@@ -9,11 +9,10 @@ import * as z from "zod";
 import { Button, buttonVariants } from "./ui/button";
 import { Input } from "./ui/input";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { Toast } from "./ui/toast";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
