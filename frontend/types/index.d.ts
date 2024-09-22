@@ -59,8 +59,9 @@ export type MonthlyBodyProps<DayData> = {
 };
 
 export type EventType = {
+  availableCount?: number;
   date: Date;
-  availability: string;
+  availability?: string;
   type: string;
   is_pending: boolean;
 };
@@ -70,6 +71,11 @@ export type DefaultEventItemProps = {
   date: Date;
   type: string;
   is_pending: boolean;
+};
+
+export type TeamEventItemProps = {
+  availability: string | number;
+  type: string;
 };
 
 export type Request = {

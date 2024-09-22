@@ -5,8 +5,10 @@ import { getOwnSchedule } from "@/service/schedule"
 import { EventType } from "@/types"
 import {  startOfMonth, subHours } from "date-fns"
 import { useState, useEffect } from "react"
-// import { Calendar } from "@/components/ui/calendar"
-// import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { motion } from "framer-motion";
+
+
 
 // Mock data - replace with actual API call
 const mockSchedule = [
@@ -43,9 +45,30 @@ export default function MySchedulePage() {
  
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">My Schedule</h2>
-      <div>
+    <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="max-w-6xl mx-auto px-2"
+  >
+    <motion.h2
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="text-2xl font-bold mb-6"
+    >
+      My Schedule
+    </motion.h2>
+
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay: 0.4 }}
+      className="w-full"
+    >
+      <Card>
+          <CardHeader></CardHeader>
+          <CardContent>
         <MonthlyCalendar
           currentMonth={currentMonth}
           onCurrentMonthChange={setCurrentMonth}
@@ -69,8 +92,9 @@ export default function MySchedulePage() {
         </MonthlyBody>
         
         </MonthlyCalendar>
-    </div>
-       
-    </div>
+        </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   )
 } 
