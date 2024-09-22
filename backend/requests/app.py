@@ -114,12 +114,17 @@ class TeamSchedule(graphene.ObjectType):
     team_count = graphene.Int()
     team_schedule = graphene.List(DaySchedule)  # A list of schedules for each team member
 
+class DepartmentSchedule(graphene.ObjectType):
+    reporting_director = graphene.Int()
+    team_count = graphene.Int()
+    dept_schedule = graphene.List(DaySchedule)
+
 class Query(graphene.ObjectType):
     own_schedule = graphene.Field(OwnSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
     team_schedule = graphene.Field(TeamSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
 
     department_schedule = graphene.Field(
-        TeamSchedule, 
+        DepartmentSchedule, 
         month=graphene.Int(), 
         year=graphene.Int(), 
         department=graphene.String(),
@@ -282,10 +287,21 @@ def resolve_team_schedule(month, year, staff_id):
         "team_count": len(team_members),
         "team_schedule": team_schedule
     }
+def map_requests_to_schedule(requests):
+    schedules_by_staff = defaultdict(lambda: defaultdict(lambda: {"AM": None, "PM": None, "FULL": None}))
+    for request in requests:
+        if request.type == "AM" or request.type == "PM":
+            schedules_by_staff[request.requesting_staff][request.day][request.type] = request
+        elif request.type == "FULL":
+            schedules_by_staff[request.requesting_staff][request.day]["AM"] = request
+            schedules_by_staff[request.requesting_staff][request.day]["PM"] = request
+    return schedules_by_staff
 
-def resolve_department_schedule(month, year, department, sort_by=None, filter_name=None): #(Shawn)
+
+def resolve_department_schedule(month, year, department, sort_by=None, filter_name=None):
     # Get all staff members in the specified department
     staff_members = User.query.filter(User.dept == department).all()
+    print(f"Staff members in department {department}: {staff_members}")
 
     # Query for all requests for the given month and year for staff in this department
     requests = RequestModel.query.filter(
@@ -294,13 +310,16 @@ def resolve_department_schedule(month, year, department, sort_by=None, filter_na
         RequestModel.requesting_staff.in_([staff.staff_id for staff in staff_members]),
         RequestModel.status.in_(['approved', 'pending'])
     ).all()
+    print(f"Requests for department {department}, month {month}, year {year}: {requests}")
 
     # Use the helper function to map requests to a schedule
     schedules_by_staff = map_requests_to_schedule(requests)
+    print(f"Schedules by staff: {schedules_by_staff}")
 
     # Filter by name if the filter_name is provided
     if filter_name:
         staff_members = [staff for staff in staff_members if filter_name.lower() in (staff.staff_fname + " " + staff.staff_lname).lower()]
+        print(f"Filtered staff members by name '{filter_name}': {staff_members}")
 
     # Create the department schedule
     department_schedule = []
@@ -316,10 +335,7 @@ def resolve_department_schedule(month, year, department, sort_by=None, filter_na
                 if request:
                     available_count -= 1
                     availability = "wfh"
-                    if request.status == "pending":
-                        is_pending = True
-                    else:
-                        is_pending = False
+                    is_pending = request.status == "pending"
                 else:
                     availability = "office"
                     is_pending = False
@@ -342,12 +358,16 @@ def resolve_department_schedule(month, year, department, sort_by=None, filter_na
     if sort_by == "arrangement":
         department_schedule.sort(key=lambda day: day['availability'][0]['availability'])  # Sort by WFH/Office
 
+    # Assuming the first staff member's reporting manager is the reporting director
+    reporting_director = User.query.filter(User.dept == department and User.position == 'Director').first().staff_id
     return {
+        "reporting_director": reporting_director,
         "team_count": len(staff_members),
-        "team_schedule": department_schedule
+        "dept_schedule": department_schedule
     }
 
 
 
 if __name__ == '__main__':
+
     app.run(host='0.0.0.0', port=5002, debug=True)
