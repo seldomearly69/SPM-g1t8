@@ -121,7 +121,7 @@ class DepartmentSchedule(graphene.ObjectType):
 
 class Query(graphene.ObjectType):
     own_schedule = graphene.Field(OwnSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
-    team_schedule = graphene.Field(TeamSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
+    team_schedule = graphene.Field(TeamSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int(), is_manager=graphene.Boolean())
 
     department_schedule = graphene.Field(
         DepartmentSchedule, 
@@ -141,8 +141,8 @@ class Query(graphene.ObjectType):
         # Here, we'll assume you pass `staff_id` in the request for simplicity.
         return resolve_own_schedule(month, year, staff_id)
 
-    def resolve_team_schedule(self, info, month, year, staff_id):
-        return resolve_team_schedule(month, year, staff_id)
+    def resolve_team_schedule(self, info, month, year, staff_id, is_manager):
+        return resolve_team_schedule(month, year, staff_id, is_manager)
 
 schema = graphene.Schema(query=Query)
 
@@ -218,10 +218,16 @@ def resolve_own_schedule(month, year, staff_id):
         "schedule": schedule
     }
 
-def resolve_team_schedule(month, year, staff_id):
-    manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
+def resolve_team_schedule(month, year, staff_id, is_manager):
     # Get all approved requests for the team members in the given month and year
-    team_members = User.query.filter(or_(User.reporting_manager == manager, User.staff_id == manager)).all()
+    if is_manager:
+        print(1)
+        manager = staff_id
+        team_members = User.query.filter(or_(User.reporting_manager == manager, User.staff_id == manager)).all()
+    else:
+        print(2)
+        manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
+        team_members = User.query.filter(User.reporting_manager == manager).all()
     print(team_members)
     requests = RequestModel.query.filter(
         RequestModel.month == month,
@@ -230,7 +236,7 @@ def resolve_team_schedule(month, year, staff_id):
         or_(
         RequestModel.approving_manager == manager, 
         RequestModel.requesting_staff == manager
-    )
+    ) if is_manager else RequestModel.approving_manager == manager
     ).all()
     print(requests)
 
