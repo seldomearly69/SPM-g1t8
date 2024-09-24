@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 // Mock data - replace with actual API call
 const mockArrangements = [
@@ -27,6 +28,13 @@ const mockArrangements = [
     endDate: "2023-07-14",
     type: "flexible",
     status: "approved",
+  },
+  {
+    id: 4,
+    startDate: "2023-07-15",
+    endDate: "2023-07-17",
+    type: "flexible",
+    status: "rejected",
   },
 ];
 
@@ -52,57 +60,79 @@ export default function ManageArrangementsPage() {
     setArrangements(arrangements.filter((arr) => arr.id !== id));
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "approved":
+        return "bg-green-500 text-white";
+      case "pending":
+        return "bg-yellow-500 text-black";
+      case "rejected":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
         Manage WFH Arrangements
       </h2>
-      <div className="space-y-6">
-        {arrangements.map((arrangement) => (
-          <Card
+      <motion.div
+        className="space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {arrangements.map((arrangement, index) => (
+          <motion.div
             key={arrangement.id}
-            className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-xl font-semibold text-gray-700">
-                  {arrangement.startDate} to {arrangement.endDate}
-                </h3>
-                <p className="text-md text-gray-600 mt-2">
-                  {arrangement.type} WFH
-                </p>
+            <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-700">
+                    {arrangement.startDate} to {arrangement.endDate}
+                  </h3>
+                  <p className="text-md text-gray-600 mt-2">
+                    {arrangement.type} WFH
+                  </p>
+                </div>
+                <Badge
+                  className={`text-sm font-medium px-3 py-1 rounded-full ${getStatusColor(
+                    arrangement.status
+                  )}`}
+                >
+                  {arrangement.status}
+                </Badge>
               </div>
-              <Badge
-                variant={
-                  arrangement.status === "approved" ? "success" : "warning"
-                }
-                className="text-sm font-medium px-3 py-1 rounded-full"
-              >
-                {arrangement.status}
-              </Badge>
-            </div>
-            <div className="mt-6">
-              {arrangement.status === "approved" ? (
-                <Button
-                  variant="destructive"
-                  onClick={() => handleWithdraw(arrangement.id)}
-                  className="w-full sm:w-auto"
-                >
-                  Withdraw Arrangement
-                </Button>
-              ) : (
-                <Button
-                  variant="secondary"
-                  onClick={() => handleCancel(arrangement.id)}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel Request
-                </Button>
-              )}
-            </div>
-          </Card>
+              <div className="mt-6">
+                {arrangement.status === "approved" && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleWithdraw(arrangement.id)}
+                    className="w-full sm:w-auto"
+                  >
+                    Withdraw Arrangement
+                  </Button>
+                )}
+                {arrangement.status === "pending" && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleCancel(arrangement.id)}
+                    className="w-full sm:w-auto"
+                  >
+                    Cancel Request
+                  </Button>
+                )}
+              </div>
+            </Card>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
       {arrangements.length === 0 && (
         <p className="text-center text-gray-500 mt-12 text-lg">
           No current WFH arrangements or pending requests.
