@@ -37,13 +37,13 @@ export default function LoggedInLandingPage({ user }: { user: any }) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <Link href="/dashboard/my-schedule">
+          <Link href="/dashboard">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 bg-blue-700 text-white rounded-full text-lg font-semibold shadow-lg hover:bg-blue-800 transition-colors"
             >
-              My Schedule
+              My Dashboard
             </motion.button>
           </Link>
           <Link href="/dashboard/manage">
