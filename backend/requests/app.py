@@ -99,6 +99,7 @@ class OwnSchedule(graphene.ObjectType):
 
 class Availability(graphene.ObjectType):
     name = graphene.String()
+    type = graphene.String()
     department = graphene.String()
     availability = graphene.String()
     is_pending = graphene.String()
@@ -115,9 +116,8 @@ class TeamSchedule(graphene.ObjectType):
     team_schedule = graphene.List(DaySchedule)  # A list of schedules for each team member
 
 class DepartmentSchedule(graphene.ObjectType):
-    reporting_director = graphene.Int()
-    team_count = graphene.Int()
-    dept_schedule = graphene.List(DaySchedule)
+    department_name = graphene.String()
+    dept_schedule = graphene.List(TeamSchedule)
 
 class Query(graphene.ObjectType):
     own_schedule = graphene.Field(OwnSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
@@ -127,14 +127,12 @@ class Query(graphene.ObjectType):
         DepartmentSchedule, 
         month=graphene.Int(), 
         year=graphene.Int(), 
-        department=graphene.String(),
-        sort_by=graphene.String(),
-        filter_name=graphene.String()
+        staff_id=graphene.Int()
     ) # Add department schedule query (Shawn)
 
     # Add resolver for department schedule (Shawn)
-    def resolve_department_schedule(self, info, month, year, department, sort_by=None, filter_name=None):
-        return resolve_department_schedule(month, year, department, sort_by, filter_name)
+    def resolve_department_schedule(self, info, month, year, staff_id):
+        return resolve_department_schedule(month, year, staff_id)
     
     def resolve_own_schedule(self, info, month, year, staff_id):
         # Extract the staff_id from the request context (if the user is authenticated and it's available)
@@ -223,12 +221,13 @@ def resolve_team_schedule(month, year, staff_id):
 
     user = User.query.filter(User.staff_id == staff_id).first()
     if user.position == "Director":
-        return {
-        "reporting_manager" : "This guy is a director",
-        "team_count": "This guy is a director",
-        "team_schedule": "This guy is a director"
-    }
-    elif user.role == "3":
+        raise Exception("User is a director. This endpoint is for managers and staff only")
+    else:
+        return retrieve_team_schedule(user,month,year)
+   
+
+def retrieve_team_schedule(user,month,year):
+    if user.role == "3":
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
     else:
         team_members = User.query.filter(User.reporting_manager == user.reporting_manager).all()
@@ -282,6 +281,7 @@ def resolve_team_schedule(month, year, staff_id):
                     
                 team_availability.append({
                     "name": member.staff_fname + " " + member.staff_lname,
+                    "type": period,
                     "department": member.dept,
                     "availability": availability,
                     "is_pending": is_pending
@@ -298,83 +298,22 @@ def resolve_team_schedule(month, year, staff_id):
         "team_count": len(team_members),
         "team_schedule": team_schedule
     }
-def map_requests_to_schedule(requests):
-    schedules_by_staff = defaultdict(lambda: defaultdict(lambda: {"AM": None, "PM": None, "FULL": None}))
-    for request in requests:
-        if request.type == "AM" or request.type == "PM":
-            schedules_by_staff[request.requesting_staff][request.day][request.type] = request
-        elif request.type == "FULL":
-            schedules_by_staff[request.requesting_staff][request.day]["AM"] = request
-            schedules_by_staff[request.requesting_staff][request.day]["PM"] = request
-    return schedules_by_staff
 
-
-def resolve_department_schedule(month, year, department, sort_by=None, filter_name=None):
-    # Get all staff members in the specified department
-    staff_members = User.query.filter(User.dept == department).all()
-    print(f"Staff members in department {department}: {staff_members}")
-
-    # Query for all requests for the given month and year for staff in this department
-    requests = RequestModel.query.filter(
-        RequestModel.month == month,
-        RequestModel.year == year,
-        RequestModel.requesting_staff.in_([staff.staff_id for staff in staff_members]),
-        RequestModel.status.in_(['approved', 'pending'])
-    ).all()
-    print(f"Requests for department {department}, month {month}, year {year}: {requests}")
-
-    # Use the helper function to map requests to a schedule
-    schedules_by_staff = map_requests_to_schedule(requests)
-    print(f"Schedules by staff: {schedules_by_staff}")
-
-    # Filter by name if the filter_name is provided
-    if filter_name:
-        staff_members = [staff for staff in staff_members if filter_name.lower() in (staff.staff_fname + " " + staff.staff_lname).lower()]
-        print(f"Filtered staff members by name '{filter_name}': {staff_members}")
-
-    # Create the department schedule
-    department_schedule = []
-    days_in_current_month = days_in_month[month]
-    
-    for day in range(1, days_in_current_month + 1):
-        for period in ["AM", "PM"]:
-            staff_availability = []
-            available_count = len(staff_members)
-            
-            for staff in staff_members:
-                request = schedules_by_staff[staff.staff_id][day][period]
-                if request:
-                    available_count -= 1
-                    availability = "wfh"
-                    is_pending = request.status == "pending"
-                else:
-                    availability = "office"
-                    is_pending = False
-                
-                staff_availability.append({
-                    "name": staff.staff_fname + " " + staff.staff_lname,
-                    "department": staff.dept,
-                    "availability": availability,
-                    "is_pending": is_pending
-                })
-
-            department_schedule.append({
-                "date": f"{year:04d}-{month:02d}-{day:02d}",
-                "type": period,
-                "available_count": available_count,
-                "availability": staff_availability
-            })
-
-    # Sort the schedule by arrangement if 'sort_by' is provided (WFH, In-office)
-    if sort_by == "arrangement":
-        department_schedule.sort(key=lambda day: day['availability'][0]['availability'])  # Sort by WFH/Office
-
-    # Assuming the first staff member's reporting manager is the reporting director
-    reporting_director = User.query.filter(User.dept == department and User.position == 'Director').first().staff_id
+def retrieve_department_schedule(user,month,year):
+    managers = User.query.filter(User.reporting_manager == user.staff_id).all()
     return {
-        "reporting_director": reporting_director,
-        "team_count": len(staff_members),
-        "dept_schedule": department_schedule
+        "department": user.dept,
+        "teams": [retrieve_team_schedule(m,month,year) for m in managers]
+    }
+
+def resolve_department_schedule(month, year, staff_id):
+    user = User.query.filter(User.staff_id == staff_id).first()
+    if user.position != "Director":
+        raise Exception("User is not a director. This endpoint is for directors only")
+    managers = User.query.filter(User.reporting_manager==staff_id).all()
+    return {
+        "department_name": user.dept,
+        "dept_schedule": [retrieve_team_schedule(m,month,year) for m in managers]
     }
 
 
