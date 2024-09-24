@@ -52,6 +52,7 @@ def authenticate():
     if result and sha256_hash.hexdigest() == result[9]:
         return jsonify({
             "staff_id": result[0],
+            "position": result[4],
             "name": result[1] + " " + result[2],
             "email": result[6],
             "reporting_manager": result[7],

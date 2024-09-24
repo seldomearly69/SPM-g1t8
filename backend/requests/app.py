@@ -221,8 +221,17 @@ def resolve_own_schedule(month, year, staff_id):
 def resolve_team_schedule(month, year, staff_id):
     # Get all approved requests for the team members in the given month and year
 
-    manager = staff_id
-    team_members = User.query.filter(or_(User.reporting_manager == manager, User.staff_id == manager)).all()
+    user = User.query.filter(User.staff_id == staff_id).first()
+    if user.position == "Director":
+        return {
+        "reporting_manager" : "This guy is a director",
+        "team_count": "This guy is a director",
+        "team_schedule": "This guy is a director"
+    }
+    elif user.role == "3":
+        team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
+    else:
+        team_members = User.query.filter(User.reporting_manager == user.reporting_manager).all()
 
     print(team_members)
     requests = RequestModel.query.filter(
@@ -230,9 +239,9 @@ def resolve_team_schedule(month, year, staff_id):
         RequestModel.year == year,
         RequestModel.status.in_(['approved', 'pending']),
         or_(
-        RequestModel.approving_manager == manager, 
-        RequestModel.requesting_staff == manager
-    )
+        RequestModel.approving_manager == user.staff_id, 
+        RequestModel.requesting_staff == user.staff_id
+    ) if user.role == "3" else RequestModel.approving_manager == user.reporting_manager
     ).all()
     print(requests)
 
@@ -285,7 +294,7 @@ def resolve_team_schedule(month, year, staff_id):
                 "availability": team_availability
             })
     return {
-        "reporting_manager" : manager,
+        "reporting_manager" : user.staff_id if user.role =="3" else user.reporting_manager,
         "team_count": len(team_members),
         "team_schedule": team_schedule
     }
