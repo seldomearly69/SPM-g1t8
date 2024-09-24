@@ -220,7 +220,7 @@ def resolve_team_schedule(month, year, staff_id):
     # Get all approved requests for the team members in the given month and year
 
     user = User.query.filter(User.staff_id == staff_id).first()
-    if user.position == "Director":
+    if user.position == "Director" or user.position == "MD":
         raise Exception("User is a director. This endpoint is for managers and staff only")
     else:
         return retrieve_team_schedule(user,month,year)
