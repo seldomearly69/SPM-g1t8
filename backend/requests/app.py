@@ -119,20 +119,42 @@ class DepartmentSchedule(graphene.ObjectType):
     department_name = graphene.String()
     dept_schedule = graphene.List(TeamSchedule)
 
+class ManagerList(graphene.ObjectType):
+    director_name = graphene.String()
+    manager_list = graphene.List(graphene.Int)
+
 class Query(graphene.ObjectType):
-    own_schedule = graphene.Field(OwnSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
-    team_schedule = graphene.Field(TeamSchedule, month=graphene.Int(), year=graphene.Int(), staff_id = graphene.Int())
+
+    own_schedule = graphene.Field(
+        OwnSchedule, 
+        month=graphene.Int(),
+        year=graphene.Int(),
+        staff_id = graphene.Int()
+    )
+
+    team_schedule = graphene.Field(
+        TeamSchedule,
+        month=graphene.Int(),
+        year=graphene.Int(),
+        staff_id = graphene.Int()
+    )
+
+    manager_list = graphene.Field(
+        ManagerList,
+        director_id = graphene.Int(),
+    )
 
     department_schedule = graphene.Field(
         DepartmentSchedule, 
         month=graphene.Int(), 
         year=graphene.Int(), 
-        staff_id=graphene.Int()
+        staff_id=graphene.Int(),
+        team_managers = graphene.List(graphene.Int)
     ) # Add department schedule query (Shawn)
 
     # Add resolver for department schedule (Shawn)
-    def resolve_department_schedule(self, info, month, year, staff_id):
-        return resolve_department_schedule(month, year, staff_id)
+    def resolve_department_schedule(self, info, month, year, staff_id, team_managers=None):
+        return resolve_department_schedule(month, year, staff_id, team_managers)
     
     def resolve_own_schedule(self, info, month, year, staff_id):
         # Extract the staff_id from the request context (if the user is authenticated and it's available)
@@ -141,11 +163,24 @@ class Query(graphene.ObjectType):
 
     def resolve_team_schedule(self, info, month, year, staff_id):
         return resolve_team_schedule(month, year, staff_id)
+    
+    def resolve_manager_list(self,info,director_id):
+        return resolve_manager_list(director_id)
 
 schema = graphene.Schema(query=Query)
 
 # Set up GraphQL endpoint
 app.add_url_rule('/get_schedule', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))
+
+def resolve_manager_list(director_id):
+    user = User.query.filter(User.staff_id == director_id).first()
+    if user.position != "Director":
+        raise Exception("User is not a director. This endpoint is for directors only")
+    m_list = User.query.filter(User.reporting_manager == director_id).all()
+    return {
+        "director": user.staff_fname + " " + user.staff_lname,
+        "manager_list": [m.staff_id for m in m_list]
+    }
 
 def resolve_own_schedule(month, year, staff_id):
 
@@ -299,21 +334,21 @@ def retrieve_team_schedule(user,month,year):
         "team_schedule": team_schedule
     }
 
-def retrieve_department_schedule(user,month,year):
-    managers = User.query.filter(User.reporting_manager == user.staff_id).all()
-    return {
-        "department": user.dept,
-        "teams": [retrieve_team_schedule(m,month,year) for m in managers]
-    }
-
-def resolve_department_schedule(month, year, staff_id):
+def resolve_department_schedule(month, year, staff_id, team_managers=None):
     user = User.query.filter(User.staff_id == staff_id).first()
     if user.position != "Director":
         raise Exception("User is not a director. This endpoint is for directors only")
-    managers = User.query.filter(User.reporting_manager==staff_id).all()
+
+    if not team_managers:
+        team_managers = User.query.filter(User.reporting_manager==staff_id).all()
+    else:
+        team_managers = User.query.filter(User.staff_id.in_(team_managers)).all()
+        print("team_managers:" +  str(team_managers))
+
+
     return {
         "department_name": user.dept,
-        "dept_schedule": [retrieve_team_schedule(m,month,year) for m in managers]
+        "dept_schedule": [retrieve_team_schedule(m,month,year) for m in team_managers]
     }
 
 
