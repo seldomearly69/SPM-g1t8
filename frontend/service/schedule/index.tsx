@@ -82,3 +82,34 @@ export async function getTeamDetails(month: number, year: number, staffId: numbe
     const data = await res.json()
     return data
 }
+
+export async function getDepartmentSchedule(month: number, year: number, staffId: number) {
+    const gqlString = gql`
+         query departmentSchedule($month: Int!, $year: Int!, $staffId: Int!) {
+            departmentSchedule(month: $month, year: $year, staffId: $staffId) {
+                departmentName
+                deptSchedule {
+                    teamSchedule {
+                        date
+                        type
+                        availableCount
+                    }
+                }
+            }
+        }
+    `
+    const res = await fetch("http://localhost:5002/get_schedule", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            query: gqlString.loc.source.body,
+            variables: { month:month, year: year, staffId: staffId }
+        }),
+    })
+    const data = await res.json()
+    return data
+}
+
+    
