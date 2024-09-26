@@ -1,28 +1,9 @@
-"use client"
-
-import {  MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav, TeamMonthlyEventItem } from "@/components/monthly-calendar";
 import { useEffect, useState} from "react"
-import { Availability, EventType } from "@/types";
-import { motion } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DataTable } from "@/components/data-table";
-import { availability_columns } from "@/components/columns";
-import { getTeamDetails, getTeamSchedule } from "@/service/schedule";
+import { getDepartmentSchedule, getTeamDetails, getTeamSchedule } from "@/service/schedule";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-const mockSchedule = [
-  { date: new Date("2024-09-01"), availableCount: "3/7", type: "AM" },
-  { date: new Date("2024-09-01"), availableCount: "2/7", type: "PM" },
-  { date: new Date("2024-09-01"), availableCount: "4/7", type: "Full" },
-  { date: new Date("2024-05-04"), availableCount: "wfh", type: "AM" },
-  { date: new Date("2024-05-05"), availableCount: "office", type: "AM" },
-  { date: new Date("2024-05-06"), availableCount: "wfh", type: "AM" },
-  { date: new Date("2023-05-07"), availableCount: "office", type: "AM" },
-  { date: new Date("2023-05-08"), availableCount: "wfh", type: "AM" },
-  { date: new Date("2023-05-09"), availableCount: "office", type: "AM" },
-  { date: new Date("2023-05-10"), availableCount: "wfh", type: "AM" },
-];
+import { getCurrentUser } from "@/lib/session";
+import TeamSchedule from "@/components/team-schedule";
+import * as motion from "framer-motion/client";
 
 // const mockAvailability = [
 //   { employee_name: "John Doe", department: "Engineering", availability: "Office", type: "AM", is_pending: false },
@@ -35,36 +16,9 @@ const mockSchedule = [
 // ]
 
 
-export default function TeamSchedulePage() {
-  const [teamSchedule, setTeamSchedule] = useState(mockSchedule);
-  const [selectedDate, setSelectedDate] = useState<Date>(
-    new Date()
-  );
-  const [dialogData, setDialogData] = useState<Availability[]>([]);
-
-
-  const handleDialogOpen = async (open: boolean) => {
-    if (open ) {
-      try {
-        const response = await getTeamDetails(selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), 140001);
-        console.log(response)
-        setDialogData(response.data.teamSchedule.teamSchedule[0].availability);
-        console.log(dialogData)
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      const data = await getTeamSchedule(selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), 140001);
-      console.log(data.data.teamSchedule.schedule)
-      setTeamSchedule(data.data.teamSchedule.teamSchedule)
-    };
-    fetchSchedule();
-  }, [selectedDate])
-
+export default async function TeamSchedulePage() {
+  
+    const user = await getCurrentUser();
 
    
   // let [currentMonth, setCurrentMonth] = useState<Date>(
@@ -93,52 +47,8 @@ export default function TeamSchedulePage() {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="w-full"
       >
-        <Card>
-          <CardHeader></CardHeader>
-          <CardContent>
-            <MonthlyCalendar
-              currentMonth={selectedDate || new Date()}
-              onCurrentMonthChange={setSelectedDate}
-            >
-              <MonthlyNav />
-              <MonthlyBody events={teamSchedule}>
-              <Dialog onOpenChange={handleDialogOpen}>
-                  <DialogTrigger >
-                    <MonthlyDay<EventType>
-                    renderDay={(data) =>
-                      data.map((item, index) => (
-                          <TeamMonthlyEventItem
-                            key={index}
-                            availability={item.availableCount || 0}
-                            type={item.type}
-                          />
-                      
-                      ))
-                    }
-                  />
-                  </DialogTrigger>
-                  <DialogContent className="w-full max-w-[95vw] h-[90vh] p-0 sm:p-6">
-                    <DialogHeader className="p-4 sm:p-0">
-                      <DialogTitle>
-                          {dialogData ? (
-                              <></>
-                              ) : (
-                                <p>Loading...</p>
-                              )}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0">
-                      <DataTable columns={availability_columns} data={dialogData ? dialogData : []} />
-                      <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
-                  </DialogContent>
-                </Dialog>
-              
-              </MonthlyBody>
-            </MonthlyCalendar>
-          </CardContent>
-        </Card>
       
+      <TeamSchedule user={user}/>
       </motion.div>
    
     </motion.div>

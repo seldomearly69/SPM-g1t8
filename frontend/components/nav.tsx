@@ -24,10 +24,7 @@ export function DashboardNav({ sideBarNav, currentUser }: DashboardNavProps) {
   const path = usePathname();
   const [navItems, setNavItems] = useState<SidebarNavItem[]>([]);
 
-  console.log("SIDE " + sideBarNav);
   const roles = sideBarNav.roleSpecific;
-
-  console.log("CURR", JSON.stringify(currentUser, null, 2));
 
   useEffect(() => {
     const items = [...sideBarNav.common];
