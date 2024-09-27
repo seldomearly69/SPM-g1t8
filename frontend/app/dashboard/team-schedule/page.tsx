@@ -1,5 +1,9 @@
-import { useEffect, useState} from "react"
-import { getDepartmentSchedule, getTeamDetails, getTeamSchedule } from "@/service/schedule";
+import { useEffect, useState } from "react";
+import {
+  getDepartmentSchedule,
+  getTeamDetails,
+  getTeamSchedule,
+} from "@/service/schedule";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getCurrentUser } from "@/lib/session";
 import TeamSchedule from "@/components/team-schedule";
@@ -12,15 +16,12 @@ import * as motion from "framer-motion/client";
 //   { employee_name: "Bob Brown", department: "Engineering", availability: "Office", type: "AM", is_pending: false },
 //   { employee_name: "Charlie Davis", department: "Marketing", availability: "Office", type: "AM", is_pending: false },
 //   { employee_name: "Diana White", department: "Sales", availability: "Office", type: "AM", is_pending:true },
-//   { employee_name: "Eve Green", department: "Engineering", availability: "Office", type: "AM", is_pending: false },    
+//   { employee_name: "Eve Green", department: "Engineering", availability: "Office", type: "AM", is_pending: false },
 // ]
 
-
 export default async function TeamSchedulePage() {
-  
-    const user = await getCurrentUser();
+  const user = await getCurrentUser();
 
-   
   // let [currentMonth, setCurrentMonth] = useState<Date>(
   //   startOfMonth(new Date())
   // );
@@ -47,10 +48,8 @@ export default async function TeamSchedulePage() {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="w-full"
       >
-      
-      <TeamSchedule user={user}/>
+        <TeamSchedule user={user} />
       </motion.div>
-   
     </motion.div>
   );
 }
