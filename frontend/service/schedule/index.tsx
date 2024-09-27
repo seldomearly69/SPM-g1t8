@@ -63,7 +63,7 @@ export async function getTeamDetails(month: number, year: number, staffId: numbe
                         department
                         availability
                         isPending
-                        
+                        type
                     }
                 }
             }

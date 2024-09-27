@@ -42,7 +42,6 @@ export default function TeamSchedule({user}: TeamScheduleProps) {
     const fetchSchedule = async () => {
         if (user.position === "Director") {
             const data = await getDepartmentSchedule(selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), user.id) 
-            console.log(data.data.departmentSchedule.deptSchedule[0].teamSchedule)
             setTeamSchedule(data.data.departmentSchedule.deptSchedule[0].teamSchedule)
         }
         else {
@@ -67,7 +66,11 @@ export default function TeamSchedule({user}: TeamScheduleProps) {
         <Card>
         <CardHeader>
           {
-
+            user.position === "Director" ? (
+              <h1>Department Schedule</h1>
+            ) : (
+              <h1>Team Schedule</h1>
+            )
           }
         </CardHeader>
         <CardContent>
