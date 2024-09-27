@@ -57,7 +57,6 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
       if (user.position === "Director") {
         console.log("Retrieved Schedule of My Teams");
 
-        console.log(user.id);
         // Get all team members that fall under that director
         const data = await getManagerList(user.id);
 
@@ -89,11 +88,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
           selectedDate?.getMonth() + 1,
           selectedDate?.getFullYear(),
           selectedManager
-          // 150115
-          // 140015
-          // selectedManager != 0 ? user.id : selectedManager
         );
-        console.log(response);
         setDialogData(response.data.teamSchedule.teamSchedule[0].availability);
       } catch (error) {
         console.error("Error fetching data:", error);
