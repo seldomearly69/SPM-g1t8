@@ -35,7 +35,8 @@ export type User = {
   email: string;
   role: string;
   position: string;
-}
+  reporting_manager: string;
+};
 
 export type DaysInWeekProps = {
   locale?: Locale;

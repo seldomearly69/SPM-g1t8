@@ -72,8 +72,9 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
         const data = await getTeamDetails(
           selectedDate?.getMonth() + 1,
           selectedDate?.getFullYear(),
-          user.id
+          parseInt(user.reporting_manager, 10)
         );
+        setSelectedManager(parseInt(user.reporting_manager, 10));
         setTeamSchedule(data.data.teamSchedule.teamSchedule);
         setShowCalendar(true); // Display the calendar after the user select the team to view
       }
@@ -84,6 +85,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
   const handleDialogOpen = async (open: boolean) => {
     if (open) {
       try {
+        console.log(selectedManager);
         const response = await getTeamDetails(
           selectedDate?.getMonth() + 1,
           selectedDate?.getFullYear(),
@@ -178,7 +180,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                     renderDay={(data) =>
                       data.map((item) => (
                         <TeamMonthlyEventItem
-                          key={`${item.date}-${item.type}`} // Ensure this key is unique for each item
+                          key={`${item.date}-${item.type}`}
                           availability={item.availableCount || 0}
                           type={item.type}
                         />

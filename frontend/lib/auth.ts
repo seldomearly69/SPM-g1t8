@@ -34,13 +34,13 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-
       if (user) {
         token.id = user.staff_id;
         token.name = user.name;
         token.email = user.email;
         token.role = user.role;
         token.position = user.position;
+        token.reporting_manager = user.reporting_manager;
       }
       return token;
     },
@@ -51,6 +51,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email;
         session.user.role = token.role;
         session.user.position = token.position;
+        session.user.reporting_manager = token.reporting_manager;
       }
       return session;
     },
