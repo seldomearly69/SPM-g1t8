@@ -119,9 +119,15 @@ class DepartmentSchedule(graphene.ObjectType):
     department_name = graphene.String()
     dept_schedule = graphene.List(TeamSchedule)
 
+
+class Manager(graphene.ObjectType):
+    staff_id = graphene.Int()
+    position = graphene.String()
+    name = graphene.String()
+
 class ManagerList(graphene.ObjectType):
     director_name = graphene.String()
-    manager_list = graphene.List(graphene.Int)
+    manager_list = graphene.List(Manager)
 
 class Query(graphene.ObjectType):
 
@@ -178,8 +184,8 @@ def resolve_manager_list(director_id):
         raise Exception("User is not a director. This endpoint is for directors only")
     m_list = User.query.filter(User.reporting_manager == director_id).all()
     return {
-        "director": user.staff_fname + " " + user.staff_lname,
-        "manager_list": [m.staff_id for m in m_list]
+        "director_name": user.staff_fname + " " + user.staff_lname,
+        "manager_list": [{"staff_id":m.staff_id, "position": m.position, "name": m.staff_fname + " " + m.staff_lname} for m in m_list]
     }
 
 def resolve_own_schedule(month, year, staff_id):
@@ -262,7 +268,7 @@ def resolve_team_schedule(month, year, staff_id):
    
 
 def retrieve_team_schedule(user,month,year):
-    if user.role == "3":
+    if user.role == 3:
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
     else:
         team_members = User.query.filter(User.reporting_manager == user.reporting_manager).all()

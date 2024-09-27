@@ -31,9 +31,9 @@ export function DashboardNav({ sideBarNav, currentUser }: DashboardNavProps) {
     if (
       currentUser &&
       currentUser.role !== undefined &&
-      sideBarNav.roleSpecific[currentUser.role]
+      roles[currentUser.role]
     ) {
-      items.push(...sideBarNav.roleSpecific[currentUser.role]);
+      items.push(...roles[currentUser.role]);
     }
     setNavItems(items);
   }, [sideBarNav, currentUser]);
