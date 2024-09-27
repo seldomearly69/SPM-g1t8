@@ -30,7 +30,7 @@ export type NavbarItem = {
 };
 
 export type User = {
-  id: number;
+  staff_id: number;
   name: string;
   email: string;
   role: string;
