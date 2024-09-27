@@ -71,15 +71,17 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
           console.error("Manager list is not an array");
         }
       } else {
-        console.log("Retrieved My Own Team Schedule");
-        const data = await getTeamDetails(
-          selectedDate?.getMonth() + 1,
-          selectedDate?.getFullYear(),
-          parseInt(user.reporting_manager, 10)
-        );
-        setSelectedManager(parseInt(user.reporting_manager, 10));
-        setTeamSchedule(data.data.teamSchedule.teamSchedule);
-        setShowCalendar(true); // Display the calendar after the user select the team to view
+        // Get the schedule of the user's team
+        // Returns availableCount and type for each day
+          const data = await getTeamSchedule (
+            selectedDate?.getMonth() + 1,
+            selectedDate?.getFullYear(),
+            user.staff_id
+          );
+
+          setSelectedManager(parseInt(user.reporting_manager, 10));
+          setTeamSchedule(data.data.teamSchedule.teamSchedule);
+          setShowCalendar(true); // Display the calendar after the user select the team to view
       }
     };
     fetchSchedule();
@@ -88,13 +90,15 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
   const handleDialogOpen = async (open: boolean) => {
     if (open) {
       try {
-        console.log(selectedManager);
-        const response = await getTeamDetails(
+        // Get the schedule details of the team
+        // Returns name, department, availability, type and status
+        const data = await getTeamDetails(
           selectedDate?.getMonth() + 1,
           selectedDate?.getFullYear(),
-          selectedManager
+          user.staff_id
         );
-        setDialogData(response.data.teamSchedule.teamSchedule[0].availability);
+        console.log(data)
+        setDialogData(data.data.teamSchedule.teamSchedule[0].availability);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -128,7 +132,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
             onCurrentMonthChange={setSelectedDate}
           >
             <div className="ml-auto flex w-full space-x-5 sm:justify-end">
-                {user.position === "Director" ? 
+                {user.position === "Director" && 
            
                   <Select>
                     <SelectTrigger>
@@ -146,7 +150,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                 
                     </SelectContent>
                   </Select>
-                  : "My Team"}  
+                }  
               <MonthlyNav />
             </div>
            

@@ -93,6 +93,7 @@ export async function getTeamDetails(
             name
             department
             availability
+            type
             isPending
           }
         }
@@ -112,6 +113,34 @@ export async function getTeamDetails(
   const data = await res.json();
   return data;
 }
+
+export async function getTeamSchedule(month: number, year: number, staffId: number) {
+    const gqlString = gql`
+         query teamSchedule($month: Int!, $year: Int!, $staffId: Int!) {
+            teamSchedule(month: $month, year: $year, staffId: $staffId) {
+                teamCount
+                teamSchedule {
+                    date
+                    type
+                    availableCount
+                }
+            }
+        }
+    `
+    const res = await fetch("http://localhost:5002/get_schedule", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            query: gqlString.loc.source.body,
+            variables: { month:month, year: year, staffId: staffId }
+        }),
+    })
+    const data = await res.json()
+    return data
+}
+
 
 export async function getDepartmentSchedule(
   month: number,
