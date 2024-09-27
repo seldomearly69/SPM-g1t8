@@ -268,7 +268,7 @@ def resolve_team_schedule(month, year, staff_id):
    
 
 def retrieve_team_schedule(user,month,year):
-    if user.role == "3":
+    if user.role == 3:
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
     else:
         team_members = User.query.filter(User.reporting_manager == user.reporting_manager).all()
