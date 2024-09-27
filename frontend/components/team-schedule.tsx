@@ -121,7 +121,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
             <select value={selectedManager} onChange={handleManagerChange}>
               {managerList.map((manager) => (
                 <option key={manager.staffId} value={manager.staffId}>
-                  {`${manager.name} - ${manager.staffId}`}
+                  {`${manager.position} - ${manager.name} - ${manager.staffId}`}
                 </option>
               ))}
             </select>
