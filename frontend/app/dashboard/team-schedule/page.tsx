@@ -5,7 +5,6 @@ import * as motion from "framer-motion/client";
 
 export default async function TeamSchedulePage() {
   const user = await getCurrentUser();
-  console.log(user)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

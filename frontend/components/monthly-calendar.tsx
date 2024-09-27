@@ -129,11 +129,11 @@ export function useMonthlyBody<DayData>() {
   }
 
 const headingClasses = {
-    l3: 'lg:grid-cols-3',
-    l4: 'lg:grid-cols-4',
-    l5: 'lg:grid-cols-5',
-    l6: 'lg:grid-cols-6',
-    l7: 'lg:grid-cols-7',
+    l3: 'xl:grid-cols-3',
+    l4: 'xl:grid-cols-4',
+    l5: 'xl:grid-cols-5',
+    l6: 'xl:grid-cols-6',
+    l7: 'xl:grid-cols-7',
   };
 
 export function MonthlyBody<DayData>({
@@ -150,12 +150,12 @@ export function MonthlyBody<DayData>({
     });
    
     const headingClassName =
-      'border-b-2 p-2 border-r-2 lg:flex justify-center items-center hidden';
+      'border-b-2 p-2 border-r-2 xl:flex justify-center items-center hidden';
 
     return (
       <div className="bg-white border-l-2 border-t-2">
         <div
-          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ${
+          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5  ${
             //@ts-expect-error -- headings.length is not known at compile time
             headingClasses[`l${headings.length}`]
           }`}
@@ -204,7 +204,7 @@ export function MonthlyDay<DayData>({ renderDay}: MonthlyDayProps<DayData>) {
       >
         <div className="flex justify-between">
           <div className="font-bold">{dayNumber}</div>
-          <div className="lg:hidden block">
+          <div className="xl:hidden block">
             {format(day, 'EEEE', { locale })}
           </div>
         </div>
