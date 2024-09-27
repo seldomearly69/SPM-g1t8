@@ -22,7 +22,7 @@ export function MainNav({ items }: MainNavProps) {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex gap-6 md:gap-10"
+      className="flex gap-6 md:gap-10" 
     >
       <Link href="/" className="flex items-center">
         <Image
