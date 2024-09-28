@@ -23,7 +23,7 @@ export function DataTableFacetedFilter<TData, TValue>({
     title,
     options,
   }: DataTableFacetedFilterProps<TData, TValue>) {
-   
+    
     const facets = React.useMemo(() => {
       try {
         return column?.getFacetedUniqueValues();
@@ -33,7 +33,7 @@ export function DataTableFacetedFilter<TData, TValue>({
       }
     }, [column]);
     
-    const selectedValues = new Set(column?.getFilterValue() as string[])
+    const selectedValues = new Set(column?.getFilterValue() as string[] || [])
     
 
     return (

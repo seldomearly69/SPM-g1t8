@@ -54,7 +54,9 @@ export function DataTable<TData, TValue>({ columns, data, onRowClick  }: DataTab
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getCoreRowModel: getCoreRowModel(),
+        enableColumnFilters: true,
     })
+
     return (
         <div className="space-y-4" >
             <DataTableToolbar table={table}/>

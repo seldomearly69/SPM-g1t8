@@ -113,26 +113,32 @@ export const availability_columns: ColumnDef<Availability>[] = [
     {
         accessorKey: "name",
         header: "Employee Name",
+        enableColumnFilter: true,
     },
     {
         accessorKey: "department",
         header: "Department",
+        enableColumnFilter: true,
     },  
     {
         accessorKey: "availability",
         header: "Availability",
+        enableColumnFilter: true,
     },
     {
         accessorKey: "type",
         header: "Type",
+        enableColumnFilter: true,
     },
     {
-        id: "status",
+        accessorKey: "isPending",
         header: "Status",
         cell: ({ row }) => {
-            return <div>
-                <Badge className={row.original.isPending ? "bg-yellow-500" : "bg-emerald-500"}>{row.original.isPending ? "Pending" : "Confirmed"}</Badge>
-            </div>
-        }
+                 const status = row.original.isPending ? "Pending" : "Confirmed"
+                 return <Badge className={row.original.isPending ? "bg-yellow-500" : "bg-emerald-500"}>{status}</Badge>
+        },
+        filterFn: (row, id, value) => {
+            return value.includes(row.original.isPending ? "Pending" : "Confirmed")
+        },
     },
 ]
