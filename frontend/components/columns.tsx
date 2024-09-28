@@ -43,6 +43,49 @@ export const request_columns: ColumnDef<Request>[] = [
     // }
 ]
 
+const ActionCell = ({ row }: {row: Row<Request>}) => {
+    const [status, setStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    return <div>
+       
+        <Button variant="ghost" size="sm" className="hover:text-green-500">
+            <Check className="w-4 h-4" />
+        </Button>
+        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+            <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="hover:text-red-500"> 
+                <X className="w-4 h-4" />   
+            </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+                <div className="grid gap-4">
+                    <div className="space-y-2">
+                        <h4 className="font-medium leading-none">Reason</h4>
+                            <p className="text-sm text-muted-foreground">
+                            Enter the reason for the rejection
+                            </p>
+                    </div>
+                    <div className="grid gap-2">
+                        <div className="grid grid-cols-3 items-center gap-4">
+                        <Textarea
+                            className="col-span-3 h-8"
+                        />
+                        </div>
+                    </div>
+                    <div className="grid gap-2">
+                        <Button onClick={() =>{
+                            setStatus('rejected') 
+                            console.log(status)
+                            setIsPopoverOpen(false)
+                        }} variant="outline">Submit</Button>
+                    </div>
+                </div>
+            </PopoverContent>
+       </Popover>
+      
+    </div>
+}
+
 export const individual_request_columns: ColumnDef<Request>[] = [
     {
         accessorKey: "id",
@@ -60,46 +103,7 @@ export const individual_request_columns: ColumnDef<Request>[] = [
         id: "action", 
         header: "Action",
         cell: ({ row }: {row: Row<Request>}) => {
-            const [status, setStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
-            const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-            return <div>
-               
-                <Button variant="ghost" size="sm" className="hover:text-green-500">
-                    <Check className="w-4 h-4" />
-                </Button>
-                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                    <PopoverTrigger asChild>
-                        <Button variant="ghost" size="sm" className="hover:text-red-500"> 
-                        <X className="w-4 h-4" />   
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                        <div className="grid gap-4">
-                            <div className="space-y-2">
-                                <h4 className="font-medium leading-none">Reason</h4>
-                                    <p className="text-sm text-muted-foreground">
-                                    Enter the reason for the rejection
-                                    </p>
-                            </div>
-                            <div className="grid gap-2">
-                                <div className="grid grid-cols-3 items-center gap-4">
-                                <Textarea
-                                    className="col-span-3 h-8"
-                                />
-                                </div>
-                            </div>
-                            <div className="grid gap-2">
-                                <Button onClick={() =>{
-                                    setStatus('rejected') 
-                                    console.log(status)
-                                    setIsPopoverOpen(false)
-                                }} variant="outline">Submit</Button>
-                            </div>
-                        </div>
-                    </PopoverContent>
-               </Popover>
-              
-            </div>
+            return <ActionCell row={row} />
         }
     }
 ]
