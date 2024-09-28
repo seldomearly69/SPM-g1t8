@@ -21,7 +21,6 @@ import { availability_columns } from "@/components/columns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   getManagerList,
-  getTeamDetails,
   getTeamSchedule,
 } from "@/service/schedule";
 import { Availability, EventType, User } from "@/types";
@@ -98,11 +97,11 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
       try {
         // Get the schedule details of the team
         // Returns name, department, availability, type and status
-        const data = await getTeamDetails(
-          selectedDate?.getMonth() + 1,
-          selectedDate?.getFullYear(),
-          user.staffId
-        );
+        // const data = await getTeamDetails(
+        //   selectedDate?.getMonth() + 1,
+        //   selectedDate?.getFullYear(),
+        //   user.staffId
+        // );
         setDialogData(mockSchedule.team_schedule)
 
         const chartData = mockSchedule.team_schedule.map((schedule) => {

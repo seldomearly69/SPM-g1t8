@@ -33,6 +33,7 @@ export default function RootLayout({
           fontSans.variable,
           fontHeading.variable
         )}
+        suppressHydrationWarning
       >
         {children}
         <Toaster />
