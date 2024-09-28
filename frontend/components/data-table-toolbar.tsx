@@ -16,7 +16,6 @@ export function DataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
-
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -28,9 +27,9 @@ export function DataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("status") && (
+        {table.getColumn("isPending") && (
           <DataTableFacetedFilter
-            column={table.getColumn("status")}
+            column={table.getColumn("isPending")}
             title="Status"
             options={schedule_status}
           />

@@ -21,12 +21,12 @@ export const request_status = [
 
 export const schedule_status = [
     {
-        value: "pending",
+        value: "Pending",
         label: "Pending",
         icon: StopwatchIcon,
     },
     {
-      value: "confirmed",
+      value: "Confirmed",
       label: "Confirmed",
       icon: CheckCircledIcon,
     },

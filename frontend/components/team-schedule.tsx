@@ -10,7 +10,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -190,9 +189,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                     </DialogHeader>
                    
                     <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0 ">
-                      <DialogDescription>
-                        <AvailabilityChartArea chartData={chartData.length > 0 ? chartData : []}/>
-                      </DialogDescription>
+                      <AvailabilityChartArea chartData={chartData.length > 0 ? chartData : []}/>
                       <DataTable
                         columns={availability_columns}
                         data={dialogData.length > 0 ? dialogData[0].availability.concat(dialogData[1].availability) : []}
