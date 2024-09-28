@@ -4,9 +4,8 @@ import { dashboardConfig } from "@/config/dashboard";
 import Footer from "@/components/Footer";
 import { UserAccountNav } from "@/components/user-account-nav";
 import { getCurrentUser } from "@/lib/session";
-import { notFound, usePathname } from "next/navigation";
+import { notFound } from "next/navigation";
 import * as motion from "framer-motion/client";
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import React from "react";
 import BreadcrumbLayout from "@/components/breadcrumb-layout";
 

@@ -46,6 +46,7 @@ export const request_columns: ColumnDef<Request>[] = [
 const ActionCell = ({ row }: {row: Row<Request>}) => {
     const [status, setStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    console.log(row)
     return <div>
        
         <Button variant="ghost" size="sm" className="hover:text-green-500">

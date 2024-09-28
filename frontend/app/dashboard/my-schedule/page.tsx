@@ -1,4 +1,3 @@
-import { getOwnSchedule } from "@/service/schedule"
 import * as motion from "framer-motion/client"
 import MySchedule from "@/components/my-schedule"
 import { getCurrentUser } from "@/lib/session";

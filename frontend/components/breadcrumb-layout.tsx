@@ -17,9 +17,9 @@ export default function BreadcrumbLayout() {
                     </BreadcrumbLink>
                 </BreadcrumbItem>
                 {pathSegments?.slice(1).map((segment, index) => (
-                    <React.Fragment key={index}>
-                        <BreadcrumbSeparator key={index} />
-                        <BreadcrumbItem key={index}>
+                    <React.Fragment key={`fragment-${index}`}>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
                         
                         <BreadcrumbLink href={`/${pathSegments.slice(0, index + 2).join('/')}`}>
                             {segment}

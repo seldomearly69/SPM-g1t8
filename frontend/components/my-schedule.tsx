@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { EventType, User } from "@/types"
 import { startOfMonth, subHours } from "date-fns";
 import { getOwnSchedule } from "@/service/schedule";
-import { mockOwnSchedule } from "@/mock-own-schedule";
 
 // Mock data - replace with actual API call
 const mockSchedule = [
