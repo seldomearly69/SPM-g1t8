@@ -141,7 +141,6 @@ export function MonthlyBody<DayData>({
     events,
     children,
   }: MonthlyBodyProps<DayData>) {
-    console.log(events)
     const { days, locale } = useMonthlyCalendar();
     const { headings, daysToRender, padding } = handleOmittedDays({
       days,
@@ -193,7 +192,7 @@ export function MonthlyBody<DayData>({
   }
 
 
-export function MonthlyDay<DayData>({ renderDay}: MonthlyDayProps<DayData>) {
+export function MonthlyDay<DayData>({ renderDay, onDateClick}: MonthlyDayProps<DayData>) {
     const { locale } = useMonthlyCalendar();
     const { day, events } = useMonthlyBody<DayData>()
     const dayNumber = format(day, 'd', { locale });
@@ -201,7 +200,8 @@ export function MonthlyDay<DayData>({ renderDay}: MonthlyDayProps<DayData>) {
       <div
         title={`Events for day ${dayNumber}`}
         className="h-48 p-2 border-b-2 border-r-2"
-      >
+        onClick={() => onDateClick(day)}
+        >
         <div className="flex justify-between">
           <div className="font-bold">{dayNumber}</div>
           <div className="xl:hidden block">
@@ -219,12 +219,12 @@ export function MonthlyDay<DayData>({ renderDay}: MonthlyDayProps<DayData>) {
 export const DefaultMonthlyEventItem = ({
     availability,
     type,
-    is_pending
+    isPending
 
   }: DefaultEventItemProps) => {
     return (
       <li className="py-2">
-        <Badge variant={is_pending ? "secondary" : "default"} className="w-full">
+        <Badge variant={isPending ? "warning" : "success"} className="w-full">
           <div className="flex text-sm flex-1 justify-between">
             <h3 className="font-medium">{availability}</h3>
             <p className="text-gray-500">{type}</p>

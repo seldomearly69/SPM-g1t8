@@ -14,7 +14,7 @@ export const request_columns: ColumnDef<Request>[] = [
         header: "ID",
     },
     {
-        accessorKey: "employee_name",
+        accessorKey: "employeeName",
         header: "Employee Name",
     },
     {
@@ -126,7 +126,7 @@ export const availability_columns: ColumnDef<Availability>[] = [
         header: "Status",
         cell: ({ row }) => {
             return <div>
-                <Badge>{row.original.is_pending ? "Pending" : "Confirmed"}</Badge>
+                <Badge className={row.original.isPending ? "bg-yellow-500" : "bg-emerald-500"}>{row.original.isPending ? "Pending" : "Confirmed"}</Badge>
             </div>
         }
     },

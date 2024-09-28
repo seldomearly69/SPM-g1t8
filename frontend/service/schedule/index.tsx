@@ -89,6 +89,8 @@ export async function getTeamDetails(
       teamSchedule(month: $month, year: $year, staffId: $staffId) {
         teamCount
         teamSchedule {
+          date
+          type
           availability {
             name
             department

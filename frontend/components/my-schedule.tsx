@@ -6,19 +6,20 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { EventType, User } from "@/types"
 import { startOfMonth, subHours } from "date-fns";
 import { getOwnSchedule } from "@/service/schedule";
+import { mockOwnSchedule } from "@/mock-own-schedule";
 
 // Mock data - replace with actual API call
 const mockSchedule = [
-    { date: "2024-09-01", availability: "office" , type: "Full", is_pending: true},
-    { date: subHours(new Date(), 2), availability: "wfh" , type: "AM", is_pending: false},
-    { date: new Date(), availability: "office" , type: "AM", is_pending: false},
-    { date: new Date("2024-05-04"), availability: "wfh" , type: "AM", is_pending: false},
-    { date: new Date("2024-05-05"), availability: "office" , type: "AM", is_pending: false},
-    { date: new Date("2024-05-06"), availability: "wfh" , type: "AM", is_pending: false},
-    { date: new Date("2023-05-07"), availability: "office" , type: "AM", is_pending: false},
-    { date: new Date("2023-05-08"), availability: "wfh" , type: "AM", is_pending: false},
-    { date: new Date("2023-05-09"), availability: "office" , type: "AM", is_pending: false},
-    { date: new Date("2023-05-10"), availability: "wfh" , type: "AM", is_pending: false},
+    { date: "2024-09-01", availability: "office" , type: "Full", isPending: true},
+    { date: subHours(new Date(), 2), availability: "wfh" , type: "AM", isPending: false},
+    { date: new Date(), availability: "office" , type: "AM", isPending: false},
+    { date: new Date("2024-05-04"), availability: "wfh" , type: "AM", isPending: false},
+    { date: new Date("2024-05-05"), availability: "office" , type: "AM", isPending: false},
+    { date: new Date("2024-05-06"), availability: "wfh" , type: "AM", isPending: false},
+    { date: new Date("2023-05-07"), availability: "office" , type: "AM", isPending: false},
+    { date: new Date("2023-05-08"), availability: "wfh" , type: "AM", isPending: false},
+    { date: new Date("2023-05-09"), availability: "office" , type: "AM", isPending: false},
+    { date: new Date("2023-05-10"), availability: "wfh" , type: "AM", isPending: false},
   ]
 
 interface MyScheduleProps {
@@ -35,9 +36,9 @@ export default function MySchedule({user}: MyScheduleProps) {
 
     useEffect(() => {
         const fetchSchedule = async () => {
-          const data = await getOwnSchedule(currentMonth.getMonth() + 1, currentMonth.getFullYear(), user.staff_id);
+          const data = await getOwnSchedule(currentMonth.getMonth() + 1, currentMonth.getFullYear(), user.staffId);
           console.log(data.data.ownSchedule.schedule)
-          setSchedule(data.data.ownSchedule.schedule)
+          setSchedule(mockOwnSchedule.schedule)
         };
         fetchSchedule();
       }, [currentMonth])
@@ -54,6 +55,7 @@ export default function MySchedule({user}: MyScheduleProps) {
                     <MonthlyBody events={schedule} >
                     
                     <MonthlyDay<EventType>
+                        onDateClick={() => {}}
                         renderDay={data =>
                         data.map((item, index) => (
                             <DefaultMonthlyEventItem
@@ -61,7 +63,7 @@ export default function MySchedule({user}: MyScheduleProps) {
                             availability={item.availability}
                             date={item.date}
                             type={item.type}
-                            is_pending={item.is_pending}
+                            isPending={item.isPending}
                             />
                         ))
                     }
