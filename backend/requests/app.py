@@ -142,6 +142,7 @@ class Query(graphene.ObjectType):
         TeamSchedule,
         month=graphene.Int(),
         year=graphene.Int(),
+        day=graphene.Int(),
         staff_id = graphene.Int()
     )
 
@@ -167,8 +168,8 @@ class Query(graphene.ObjectType):
         # Here, we'll assume you pass `staff_id` in the request for simplicity.
         return resolve_own_schedule(month, year, staff_id)
 
-    def resolve_team_schedule(self, info, month, year, staff_id):
-        return resolve_team_schedule(month, year, staff_id)
+    def resolve_team_schedule(self, info, month, year, day, staff_id):
+        return resolve_team_schedule(month, year, day, staff_id)
     
     def resolve_manager_list(self,info,director_id):
         return resolve_manager_list(director_id)
@@ -182,7 +183,7 @@ def resolve_manager_list(director_id):
     user = User.query.filter(User.staff_id == director_id).first()
     if user.position != "Director":
         raise Exception("User is not a director. This endpoint is for directors only")
-    m_list = User.query.filter(User.reporting_manager == director_id).all()
+    m_list = User.query.filter(User.reporting_manager == director_id, User.role == 3).all()
     return {
         "director_name": user.staff_fname + " " + user.staff_lname,
         "manager_list": [{"staff_id":m.staff_id, "position": m.position, "name": m.staff_fname + " " + m.staff_lname} for m in m_list]
@@ -257,85 +258,82 @@ def resolve_own_schedule(month, year, staff_id):
         "schedule": schedule
     }
 
-def resolve_team_schedule(month, year, staff_id):
+def resolve_team_schedule(month, year, day, staff_id):
     # Get all approved requests for the team members in the given month and year
 
     user = User.query.filter(User.staff_id == staff_id).first()
-    if user.position == "Director" or user.position == "MD":
-        raise Exception("User is a director. This endpoint is for managers and staff only")
-    else:
-        return retrieve_team_schedule(user,month,year)
+    return retrieve_team_schedule(user,month,year,day)
    
 
-def retrieve_team_schedule(user,month,year):
-    if user.role == 3:
+def retrieve_team_schedule(user,month,year,day):
+    if user.role == 3 or user.position == "Director" or user.position == "MD":
+        print("staff id: " + str(user.staff_id))
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
     else:
         team_members = User.query.filter(User.reporting_manager == user.reporting_manager).all()
 
     print(team_members)
     requests = RequestModel.query.filter(
+        RequestModel.day == day,
         RequestModel.month == month,
         RequestModel.year == year,
         RequestModel.status.in_(['approved', 'pending']),
         or_(
         RequestModel.approving_manager == user.staff_id, 
         RequestModel.requesting_staff == user.staff_id
-    ) if user.role == "3" else RequestModel.approving_manager == user.reporting_manager
+    ) if user.role == 3 or user.position == "Director" or user.position == "MD" else RequestModel.approving_manager == user.reporting_manager
     ).all()
-    print(requests)
-
+    print("Reqeusts: " + str(requests))
     # Create a mapping of requests by staff member and day
-    schedules_by_staff = defaultdict(lambda: defaultdict(lambda: {"AM": None, "PM": None, "FULL": None}))
+    schedules_by_staff = {u.staff_id : {"AM": None, "PM": None} for u in team_members}
+    print(schedules_by_staff)
     for request in requests:
         if request.type == "AM" or request.type == "PM":
-            schedules_by_staff[request.requesting_staff][request.day][request.type] = request
+            schedules_by_staff[request.requesting_staff][request.type] = request
         elif request.type == "FULL":
-            schedules_by_staff[request.requesting_staff][request.day]["AM"] = request
-            schedules_by_staff[request.requesting_staff][request.day]["PM"] = request
+            schedules_by_staff[request.requesting_staff]["AM"] = request
+            schedules_by_staff[request.requesting_staff]["PM"] = request
 
     # Create the team schedule
     team_schedule = []
     days_in_current_month = days_in_month[month]
     print(schedules_by_staff)
     
-    for day in range(1, days_in_current_month+1):
+    for period in ["AM","PM"]:
 
-        for period in ["AM","PM"]:
-
-            team_availability = []
-            count = len(team_members)
-            
-            for member in team_members:
-                request = schedules_by_staff[member.staff_id][day][period]
-                if request:
-                    count -= 1
-                    availability = "wfh"
-                    if request.status == "pending":
-                        is_pending = True
-                    else:
-                        
-                        is_pending = False
+        team_availability = []
+        count = len(team_members)
+        
+        for member in team_members:
+            request = schedules_by_staff[member.staff_id][period]
+            if request:
+                count -= 1
+                availability = "wfh"
+                if request.status == "pending":
+                    is_pending = True
                 else:
-                    availability = "office"
-                    is_pending = False
                     
-                team_availability.append({
-                    "name": member.staff_fname + " " + member.staff_lname,
-                    "type": period,
-                    "department": member.dept,
-                    "availability": availability,
-                    "is_pending": is_pending
-                })
-
-            team_schedule.append({
-                "date": f"{year:04d}-{month:02d}-{day:02d}",
+                    is_pending = False
+            else:
+                availability = "office"
+                is_pending = False
+                
+            team_availability.append({
+                "name": member.staff_fname + " " + member.staff_lname,
                 "type": period,
-                "available_count": count,
-                "availability": team_availability
+                "department": member.dept,
+                "availability": availability,
+                "is_pending": is_pending
             })
+
+        team_schedule.append({
+            "date": f"{year:04d}-{month:02d}-{day:02d}",
+            "type": period,
+            "available_count": count,
+            "availability": team_availability
+        })
     return {
-        "reporting_manager" : user.staff_id if user.role =="3" else user.reporting_manager,
+        "reporting_manager" : user.staff_id if user.role ==3 or user.position == "Director" or user.position == "MD" else user.reporting_manager,
         "team_count": len(team_members),
         "team_schedule": team_schedule
     }
