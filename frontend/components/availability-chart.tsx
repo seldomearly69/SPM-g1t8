@@ -17,11 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 export const description = "A stacked bar chart with a legend"
-const chartData = [
-  { availability: "Office", PM: 186, AM: 80 },
-  { availability: "WFH", PM: 305, AM: 200 },
-  
-]
+
 const chartConfig = {
   PM: {
     label: "PM",
@@ -33,7 +29,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export const AvailabilityChart = () =>  {
+interface AvailabilityChartProps {
+  chartData: any;
+}
+
+export const AvailabilityChart = ({chartData}: AvailabilityChartProps) =>  {
   return (
     <div className="max-w-[500px] mx-auto">
         <ChartContainer config={chartConfig}>

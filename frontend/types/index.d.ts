@@ -30,12 +30,12 @@ export type NavbarItem = {
 };
 
 export type User = {
-  staff_id: number;
+  staffId: number;
   name: string;
   email: string;
   role: string;
   position: string;
-  reporting_manager: string;
+    reportingManager: string;
 };
 
 export type DaysInWeekProps = {
@@ -55,6 +55,7 @@ export type OmittedDaysProps = {
 
 export type MonthlyDayProps<DayData> = {
   renderDay: (events: DayData[]) => ReactNode;
+  onDateClick: (date: Date) => void;
 };
 
 export type MonthlyBodyProps<DayData> = {
@@ -72,14 +73,14 @@ export type EventType = {
   date: Date;
   availability?: string;
   type: string;
-  is_pending: boolean;
+  isPending: boolean;
 };
 
 export type DefaultEventItemProps = {
   availability: string;
   date: Date;
   type: string;
-  is_pending: boolean;
+  isPending: boolean;
 };
 
 export type TeamEventItemProps = {
@@ -89,8 +90,8 @@ export type TeamEventItemProps = {
 
 export type Request = {
   id: number;
-  staff_id: number;
-  employee_name: string;
+  staffId: number;
+  employeeName: string;
   department: string;
   date: string;
   type: "AM" | "PM" | "full";
@@ -100,9 +101,9 @@ export type Request = {
 };
 
 export type Availability = {
-  employee_name: string;
+  employeeName: string;
   department: string;
   availability: string;
   type: "AM" | "PM" | "full";
-  is_pending: boolean;
+  isPending: boolean;
 };

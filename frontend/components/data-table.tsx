@@ -30,8 +30,12 @@ export function DataTable<TData, TValue>({ columns, data, onRowClick  }: DataTab
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-    const [sorting, setSorting] = React.useState<SortingState>([])
-
+    const [sorting, setSorting] = React.useState<SortingState>([
+        {
+            id: "name",
+            desc: false
+        }
+    ])
     const table = useReactTable({
         data,
         columns,
@@ -47,7 +51,6 @@ export function DataTable<TData, TValue>({ columns, data, onRowClick  }: DataTab
         onColumnFiltersChange: setColumnFilters,
         onColumnVisibilityChange: setColumnVisibility,
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -95,8 +98,8 @@ export function DataTable<TData, TValue>({ columns, data, onRowClick  }: DataTab
                     )}
                 </TableBody>
            
-            </Table></div>
-           
+            </Table>
+            </div>
         </div>
     )
 

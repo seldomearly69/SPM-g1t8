@@ -64,3 +64,17 @@ export const department = [
     },
     
 ]
+
+export const type = [
+    {
+        value: "AM",
+        label: "AM",
+        icon: CircleIcon,
+    },
+    {
+        value: "PM",
+        label: "PM",
+        icon: CircleIcon,
+    },
+    
+]

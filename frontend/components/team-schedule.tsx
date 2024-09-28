@@ -30,11 +30,13 @@ import { useEffect, useState } from "react";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import {AvailabilityChart} from "./availability-chart";
+import { AvailabilityChartArea } from "./availability-chart-area";
+import { mockSchedule } from "@/mock-schedule";
 
-const mockSchedule = [
-  { date: new Date("2024-09-01"), availableCount: "3/7", type: "AM" },
-  { date: new Date("2024-09-01"), availableCount: "2/7", type: "PM" },
-  { date: new Date("2024-09-01"), availableCount: "4/7", type: "Full" },
+const mockSchedule2 = [
+  { date: new Date("2024-09-01"), availableCount: 3, type: "AM" },
+  { date: new Date("2024-09-01"), availableCount: 4, type: "PM" },
+  { date: new Date("2024-09-01"), availableCount: 5, type: "Full" },
   { date: new Date("2024-05-04"), availableCount: "wfh", type: "AM" },
   { date: new Date("2024-05-05"), availableCount: "office", type: "AM" },
   { date: new Date("2024-05-06"), availableCount: "wfh", type: "AM" },
@@ -44,90 +46,101 @@ const mockSchedule = [
   { date: new Date("2023-05-10"), availableCount: "wfh", type: "AM" },
 ];
 
+
 interface TeamScheduleProps {
   user: User;
 }
 
 export default function TeamSchedule({ user }: TeamScheduleProps) {
-  const [teamSchedule, setTeamSchedule] = useState(mockSchedule);
+  const [teamSchedule, setTeamSchedule] = useState(mockSchedule2);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDialogDate, setSelectedDialogDate] = useState<Date | null>(null);
+  const [chartData, setChartData] = useState<any[]>([]);
   const [dialogData, setDialogData] = useState<Availability[]>([]);
   const [managerList, setManagerList] = useState<User[]>([]);
   const [selectedManager, setSelectedManager] = useState<number>(0); // Added to store the selected manager's ID
-  const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar
+  // const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar (redundant)
 
   useEffect(() => {
     const fetchSchedule = async () => {
       if (user.position === "Director") {
-        console.log("Retrieved Schedule of My Teams");
 
-        // Get all team members that fall under that director
-        console.log(user)
-        const data = await getManagerList(user.staff_id);
-
+        // Get all managers that fall under that director
+        const data = await getManagerList(user.staffId);
         const managerList = data.data.managerList.managerList;
 
         if (Array.isArray(managerList)) {
           setManagerList(managerList);
-        } else {
-          console.error("Manager list is not an array");
-        }
+
+          // Get team schedule, by default will be the first manager's team
+          const teamSchedule = await getTeamSchedule(selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), managerList[0].staffId);
+          setTeamSchedule(teamSchedule.data.teamSchedule.teamSchedule)
+
+        } else console.error("Manager list is not an array");
+        
       } else {
         // Get the schedule of the user's team
         // Returns availableCount and type for each day
           const data = await getTeamSchedule (
             selectedDate?.getMonth() + 1,
             selectedDate?.getFullYear(),
-            user.staff_id
+            user.staffId
           );
-          console.log(data)
 
-          setSelectedManager(parseInt(user.reporting_manager, 10));
+          setSelectedManager(parseInt(user.reportingManager, 10));
           setTeamSchedule(data.data.teamSchedule.teamSchedule);
-          setShowCalendar(true); // Display the calendar after the user select the team to view
+          // Redundant, react will auto re-render
+          // setShowCalendar(true); 
       }
     };
     fetchSchedule();
   }, [selectedDate]);
 
   const handleDialogOpen = async (open: boolean) => {
-    if (open) {
+    if (open && selectedDialogDate) {
       try {
         // Get the schedule details of the team
         // Returns name, department, availability, type and status
         const data = await getTeamDetails(
           selectedDate?.getMonth() + 1,
           selectedDate?.getFullYear(),
-          user.staff_id
+          user.staffId
         );
-        console.log(data)
-        setDialogData(data.data.teamSchedule.teamSchedule[0].availability);
+        setDialogData(mockSchedule.team_schedule)
+
+        const chartData = mockSchedule.team_schedule.map((schedule) => {
+          return {
+          type: schedule.type,
+          office: schedule.available_count.office,
+          wfh: schedule.available_count.WFH
+        }})
+        setChartData(chartData)
+        // setDialogData(data.data.teamSchedule.teamSchedule[0].availability.concat(data.data.teamSchedule.teamSchedule[1].availability));
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     }
   };
 
-  const handleManagerChange = async (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const managerId = parseInt(event.target.value, 10);
-    setSelectedManager(managerId); // Update the selected manager's ID
-    // Assuming there's a method to fetch team schedule based on manager ID
-    const data = await getTeamDetails(
+  const handleManagerChange = async (managerId: string ) => {
+    // Update the selected manager's ID
+    setSelectedManager(parseInt(managerId, 10)); 
+
+    // Assuming there's a method to fetch team schedule based on manager ID // There is, it's getTeamSchedule
+    const data = await getTeamSchedule(
       selectedDate?.getMonth() + 1,
       selectedDate?.getFullYear(),
-      managerId
+      parseInt(managerId, 10)
     );
     setTeamSchedule(data.data.teamSchedule.teamSchedule);
-    setShowCalendar(true); // Display the calendar after the user select the team to view
+
+    // Display the calendar after the user select the team to view // Redundant, react will auto re-render
+    // setShowCalendar(true); 
   };
 
   return (
       <Card>
-    
         <CardHeader>
-        
         </CardHeader>
         <CardContent>
             <MonthlyCalendar
@@ -137,15 +150,15 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
               <div className="ml-auto flex w-full space-x-5 sm:justify-end">
                   {user.position === "Director" && 
             
-                    <Select>
+                    <Select onValueChange={handleManagerChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a Team" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                         {managerList.map((manager) => (
-                          <SelectItem key={manager.staff_id} value={manager.staff_id}>
-                            {`${manager.position} - ${manager.name} - ${manager.staff_id}`}
+                          <SelectItem key={manager.staffId} value={manager.staffId.toString()}>
+                            {`${manager.position} - ${manager.name} - ${manager.staffId}`}
                           </SelectItem>
                         ))}
                         </SelectGroup>
@@ -161,6 +174,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                 <Dialog onOpenChange={handleDialogOpen}>
                   <DialogTrigger>
                     <MonthlyDay<EventType>
+                      onDateClick={(date) => setSelectedDialogDate(date)}
                       renderDay={(data) =>
                         data.map((item) => (
                           <TeamMonthlyEventItem
@@ -181,11 +195,11 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                    
                     <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0 ">
                       <DialogDescription>
-                        <AvailabilityChart />
+                        <AvailabilityChartArea chartData={chartData.length > 0 ? chartData : []}/>
                       </DialogDescription>
                       <DataTable
                         columns={availability_columns}
-                        data={dialogData ? dialogData : []}
+                        data={dialogData.length > 0 ? dialogData[0].availability.concat(dialogData[1].availability) : []}
                       />
                       <ScrollBar orientation="horizontal" />
                     </ScrollArea>
