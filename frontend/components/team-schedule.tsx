@@ -20,16 +20,13 @@ import { DataTable } from "@/components/data-table";
 import { availability_columns } from "@/components/columns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
-  getDepartmentSchedule,
   getManagerList,
   getTeamDetails,
   getTeamSchedule,
 } from "@/service/schedule";
 import { Availability, EventType, User } from "@/types";
 import { useEffect, useState } from "react";
-import { Label } from "./ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import {AvailabilityChart} from "./availability-chart";
 import { AvailabilityChartArea } from "./availability-chart-area";
 import { mockSchedule } from "@/mock-schedule";
 

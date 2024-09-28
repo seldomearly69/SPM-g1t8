@@ -36,9 +36,11 @@ export default function MySchedule({user}: MyScheduleProps) {
 
     useEffect(() => {
         const fetchSchedule = async () => {
-          const data = await getOwnSchedule(currentMonth.getMonth() + 1, currentMonth.getFullYear(), user.staffId);
-          console.log(data.data.ownSchedule.schedule)
-          setSchedule(mockOwnSchedule.schedule)
+
+            // Get the schedule of the user by passing in month, year and user's staffId
+            const data = await getOwnSchedule(currentMonth.getMonth() + 1, currentMonth.getFullYear(), user.staffId);
+
+            setSchedule(data.data.ownSchedule.schedule)
         };
         fetchSchedule();
       }, [currentMonth])
@@ -60,7 +62,7 @@ export default function MySchedule({user}: MyScheduleProps) {
                         data.map((item, index) => (
                             <DefaultMonthlyEventItem
                             key={index}
-                            availability={item.availability}
+                            availability={item.availability || ""}
                             date={item.date}
                             type={item.type}
                             isPending={item.isPending}

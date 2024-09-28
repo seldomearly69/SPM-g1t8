@@ -17,7 +17,11 @@ interface DashboardLayoutProps {
 export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
+
+  // Get the current user
   const user = await getCurrentUser();
+
+  // If the user is not found, return a not found page
   if (!user) {
     return notFound();
   }
@@ -36,6 +40,7 @@ export default async function DashboardLayout({
           <MainNav items={dashboardConfig.loggedInNav} />
           <UserAccountNav
             user={{
+              name: user.name,
               email: user.email,
             }}
           />

@@ -33,6 +33,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+   
+    async session({ session, token }) {
+      if (token) {
+        session.user.staffId = token.staffId;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.role = token.role;
+        session.user.position = token.position;
+        session.user.reportingManager = token.reportingManager;
+      }
+      return session;
+    },
+
     async jwt({ token, user }) {
       if (user) {
         token.staffId = user.staff_id;
@@ -43,17 +56,6 @@ export const authOptions: NextAuthOptions = {
         token.reportingManager = user.reporting_manager;
       }
       return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.staffId = token.staff_id;
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.role = token.role;
-        session.user.position = token.position;
-        session.user.reportingManager = token.reporting_manager;
-      }
-      return session;
-    },
+    }
   },
 };

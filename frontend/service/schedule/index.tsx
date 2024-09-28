@@ -20,7 +20,7 @@ export async function getOwnSchedule(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString.loc.source.body,
+      query: gqlString?.loc?.source?.body,
       variables: { month: month, year: year, staffId: staffId },
     }),
   });
@@ -108,7 +108,7 @@ export async function getTeamDetails(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString.loc.source.body,
+      query: gqlString?.loc?.source?.body,
       variables: { month: month, year: year, staffId: staffId },
     }),
   });
@@ -135,7 +135,7 @@ export async function getTeamSchedule(month: number, year: number, staffId: numb
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            query: gqlString.loc.source.body,
+            query: gqlString?.loc?.source?.body,
             variables: { month:month, year: year, staffId: staffId }
         }),
     })
@@ -169,7 +169,7 @@ export async function getDepartmentSchedule(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString.loc.source.body,
+      query: gqlString?.loc?.source?.body,
       variables: { month: month, year: year, staffId: staffId },
     }),
   });
