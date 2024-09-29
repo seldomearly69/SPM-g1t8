@@ -20,6 +20,7 @@ import { availability_columns } from "@/components/columns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   getManagerList,
+  getTeamDetails,
   getTeamSchedule,
 } from "@/service/schedule";
 import { Availability, EventType, User } from "@/types";
@@ -66,9 +67,11 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
 
         if (Array.isArray(managerList)) {
           setManagerList(managerList);
-
+          console.log(managerList)
+          console.log(managerList[0]?.staffId)
           // Get team schedule, by default will be the first manager's team
-          const teamSchedule = await getTeamSchedule(selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), managerList[0].staffId);
+          const teamSchedule = await getTeamSchedule(0, selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), managerList[0]?.staffId ?? user.staffId);
+          console.log(teamSchedule)
           setTeamSchedule(teamSchedule.data.teamSchedule.teamSchedule)
 
         } else console.error("Manager list is not an array");
@@ -77,11 +80,13 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
         // Get the schedule of the user's team
         // Returns availableCount and type for each day
           const data = await getTeamSchedule (
+            0,
             selectedDate?.getMonth() + 1,
             selectedDate?.getFullYear(),
             user.staffId
           );
 
+          console.log(data)
           setSelectedManager(parseInt(user.reportingManager, 10));
           setTeamSchedule(data.data.teamSchedule.teamSchedule);
           // Redundant, react will auto re-render
@@ -94,21 +99,37 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
   const handleDialogOpen = async (open: boolean) => {
     if (open && selectedDialogDate) {
       try {
-        // Get the schedule details of the team
-        // Returns name, department, availability, type and status
-        // const data = await getTeamDetails(
-        //   selectedDate?.getMonth() + 1,
-        //   selectedDate?.getFullYear(),
-        //   user.staffId
-        // );
-        setDialogData(mockSchedule.team_schedule)
+     
+        let data;
+        if (user.position === "Director") {
+          // Get the schedule details of the team
+          // Returns name, department, availability, type and status
+          data = await getTeamDetails(
+            selectedDate?.getDate(),
+            selectedDate?.getMonth() + 1,
+            selectedDate?.getFullYear(),
+            selectedManager
+          );
+        } else {
+          // Get the schedule details of the team
+          // Returns name, department, availability, type and status
+          data = await getTeamDetails(
+            selectedDate?.getDate(),
+            selectedDate?.getMonth() + 1,
+            selectedDate?.getFullYear(),
+            user.staffId
+          );
+        }
+        console.log(data)
+        setDialogData(data.data.teamSchedule.teamSchedule)
 
-        const chartData = mockSchedule.team_schedule.map((schedule) => {
+        const chartData = data.data.teamSchedule.teamSchedule.map((schedule: any) => {
           return {
           type: schedule.type,
-          office: schedule.available_count.office,
-          wfh: schedule.available_count.WFH
+          office: schedule.availableCount.office,
+          wfh: schedule.availableCount.home
         }})
+        console.log(chartData)
         setChartData(chartData)
         // setDialogData(data.data.teamSchedule.teamSchedule[0].availability.concat(data.data.teamSchedule.teamSchedule[1].availability));
       } catch (error) {
@@ -123,6 +144,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
 
     // Assuming there's a method to fetch team schedule based on manager ID // There is, it's getTeamSchedule
     const data = await getTeamSchedule(
+      0,
       selectedDate?.getMonth() + 1,
       selectedDate?.getFullYear(),
       parseInt(managerId, 10)
@@ -174,7 +196,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                         data.map((item) => (
                           <TeamMonthlyEventItem
                             key={`${item.date}-${item.type}`}
-                            availability={item.availableCount || 0}
+                            availability={item.availableCount?.office || 0}
                             type={item.type}
                           />
                         ))
