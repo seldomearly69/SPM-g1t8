@@ -21,12 +21,12 @@ export const request_status = [
 
 export const schedule_status = [
     {
-        value: "Pending",
+        value: true,
         label: "Pending",
         icon: StopwatchIcon,
     },
     {
-      value: "Confirmed",
+      value: false,
       label: "Confirmed",
       icon: CheckCircledIcon,
     },
@@ -40,7 +40,7 @@ export const availability = [
         icon: CircleIcon,
     },
     {
-        value: "wfh",
+        value: "WFH",
         label: "WFH",
         icon: CircleIcon,
     }
@@ -48,17 +48,17 @@ export const availability = [
 
 export const department = [
     {
-        value: "sales",
+        value: "Sales",
         label: "Sales",
         icon: CircleIcon,
     },
     {
-        value: "marketing",
+        value: "Marketing",
         label: "Marketing",
         icon: CircleIcon,
     },
     {
-        value: "engineering",
+        value: "Engineering",
         label: "Engineering",
         icon: CircleIcon,
     },

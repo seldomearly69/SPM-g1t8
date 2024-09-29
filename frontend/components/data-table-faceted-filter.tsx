@@ -25,13 +25,9 @@ export function DataTableFacetedFilter<TData, TValue>({
   }: DataTableFacetedFilterProps<TData, TValue>) {
     
     const facets = React.useMemo(() => {
-      try {
         return column?.getFacetedUniqueValues();
-      } catch (error) {
-        console.error("Error getting faceted values:", error);
-        return new Map();
-      }
-    }, [column]);
+    }, [column])
+   
     
     const selectedValues = new Set(column?.getFilterValue() as string[] || [])
     
@@ -84,6 +80,7 @@ export function DataTableFacetedFilter<TData, TValue>({
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
                 {options.map((option) => {
+                  console.log(facets?.get(option.value))
                   const isSelected = selectedValues.has(option.value)
                   return (
                     <CommandItem

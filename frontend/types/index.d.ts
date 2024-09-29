@@ -69,7 +69,10 @@ export type MonthlyBodyProps<DayData> = {
 };
 
 export type EventType = {
-  availableCount?: number;
+  availableCount?: {
+    office?: number;
+    home?: number;
+  };
   date: Date;
   availability?: string;
   type: string;

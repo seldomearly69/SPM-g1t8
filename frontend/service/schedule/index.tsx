@@ -80,17 +80,19 @@ export async function getManagerList(directorId: number) {
 }
 
 export async function getTeamDetails(
+  day: number,
   month: number,
   year: number,
   staffId: number
 ) {
   const gqlString = gql`
-    query teamSchedule($month: Int!, $year: Int!, $staffId: Int!) {
-      teamSchedule(month: $month, year: $year, staffId: $staffId) {
+    query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
+      teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {
         teamCount
         teamSchedule {
           date
           type
+          availableCount
           availability {
             name
             department
@@ -109,17 +111,17 @@ export async function getTeamDetails(
     },
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
-      variables: { month: month, year: year, staffId: staffId },
+      variables: { day: day, month: month, year: year, staffId: staffId },
     }),
   });
   const data = await res.json();
   return data;
 }
 
-export async function getTeamSchedule(month: number, year: number, staffId: number) {
+export async function getTeamSchedule(day: number, month: number, year: number, staffId: number) {
     const gqlString = gql`
-         query teamSchedule($month: Int!, $year: Int!, $staffId: Int!) {
-            teamSchedule(month: $month, year: $year, staffId: $staffId) {
+         query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
+            teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {
                 teamCount
                 teamSchedule {
                     date
@@ -136,7 +138,7 @@ export async function getTeamSchedule(month: number, year: number, staffId: numb
         },
         body: JSON.stringify({
             query: gqlString?.loc?.source?.body,
-            variables: { month:month, year: year, staffId: staffId }
+            variables: { day: day, month: month, year: year, staffId: staffId }
         }),
     })
     const data = await res.json()
