@@ -1,16 +1,20 @@
 "use client"
 import { ColumnDef, Row } from "@tanstack/react-table"
 import { Button } from "./ui/button"
-import { Availability,  Request } from "@/types"
+import { Availability,  IndividualRequest,  Request } from "@/types"
 import { Check, X } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { Textarea } from "./ui/textarea"
 import { useState } from "react"
 import { Badge } from "./ui/badge"
+import { cn } from "@/lib/utils"
+
+
+
 
 export const request_columns: ColumnDef<Request>[] = [
     {
-        accessorKey: "id",
+        accessorKey: "requestId",
         header: "ID",
     },
     {
@@ -21,14 +25,26 @@ export const request_columns: ColumnDef<Request>[] = [
         accessorKey: "department",
         header: "Department",
     },
-
     {
-        accessorKey: "requested_on",
+        accessorKey: "date",
+        header: "Date",
+    
+    },
+    {
+        accessorKey: "type",
+        header: "Type",
+    },
+    {
+        accessorKey: "requestedOn",
         header: "Requested On",
     },
     {
         accessorKey: "status",
         header: "Status",
+    },
+    {
+        accessorKey: "remarks",
+        header: "Remarks",
     },
 
     // {
@@ -87,9 +103,9 @@ const ActionCell = ({ row }: {row: Row<Request>}) => {
     </div>
 }
 
-export const individual_request_columns: ColumnDef<Request>[] = [
+export const individual_request_columns: ColumnDef<IndividualRequest>[] = [
     {
-        accessorKey: "id",
+        accessorKey: "requestId",
         header: "ID",
     },
     {
@@ -101,12 +117,18 @@ export const individual_request_columns: ColumnDef<Request>[] = [
         header: "Type",
     },
     {
-        id: "action", 
-        header: "Action",
-        cell: ({ row }: {row: Row<Request>}) => {
-            return <ActionCell row={row} />
-        }
-    }
+        accessorKey: "remarks",
+        header: "Remarks",
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+            return <Badge className={cn("w-20 justify-center ", row.original.status == "pending" ? "bg-yellow-500" : row.original.status == "approved" ? "bg-emerald-500" : "bg-red-500")}>{row.original.status}</Badge>
+   },
+    },
+ 
+   
 ]
 
 export const availability_columns: ColumnDef<Availability>[] = [
