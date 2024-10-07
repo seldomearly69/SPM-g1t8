@@ -72,6 +72,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
           // Get team schedule, by default will be the first manager's team
           const teamSchedule = await getTeamSchedule(0, selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), managerList[0]?.staffId ?? user.staffId);
           console.log(teamSchedule)
+          setSelectedManager(parseInt(managerList[0]?.staffId, 10));
           setTeamSchedule(teamSchedule.data.teamSchedule.teamSchedule)
 
         } else console.error("Manager list is not an array");
@@ -99,24 +100,25 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
   const handleDialogOpen = async (open: boolean) => {
     if (open && selectedDialogDate) {
       try {
-     
+        console.log(selectedDialogDate);
+        
         let data;
         if (user.position === "Director") {
           // Get the schedule details of the team
           // Returns name, department, availability, type and status
           data = await getTeamDetails(
-            selectedDate?.getDate(),
-            selectedDate?.getMonth() + 1,
-            selectedDate?.getFullYear(),
+            selectedDialogDate?.getDate(),
+            selectedDialogDate?.getMonth() + 1,
+            selectedDialogDate?.getFullYear(),
             selectedManager
           );
         } else {
           // Get the schedule details of the team
           // Returns name, department, availability, type and status
           data = await getTeamDetails(
-            selectedDate?.getDate(),
-            selectedDate?.getMonth() + 1,
-            selectedDate?.getFullYear(),
+            selectedDialogDate?.getDate(),
+            selectedDialogDate?.getMonth() + 1,
+            selectedDialogDate?.getFullYear(),
             user.staffId
           );
         }
@@ -139,6 +141,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
   };
 
   const handleManagerChange = async (managerId: string ) => {
+    console.log(managerId)
     // Update the selected manager's ID
     setSelectedManager(parseInt(managerId, 10)); 
 
@@ -165,25 +168,30 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
               onCurrentMonthChange={setSelectedDate}
             >
               <div className="ml-auto flex w-full space-x-5 sm:justify-end">
-                  {user.position === "Director" && 
-            
-                    <Select onValueChange={handleManagerChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a Team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                        {managerList.map((manager) => (
-                          <SelectItem key={manager.staffId} value={manager.staffId.toString()}>
-                            {`${manager.position} - ${manager.name} - ${manager.staffId}`}
-                          </SelectItem>
-                        ))}
-                        </SelectGroup>
+                  {user.position === "Director" && managerList.length > 0 && 
+                  <Select onValueChange={handleManagerChange} defaultValue={managerList[0]?.staffId.toString()}>
+                  <SelectTrigger>
+                      <SelectValue 
+                        placeholder="Select a Team" 
+                      />
+                    </SelectTrigger>
+                                
+                    <SelectContent>
+                      <SelectGroup>
+                      {managerList.map((manager) => (
+                        <SelectItem key={manager.staffId} value={manager.staffId.toString()}>
+                          {`${manager.position} - ${manager.name} - ${manager.staffId}`}
+                        </SelectItem>
+                      ))}
+                      </SelectGroup>
+              
                 
+                    </SelectContent>
+                  </Select>
+                
+                    
                   
-                      </SelectContent>
-                    </Select>
-                  }  
+                }
                 <MonthlyNav />
               </div>
             
