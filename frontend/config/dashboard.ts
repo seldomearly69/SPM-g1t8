@@ -46,6 +46,16 @@ export const dashboardConfig: DashboardConfig = {
         href: "/dashboard/team-schedule",
         icon: "users",
       },
+      {
+        title: "Manage Employees",
+        href: "/dashboard/manage-employees",
+        icon: "users",
+      },
+      {
+        title: "Overall Schedule",
+        href: "/dashboard/overall-schedule",
+        icon: "calendar",
+      },
     ],
     roleSpecific: {
       1: [
