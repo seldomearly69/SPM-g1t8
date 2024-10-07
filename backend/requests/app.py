@@ -125,20 +125,7 @@ class ManagerList(graphene.ObjectType):
     director_name = graphene.String()
     manager_list = graphene.List(Manager)
 
-class Request(graphene.ObjectType):
-    # requesting_staff = graphene.Int()
-    year = graphene.Int()
-    month = graphene.Int()
-    day = graphene.Int()
-    type = graphene.String()
-    status = graphene.String()
-    remarks = graphene.String()
-
-class OwnRequests(graphene.ObjectType):
-    approving_manager = graphene.String()
-    requests = graphene.List(Request)
-
-class Query(graphene.ObjectType):
+class Query1(graphene.ObjectType):
 
     own_schedule = graphene.Field(
         OwnSchedule, 
@@ -168,10 +155,6 @@ class Query(graphene.ObjectType):
         team_managers = graphene.List(graphene.Int)
     ) # Add department schedule query (Shawn)
 
-    own_requests = graphene.Field(
-        OwnRequests,
-        staff_id = graphene.Int()
-    )
 
     # Add resolver for department schedule (Shawn)
     def resolve_department_schedule(self, info, month, year, staff_id, team_managers=None):
@@ -187,14 +170,36 @@ class Query(graphene.ObjectType):
     
     def resolve_manager_list(self,info,director_id):
         return resolve_manager_list(director_id)
+    
+schedule_schema = graphene.Schema(query=Query1)
+
+### SCHEMA 2 (get_requests)
+class Request(graphene.ObjectType):
+    date = graphene.String()
+    type = graphene.String()
+    status = graphene.String()
+    remarks = graphene.String()
+
+class OwnRequests(graphene.ObjectType):
+    approving_manager = graphene.String()
+    requests = graphene.List(Request)
+
+class Query2(graphene.ObjectType):
+    own_requests = graphene.Field(
+        OwnRequests,
+        staff_id = graphene.Int()
+    )
 
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
-    
-schema = graphene.Schema(query=Query)
+
+# Schema for the second endpoint
+requests_schema = graphene.Schema(query=Query2)
 
 # Set up GraphQL endpoint
-app.add_url_rule('/get_schedule', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))
+app.add_url_rule('/get_schedule', view_func=GraphQLView.as_view('graphql1', schema=schedule_schema, graphiql=True))
+
+app.add_url_rule('/get_requests', view_func=GraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
 
 def resolve_manager_list(director_id):
     user = User.query.filter(User.staff_id == director_id).first()
@@ -394,14 +399,15 @@ def resolve_department_schedule(month, year, staff_id, team_managers=None):
         "dept_schedule": [retrieve_team_schedule(m,month,year) for m in team_managers]
     }
 
+
+
+
 def resolve_own_requests(staff_id):
     requests = RequestModel.query.filter(RequestModel.requesting_staff == staff_id).all()
     manager = User.query.filter(User.staff_id == User.query.filter(User.staff_id == staff_id).first().reporting_manager).first()
     manager = manager.staff_fname + " " + manager.staff_lname
     ret = [{
-        "year": r.year,
-        "month": r.month,
-        "day": r.day,
+        "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
         "type": r.type,
         "status": r.status,
         "remarks": r.remarks

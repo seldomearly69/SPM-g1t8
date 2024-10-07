@@ -60,7 +60,10 @@ INSERT INTO requests (Requesting_staff, Year, Month, Day, Type, Status, Approvin
 (140001, 2024, 12, 1, 'AM', 'approved', 130002, 'Morning leave approved for medical appointment'), -- Derek reports to Jack
 (150008, 2024, 1, 19, 'PM', 'rejected', 130002, 'Rejected due to overlapping leave requests'), -- Eric reports to Jack
 (151408, 2024, 2, 8, 'FULL', 'approved', 130002, 'Approved for annual leave'), -- Philip reports to Jack
-(140894, 2024, 3, 23, 'AM', 'pending', 140001, 'Pending approval for emergency leave'); -- Rahim reports to Derek
+(140894, 2024, 3, 23, 'AM', 'pending', 140001, 'Pending approval for emergency leave'),
+(140941, 2024, 11, 23, 'AM', 'pending', 140879, 'Pending approval for emergency leave'),
+(140894, 2024, 11, 23, 'PM', 'approved', 140879, 'Approved'),
+(140894, 2024, 11, 24, 'AM', 'rejected', 140879, 'Rejected'); -- Rahim reports to Derek
 
 
 -- CREATE TABLE departments (
