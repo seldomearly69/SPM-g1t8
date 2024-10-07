@@ -38,7 +38,8 @@ export default function MySchedule({user}: MyScheduleProps) {
 
             // Get the schedule of the user by passing in month, year and user's staffId
             const data = await getOwnSchedule(currentMonth.getMonth() + 1, currentMonth.getFullYear(), user.staffId);
-
+            console.log(data);
+            
             setSchedule(data.data.ownSchedule.schedule)
         };
         fetchSchedule();

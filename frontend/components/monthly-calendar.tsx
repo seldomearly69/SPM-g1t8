@@ -68,7 +68,11 @@ export const MonthlyNav = () => {
   return (
     <div className="flex justify-end mb-4">
       <Button
-        onClick={() => onCurrentMonthChange(subMonths(currentMonth, 1))}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          onCurrentMonthChange(subMonths(currentMonth, 1));
+        }}
         variant="secondary"
         size="sm"
       >
@@ -85,7 +89,11 @@ export const MonthlyNav = () => {
         )}
       </div>
       <Button
-        onClick={() => onCurrentMonthChange(addMonths(currentMonth, 1))}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          onCurrentMonthChange(addMonths(currentMonth, 1));
+        }}
         variant="secondary"
         size="sm"
       >
@@ -140,6 +148,7 @@ export function MonthlyBody<DayData>({
     omitDays,
     events,
     children,
+    className
   }: MonthlyBodyProps<DayData>) {
     const { days, locale } = useMonthlyCalendar();
     const { headings, daysToRender, padding } = handleOmittedDays({
@@ -152,7 +161,7 @@ export function MonthlyBody<DayData>({
       'border-b-2 p-2 border-r-2 xl:flex justify-center items-center hidden';
 
     return (
-      <div className="bg-white border-l-2 border-t-2">
+      <div className={cn("bg-white border-l-2 border-t-2", className)}>
         <div
           className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5  ${
             //@ts-expect-error -- headings.length is not known at compile time
@@ -162,7 +171,7 @@ export function MonthlyBody<DayData>({
           {headings.map(day => (
             <div
               key={day.day}
-              className={cn(headingClassName, "text-sm font-bold")}
+              className={cn(headingClassName, className, "text-sm font-bold")}
               title="Day of Week"
             >
               {day.label}
@@ -171,7 +180,7 @@ export function MonthlyBody<DayData>({
           {padding.map((_, index) => (
             <div
               key={index}
-              className={headingClassName}
+              className={cn(headingClassName, className)}
               title="Empty Day"
             />
           ))}
@@ -192,14 +201,14 @@ export function MonthlyBody<DayData>({
   }
 
 
-export function MonthlyDay<DayData>({ renderDay, onDateClick}: MonthlyDayProps<DayData>) {
+export function MonthlyDay<DayData>({ renderDay, onDateClick, className}: MonthlyDayProps<DayData>) {
     const { locale } = useMonthlyCalendar();
     const { day, events } = useMonthlyBody<DayData>()
     const dayNumber = format(day, 'd', { locale });
     return (
       <div
         title={`Events for day ${dayNumber}`}
-        className="h-48 p-2 border-b-2 border-r-2"
+        className={cn("h-48 p-2 border-b-2 border-r-2", className?.({date: day}))}
         onClick={() => onDateClick(day)}
         >
         <div className="flex justify-between">
@@ -222,6 +231,7 @@ export const DefaultMonthlyEventItem = ({
     isPending
 
   }: DefaultEventItemProps) => {
+    
     return (
       <li className="py-2">
         <Badge variant={isPending ? "warning" : "success"} className="w-full">
