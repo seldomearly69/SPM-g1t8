@@ -415,7 +415,7 @@ def resolve_own_requests(staff_id):
     manager = User.query.filter(User.staff_id == User.query.filter(User.staff_id == staff_id).first().reporting_manager).first()
     manager = manager.staff_fname + " " + manager.staff_lname
     ret = [{
-        "request_id": r.id,
+        "request_id": r.request_id,
         "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
         "type": r.type,
         "status": r.status,
