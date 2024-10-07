@@ -175,6 +175,7 @@ schedule_schema = graphene.Schema(query=Query1)
 
 ### SCHEMA 2 (get_requests)
 class Request(graphene.ObjectType):
+    request_id = graphene.Int()
     date = graphene.String()
     type = graphene.String()
     status = graphene.String()
@@ -190,8 +191,15 @@ class Query2(graphene.ObjectType):
         staff_id = graphene.Int()
     )
 
+    request = graphene.Field(
+        Request,
+        request_id = graphene.Int()
+    )
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
+    
+    def resolve_request(self, info, request_id):
+        return resolve_request(request_id)
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2)
@@ -407,6 +415,7 @@ def resolve_own_requests(staff_id):
     manager = User.query.filter(User.staff_id == User.query.filter(User.staff_id == staff_id).first().reporting_manager).first()
     manager = manager.staff_fname + " " + manager.staff_lname
     ret = [{
+        "request_id": r.id,
         "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
         "type": r.type,
         "status": r.status,
@@ -418,8 +427,18 @@ def resolve_own_requests(staff_id):
         "requests": ret
     }
     
-
-
+def resolve_request(request_id):
+    r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
+    if r:
+        return {
+            "request_id": r.request_id,
+            "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
+            "type": r.type,
+            "status": r.status,
+            "remarks": r.remarks
+        }
+    
+    return None
 if __name__ == '__main__':
 
     app.run(host='0.0.0.0', port=5002, debug=True)
