@@ -49,21 +49,25 @@ class User(db.Model):
     position = db.Column(db.String(50), nullable=False)
     country = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
-    reporting_manager = db.Column(db.Integer, db.ForeignKey('users.Staff_ID'))
+    reporting_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
     role = db.Column(db.Integer, db.ForeignKey('roles.role_id'))
     password = db.Column(db.String(255), nullable=False)
 
 class RequestModel(db.Model):
     __tablename__ = 'requests'
     request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    requesting_staff = db.Column(db.Integer, db.ForeignKey('users.Staff_ID'))
+    requesting_staff = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
     year = db.Column(db.Integer, nullable=False)
     month = db.Column(db.Integer, nullable=False)
     day = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(4), nullable=False)
     status = db.Column(db.String(8), nullable=False, default='pending')
-    approving_manager = db.Column(db.Integer, db.ForeignKey('users.Staff_ID'))
+    approving_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
+    reason = db.Column(db.String(300))
     remarks = db.Column(db.String(300))
+
+    def __repr__(self):
+        return f"<RequestModel(request_id={self.request_id}, requesting_staff={self.requesting_staff}, year={self.year}, month={self.month}, day={self.day}, type='{self.type}', status='{self.status}', approving_manager={self.approving_manager}, remarks='{self.remarks}')>"
 
 # Custom Scalar for JSON
 class JSON(graphene.Scalar):
@@ -201,13 +205,52 @@ class Query2(graphene.ObjectType):
     def resolve_request(self, info, request_id):
         return resolve_request(request_id)
 
+# Define Mutations
+class CreateRequest(graphene.Mutation):
+    class Arguments:
+        staff_id = graphene.Int(required=True)
+        reason = graphene.String(required=False)
+        type = graphene.String(required=True)
+        date = graphene.List(graphene.String)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, staff_id, type, date, reason=None):
+        try:
+            manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
+            for d in date:
+                d = d.split("T")[0]
+                d = d.split("-")
+                r = RequestModel(
+                    requesting_staff = staff_id,
+                    year = d[0],
+                    month = d[1],
+                    day = d[2],
+                    type = type,
+                    status = "pending",
+                    approving_manager = manager,
+                    reason = reason
+                )
+                print(r)
+                db.session.add(r)
+                db.session.commit()
+        except Exception as e:
+            return CreateRequest(success = False, message = str(e))
+        
+
+        return CreateRequest(success=True, message="Request created successfully")
+
+class Mutation1(graphene.ObjectType):
+    create_request = CreateRequest.Field()
+
 # Schema for the second endpoint
-requests_schema = graphene.Schema(query=Query2)
+requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
 
 # Set up GraphQL endpoint
-app.add_url_rule('/get_schedule', view_func=GraphQLView.as_view('graphql1', schema=schedule_schema, graphiql=True))
+app.add_url_rule('/schedule', view_func=GraphQLView.as_view('graphql1', schema=schedule_schema, graphiql=True))
 
-app.add_url_rule('/get_requests', view_func=GraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
+app.add_url_rule('/requests', view_func=GraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
 
 def resolve_manager_list(director_id):
     user = User.query.filter(User.staff_id == director_id).first()
@@ -439,6 +482,7 @@ def resolve_request(request_id):
         }
     
     return None
+
 if __name__ == '__main__':
 
     app.run(host='0.0.0.0', port=5002, debug=True)
