@@ -7,6 +7,8 @@ import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
 import os, json, ast
 from flask_cors import CORS
+from graphene_file_upload.scalars import Upload
+from graphene_file_upload.flask import FileUploadGraphQLView
 
 days_in_month = {
     1: 31,   # January
@@ -68,6 +70,16 @@ class RequestModel(db.Model):
 
     def __repr__(self):
         return f"<RequestModel(request_id={self.request_id}, requesting_staff={self.requesting_staff}, year={self.year}, month={self.month}, day={self.day}, type='{self.type}', status='{self.status}', approving_manager={self.approving_manager}, remarks='{self.remarks}')>"
+
+class File(db.Model):
+    __tablename__ = 'files'
+    file_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    file_data = db.Column(db.LargeBinary, nullable=False)
+
+class FileRequestAssoc(db.Model):
+    __tablename__ = 'file_request_assoc'
+    file_id = db.Column(db.Integer, db.ForeignKey('files.file_id'), primary_key=True)
+    request_id = db.Column(db.Integer, db.ForeignKey('requests.request_id'), primary_key=True)
 
 # Custom Scalar for JSON
 class JSON(graphene.Scalar):
@@ -211,14 +223,24 @@ class CreateRequest(graphene.Mutation):
         staff_id = graphene.Int(required=True)
         reason = graphene.String(required=False)
         type = graphene.String(required=True)
-        date = graphene.List(graphene.String)
+        date = graphene.List(graphene.String, required=True)
+        files = graphene.List(Upload, required=False)
 
     success = graphene.Boolean()
     message = graphene.String()
 
-    def mutate(self, info, staff_id, type, date, reason=None):
+    def mutate(self, info, staff_id, type, date,files = None, reason=None):
         try:
             manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
+            f_ids = []
+            for f in files:
+                file_binary = f.read()
+                file = File(file_data = file_binary)
+                db.session.add(file)
+                db.session.commit()
+
+                f_ids.append(file.file_id)
+            print(f_ids)
             for d in date:
                 d = d.split("T")[0]
                 d = d.split("-")
@@ -250,7 +272,7 @@ requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
 # Set up GraphQL endpoint
 app.add_url_rule('/schedule', view_func=GraphQLView.as_view('graphql1', schema=schedule_schema, graphiql=True))
 
-app.add_url_rule('/requests', view_func=GraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
+app.add_url_rule('/requests', view_func=FileUploadGraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
 
 def resolve_manager_list(director_id):
     user = User.query.filter(User.staff_id == director_id).first()

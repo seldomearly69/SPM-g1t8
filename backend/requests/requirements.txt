@@ -7,3 +7,4 @@ Flask-SQLAlchemy==2.5.1
 graphene==2.1.8               
 graphene-sqlalchemy==2.3.0
 graphql-core==2.3.2
+graphene-file-upload==1.3.0

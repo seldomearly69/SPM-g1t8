@@ -35,6 +35,16 @@ CREATE TABLE requests (
     Remarks VARCHAR(300)
 );
 
+CREATE TABLE files(
+    File_id SERIAL PRIMARY KEY,
+    File_data BYTEA
+);
+
+CREATE TABLE file_request_assoc (
+    Request_id INT REFERENCES requests(request_id),
+    File_id INT REFERENCES files(File_id),
+    PRIMARY KEY (Request_id, File_id)
+);
 
 INSERT INTO roles VALUES 
     (1, 'HR'),
