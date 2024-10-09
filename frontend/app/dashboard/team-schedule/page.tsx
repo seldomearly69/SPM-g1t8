@@ -2,7 +2,6 @@ import { getCurrentUser } from "@/lib/session";
 import TeamSchedule from "@/components/team-schedule";
 import * as motion from "framer-motion/client";
 
-
 export default async function TeamSchedulePage() {
   const user = await getCurrentUser();
   return (

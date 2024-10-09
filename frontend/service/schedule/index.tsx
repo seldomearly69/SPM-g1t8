@@ -14,7 +14,7 @@ export async function getOwnSchedule(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/get_schedule", {
+  const res = await fetch("http://localhost:5002/schedule", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export async function getManagerList(directorId: number) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/get_schedule", {
+  const res = await fetch("http://localhost:5002/schedule", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -104,7 +104,7 @@ export async function getTeamDetails(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/get_schedule", {
+  const res = await fetch("http://localhost:5002/schedule", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -118,33 +118,37 @@ export async function getTeamDetails(
   return data;
 }
 
-export async function getTeamSchedule(day: number, month: number, year: number, staffId: number) {
-    const gqlString = gql`
-         query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
-            teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {
-                teamCount
-                teamSchedule {
-                    date
-                    type
-                    availableCount
-                }
-            }
+export async function getTeamSchedule(
+  day: number,
+  month: number,
+  year: number,
+  staffId: number
+) {
+  const gqlString = gql`
+    query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
+      teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {
+        teamCount
+        teamSchedule {
+          date
+          type
+          availableCount
         }
-    `
-    const res = await fetch("http://localhost:5002/get_schedule", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            query: gqlString?.loc?.source?.body,
-            variables: { day: day, month: month, year: year, staffId: staffId }
-        }),
-    })
-    const data = await res.json()
-    return data
+      }
+    }
+  `;
+  const res = await fetch("http://localhost:5002/schedule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString?.loc?.source?.body,
+      variables: { day: day, month: month, year: year, staffId: staffId },
+    }),
+  });
+  const data = await res.json();
+  return data;
 }
-
 
 export async function getDepartmentSchedule(
   month: number,
@@ -165,7 +169,7 @@ export async function getDepartmentSchedule(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/get_schedule", {
+  const res = await fetch("http://localhost:5002/schedule", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -178,3 +182,4 @@ export async function getDepartmentSchedule(
   const data = await res.json();
   return data;
 }
+
