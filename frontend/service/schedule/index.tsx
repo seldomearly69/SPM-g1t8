@@ -182,3 +182,30 @@ export async function getDepartmentSchedule(
   const data = await res.json();
   return data;
 }
+
+export async function fetchPendingRequests() {
+  const query = gql`
+    query {
+      pendingRequests {
+        requestId
+        employeeName
+        status
+      }
+    }
+  `;
+
+  const response = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query: query.loc?.source?.body }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch pending requests");
+  }
+
+  const data = await response.json();
+  return data.data.pendingRequests;
+}
