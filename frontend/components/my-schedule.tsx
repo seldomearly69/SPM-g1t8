@@ -65,7 +65,7 @@ export default function MySchedule({user}: MyScheduleProps) {
                             availability={item.availability || ""}
                             date={item.date}
                             type={item.type}
-                            isPending={item.isPending}
+                            isPending={item.is_pending}
                             />
                         ))
                     }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchPendingRequests } from "@/service/requests";
+import { fetchPendingRequests } from "@/service/request";
 
 interface Request {
   requestId: number;
