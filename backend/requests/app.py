@@ -65,8 +65,8 @@ class RequestModel(db.Model):
     type = db.Column(db.String(4), nullable=False)
     status = db.Column(db.String(8), nullable=False, default='pending')
     approving_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
-    reason = db.Column(db.String(300))
-    remarks = db.Column(db.String(300))
+    reason = db.Column(db.String(300),nullable=True)
+    remarks = db.Column(db.String(300),nullable=True)
 
     def __repr__(self):
         return f"<RequestModel(request_id={self.request_id}, requesting_staff={self.requesting_staff}, year={self.year}, month={self.month}, day={self.day}, type='{self.type}', status='{self.status}', approving_manager={self.approving_manager}, remarks='{self.remarks}')>"
@@ -232,15 +232,16 @@ class CreateRequest(graphene.Mutation):
     def mutate(self, info, staff_id, type, date,files = None, reason=None):
         try:
             manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
-            f_ids = []
-            for f in files:
-                file_binary = f.read()
-                file = File(file_data = file_binary)
-                db.session.add(file)
-                db.session.commit()
+            if files:
+                f_ids = []
+                for f in files:
+                    file_binary = f.read()
+                    file = File(file_data = file_binary)
+                    db.session.add(file)
+                    db.session.commit()
 
-                f_ids.append(file.file_id)
-            print(f_ids)
+                    f_ids.append(file.file_id)
+                print(f_ids)
             for d in date:
                 d = d.split("T")[0]
                 d = d.split("-")
@@ -252,7 +253,7 @@ class CreateRequest(graphene.Mutation):
                     type = type,
                     status = "pending",
                     approving_manager = manager,
-                    reason = reason
+                    reason = reason 
                 )
                 print(r)
                 db.session.add(r)
@@ -484,6 +485,7 @@ def resolve_own_requests(staff_id):
         "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
         "type": r.type,
         "status": r.status,
+        "reason": r.reason,
         "remarks": r.remarks
     } for r in requests]
 
@@ -500,6 +502,7 @@ def resolve_request(request_id):
             "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
             "type": r.type,
             "status": r.status,
+            "reason": r.reason,
             "remarks": r.remarks
         }
     
