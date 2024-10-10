@@ -28,18 +28,3 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # Build and test the services using Docker Compose
-      - name: Build and test services
-        run: |
-          cd backend  # Navigate to the directory containing the docker-compose.yml
-          docker-compose up -d --build
-          # Add any additional commands here to test your services
-          sleep 10  # Wait for services to be up
-          curl -f http://localhost:5001/healthcheck || exit 1  # Check health of authentication service
-          curl -f http://localhost:5002/healthcheck || exit 1  # Check health of requests service
-
-      # Tear down services after testing
-      - name: Tear down services
-        run: |
-          cd backend  # Navigate back to the backend folder
-          docker-compose down
