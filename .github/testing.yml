@@ -1,0 +1,59 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Cache Docker layers
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # Build the authentication service
+      - name: Build authentication service
+        run: |
+          docker-compose -f docker-compose.yml build authentication
+
+      # Build the requests service
+      - name: Build requests service
+        run: |
+          docker-compose -f docker-compose.yml build requests
+
+      # Run Super Linter
+      - name: Run Super Linter
+        uses: github/super-linter@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: main
+        with:
+          run: true
+          language: "python"  # Adjust the language if needed
+          linter: "python"     # Specify the linter to run
+
+      # Clean up services after testing
+      - name: Tear down services
+        run: docker-compose -f docker-compose.yml down
+
+
