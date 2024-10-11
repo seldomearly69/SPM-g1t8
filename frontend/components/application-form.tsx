@@ -20,7 +20,7 @@ import {
   MonthlyDay,
   MonthlyNav,
 } from "./monthly-calendar";
-import { applyForWFH } from "@/service/apply";
+import { createRequest } from "@/service/apply";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { applicationSchema } from "@/lib/validations/application";
@@ -31,7 +31,7 @@ import { z } from "zod";
 type FormData = z.infer<typeof applicationSchema>;
 
 interface ApplicationFormProps extends React.HTMLAttributes<HTMLDivElement> {
-  user: User;
+  user: any;
 }
 
 export default function ApplicationForm({
@@ -53,23 +53,43 @@ export default function ApplicationForm({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [statusCode, setStatusCode] = useState();
 
+  // Submission Logic is here
   const onSubmit = async (data: any) => {
-    console.log(data);
-    console.log(user.staffId);
+    // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
+    const formattedDates = data.date.map((d: string) => {
+      return new Date(d).toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+    });
 
-    setStatusCode(
-      await applyForWFH(
+    // Convert FileList to array or handle it being empty
+    const files = data.file ? Array.from(data.file) : [];
+
+    console.log("Form Data Submitted:", { ...data, date: formattedDates });
+
+    try {
+      const response = await createRequest(
         user.staffId,
         data.type,
+        formattedDates,
         data.reason,
-        data.date,
-        data.file
-      )
-    );
+        files
+      );
+
+      console.log("Response: ", response);
+
+      if (response.statusCode) {
+        console.log("Status Code:", response.statusCode);
+        setStatusCode(response.statusCode);
+      } else {
+        console.log("No status code returned from the backend");
+      }
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      setStatusCode(500);
+    }
   };
 
   const onError = (errors: any) => {
-    console.log(errors);
+    console.log("Form submission errors:", errors); // Check what validation errors are thrown
   };
 
   useEffect(() => {
@@ -142,6 +162,7 @@ export default function ApplicationForm({
               type="file"
               accept="*"
               {...register("file", { required: false })}
+              multiple
             />
           </motion.div>
           {statusCode !== 200 && (
@@ -154,7 +175,7 @@ export default function ApplicationForm({
                 htmlFor="error"
                 className="block mb-2 text-sm font-medium text-red-700"
               >
-                Error Message
+                {statusCode}
               </Label>
             </motion.div>
           )}

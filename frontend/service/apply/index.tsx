@@ -1,29 +1,30 @@
 import { gql } from "@apollo/client";
 
-export async function applyForWFH(
-  userId: number,
-  type: String,
-  reason: String,
-  date: Array<Date>,
-  file: File
+export async function createRequest(
+  staffId: number,
+  type: string,
+  date: Array<string>,
+  reason?: string,
+  files?: Array<File>
 ) {
   // The GraphQL mutation string for file upload
   const gqlString = `
-    mutation applyWFH(
-      $userId: Int!,
+    mutation createRequest(
+      $staffId: Int!,
+      $reason: String,
       $type: String!,
-      $reason: String!,
-      $date: [Date!]!,
-      $file: Upload
+      $date: [String!]!,
+      $files: [Upload!]
     ) {
-      applyWFH(
-        userId: $userId,
-        type: $type,
+      createRequest(
+        staffId: $staffId,
         reason: $reason,
+        type: $type,
         date: $date,
-        file: $file
+        files: $files
       ) {
-        statusCode
+        success
+        message
       }
     }
   `;
@@ -37,28 +38,31 @@ export async function applyForWFH(
     JSON.stringify({
       query: gqlString,
       variables: {
-        userId: userId,
+        staffId: staffId,
+        reason: reason || null,
         type: type,
-        reason: reason,
         date: date,
-        file: null, // Placeholder for file in the variables
+
+        files: files ? files.map((file) => file) : [],
       },
     })
   );
 
-  // Map the file in the form data to the GraphQL "file" variable
-  formData.append(
-    "map",
-    JSON.stringify({
-      "1": ["variables.file"], // Map file to the correct GraphQL variable
-    })
-  );
+  if (files && files.length > 0) {
+    const map: { [key: string]: string[] } = {};
+    files.forEach((file, index) => {
+      map[index] = [`variables.files.${index}`]; // Correct 'variables' typo
+    });
 
-  // Attach the actual file under key "1"
-  formData.append("1", file);
+    formData.append("map", JSON.stringify(map));
+
+    files.forEach((file, index) => {
+      formData.append(`variables.files.${index}`, file);
+    });
+  }
 
   // Send the fetch request with multipart/form-data
-  const res = await fetch("http://localhost:5002/graphql", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     body: formData, // No need for 'Content-Type' header, FormData handles that
   });
