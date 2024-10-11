@@ -232,8 +232,9 @@ class CreateRequest(graphene.Mutation):
     def mutate(self, info, staff_id, type, date,files = None, reason=None):
         try:
             manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
+            f_ids = []
             if files:
-                f_ids = []
+                
                 for f in files:
                     file_binary = f.read()
                     file = File(file_data = file_binary)
@@ -258,6 +259,13 @@ class CreateRequest(graphene.Mutation):
                 print(r)
                 db.session.add(r)
                 db.session.commit()
+                # rid = r.request_id
+                for id in f_ids:
+                    assoc = FileRequestAssoc(file_id = id, request_id = r.request_id)
+                    db.session.add(assoc)
+                    db.session.commit()
+                
+
         except Exception as e:
             return CreateRequest(success = False, message = str(e))
         
