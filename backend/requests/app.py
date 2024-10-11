@@ -1,5 +1,6 @@
 from collections import defaultdict
 from flask import Flask, jsonify
+from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
 from sqlalchemy import or_
@@ -231,6 +232,15 @@ class CreateRequest(graphene.Mutation):
 
     def mutate(self, info, staff_id, type, date,files = None, reason=None):
         # try:
+        # Log the incoming request files
+        print("Request Files: ", request.files)
+        
+        # Log the form data
+        print("Form Data: ", request.form)
+
+        print("FFF")
+
+
         manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
         f_ids = []
         if files:
@@ -242,12 +252,10 @@ class CreateRequest(graphene.Mutation):
 
                 f_ids.append(file.file_id)
             print(f_ids)
-        for d in date:
-            print(f"Processing date: {d}")  # Print each date before formatting
-            
+
+        for d in date:    
             d = d.split("T")[0]  # This removes the time part and keeps only the date
             d = d.split("-")
-            print(f"Formatted date (split): {d}")  # Print formatted date after splitting
             
             r = RequestModel(
                 requesting_staff=staff_id,
@@ -259,8 +267,7 @@ class CreateRequest(graphene.Mutation):
                 approving_manager=manager,
                 reason=reason
             )
-            print(f"RequestModel: {r}")  # Print the request object before committing to the database
-            
+    
             db.session.add(r)
             db.session.commit()
 

@@ -14,7 +14,7 @@ export async function createRequest(
       $reason: String,
       $type: String!,
       $date: [String!]!,
-      $files: [Upload!]
+      $files: [Upload]
     ) {
       createRequest(
         staffId: $staffId,
@@ -42,22 +42,21 @@ export async function createRequest(
         reason: reason || null,
         type: type,
         date: date,
-
-        files: files ? files.map((file) => file) : [],
+        files: files.length > 0 ? files.map((file) => null) : null,
       },
     })
   );
-
+  // Assuming `files` is an array of File objects.
   if (files && files.length > 0) {
     const map: { [key: string]: string[] } = {};
     files.forEach((file, index) => {
-      map[index] = [`variables.files.${index}`]; // Correct 'variables' typo
+      map[index.toString()] = [`variables.files.${index}`]; // Stringify index for keys
     });
 
     formData.append("map", JSON.stringify(map));
 
     files.forEach((file, index) => {
-      formData.append(`variables.files.${index}`, file);
+      formData.append(index.toString(), file); // Append each file with its index as the key
     });
   }
 

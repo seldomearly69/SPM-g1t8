@@ -76,15 +76,15 @@ export default function ApplicationForm({
 
       console.log("Response: ", response);
 
-      if (response.statusCode) {
-        console.log("Status Code:", response.statusCode);
-        setStatusCode(response.statusCode);
+      if (response.data.createRequest.success) {
+        console.log("Status Code:", response.data.createRequest.success);
+        setStatusCode(response.data.createRequest.success);
       } else {
         console.log("No status code returned from the backend");
       }
     } catch (error) {
       console.error("Error submitting request:", error);
-      setStatusCode(500);
+      setStatusCode("500");
     }
   };
 
