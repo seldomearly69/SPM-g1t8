@@ -20,21 +20,20 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     onRowClick?: (row: TData) => void
+    hasToolbar?: boolean
+    sort?: string
 }
 
 
 
-export function DataTable<TData, TValue>({ columns, data, onRowClick  }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, onRowClick, hasToolbar, sort  }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-    const [sorting, setSorting] = React.useState<SortingState>([
-        {
-            id: "name",
-            desc: false
-        }
-    ])
+
+    
+    const [sorting, setSorting] = React.useState<SortingState>(sort ? [{ id: sort, desc: false }] : [])
     const table = useReactTable({
         data,
         columns,
@@ -57,9 +56,12 @@ export function DataTable<TData, TValue>({ columns, data, onRowClick  }: DataTab
         enableColumnFilters: true,
     })
 
+    
+
     return (
         <div className="space-y-4" >
-            <DataTableToolbar table={table}/>
+            
+            {hasToolbar && <DataTableToolbar table={table}/> }
             <div className="rounded-md border max-h-[400px] overflow-y-auto">  
                 <Table>
                 <TableHeader>

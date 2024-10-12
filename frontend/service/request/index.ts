@@ -17,7 +17,7 @@ export async function getArrangements(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/get_requests", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export async function getIndividualRequest(requestId: number) {
       }
     }`;
 
-  const res = await fetch("http://localhost:5002/get_requests", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
