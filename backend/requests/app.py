@@ -1,5 +1,6 @@
 from collections import defaultdict
 from flask import Flask, jsonify
+from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
 from sqlalchemy import or_
@@ -230,36 +231,56 @@ class CreateRequest(graphene.Mutation):
     message = graphene.String()
 
     def mutate(self, info, staff_id, type, date,files = None, reason=None):
-        try:
-            manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
-            if files:
-                f_ids = []
-                for f in files:
-                    file_binary = f.read()
-                    file = File(file_data = file_binary)
-                    db.session.add(file)
-                    db.session.commit()
+        # try:
+        # Log the incoming request files
+        print("Request Files: ", request.files)
+        
+        # Log the form data
+        print("Form Data: ", request.form)
 
-                    f_ids.append(file.file_id)
-                print(f_ids)
-            for d in date:
-                d = d.split("T")[0]
-                d = d.split("-")
-                r = RequestModel(
-                    requesting_staff = staff_id,
-                    year = d[0],
-                    month = d[1],
-                    day = d[2],
-                    type = type,
-                    status = "pending",
-                    approving_manager = manager,
-                    reason = reason 
-                )
-                print(r)
-                db.session.add(r)
+        print("FFF")
+
+
+        manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
+        f_ids = []
+        if files:
+            for f in files:
+                file_binary = f.read()
+                file = File(file_data = file_binary)
+                db.session.add(file)
                 db.session.commit()
-        except Exception as e:
-            return CreateRequest(success = False, message = str(e))
+
+                f_ids.append(file.file_id)
+            print(f_ids)
+
+        for d in date:    
+            d = d.split("T")[0]  # This removes the time part and keeps only the date
+            d = d.split("-")
+            
+            r = RequestModel(
+                requesting_staff=staff_id,
+                year=d[0],
+                month=d[1],
+                day=d[2],
+                type=type,
+                status="pending",
+                approving_manager=manager,
+                reason=reason
+            )
+    
+            db.session.add(r)
+            db.session.commit()
+
+
+            # rid = r.request_id
+            for id in f_ids:
+                assoc = FileRequestAssoc(file_id = id, request_id = r.request_id)
+                db.session.add(assoc)
+                db.session.commit()
+                
+
+        # except Exception as e:
+        #     return CreateRequest(success = False, message = str(e))
         
 
         return CreateRequest(success=True, message="Request created successfully")

@@ -1,29 +1,30 @@
 import { gql } from "@apollo/client";
 
-export async function applyForWFH(
-  userId: number,
-  type: String,
-  reason: String,
-  date: Array<Date>,
-  file: File
+export async function createRequest(
+  staffId: number,
+  type: string,
+  date: Array<string>,
+  reason?: string,
+  files?: Array<File>
 ) {
   // The GraphQL mutation string for file upload
   const gqlString = `
-    mutation applyWFH(
-      $userId: Int!,
+    mutation createRequest(
+      $staffId: Int!,
+      $reason: String,
       $type: String!,
-      $reason: String!,
-      $date: [Date!]!,
-      $file: Upload
+      $date: [String!]!,
+      $files: [Upload]
     ) {
-      applyWFH(
-        userId: $userId,
-        type: $type,
+      createRequest(
+        staffId: $staffId,
         reason: $reason,
+        type: $type,
         date: $date,
-        file: $file
+        files: $files
       ) {
-        statusCode
+        success
+        message
       }
     }
   `;
@@ -37,28 +38,30 @@ export async function applyForWFH(
     JSON.stringify({
       query: gqlString,
       variables: {
-        userId: userId,
+        staffId: staffId,
+        reason: reason || null,
         type: type,
-        reason: reason,
         date: date,
-        file: null, // Placeholder for file in the variables
+        files: files.length > 0 ? files.map((file) => null) : null,
       },
     })
   );
+  // Assuming `files` is an array of File objects.
+  if (files && files.length > 0) {
+    const map: { [key: string]: string[] } = {};
+    files.forEach((file, index) => {
+      map[index.toString()] = [`variables.files.${index}`]; // Stringify index for keys
+    });
 
-  // Map the file in the form data to the GraphQL "file" variable
-  formData.append(
-    "map",
-    JSON.stringify({
-      "1": ["variables.file"], // Map file to the correct GraphQL variable
-    })
-  );
+    formData.append("map", JSON.stringify(map));
 
-  // Attach the actual file under key "1"
-  formData.append("1", file);
+    files.forEach((file, index) => {
+      formData.append(index.toString(), file); // Append each file with its index as the key
+    });
+  }
 
   // Send the fetch request with multipart/form-data
-  const res = await fetch("http://localhost:5002/graphql", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     body: formData, // No need for 'Content-Type' header, FormData handles that
   });
