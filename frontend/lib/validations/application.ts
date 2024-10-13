@@ -3,8 +3,7 @@ import * as z from "zod";
 export const applicationSchema = z.object({
   type: z.enum(["AM", "PM", "full"]),
   reason: z.string().min(1, "Reason is required"),
-
-  // Add check to see if FileList exists to avoid ReferenceError
+  remarks: z.string().min(1, "Reason is required"),
   file:
     typeof window !== "undefined" && typeof FileList !== "undefined"
       ? z

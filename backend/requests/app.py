@@ -223,6 +223,7 @@ class CreateRequest(graphene.Mutation):
     class Arguments:
         staff_id = graphene.Int(required=True)
         reason = graphene.String(required=False)
+        remarks = graphene.String(required=False)
         type = graphene.String(required=True)
         date = graphene.List(graphene.String, required=True)
         files = graphene.List(Upload, required=False)
@@ -230,16 +231,13 @@ class CreateRequest(graphene.Mutation):
     success = graphene.Boolean()
     message = graphene.String()
 
-    def mutate(self, info, staff_id, type, date,files = None, reason=None):
+    def mutate(self, info, staff_id, type, date,files = None, reason=None, remarks=None):
         # try:
         # Log the incoming request files
         print("Request Files: ", request.files)
         
         # Log the form data
         print("Form Data: ", request.form)
-
-        print("FFF")
-
 
         manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
         f_ids = []
@@ -265,7 +263,8 @@ class CreateRequest(graphene.Mutation):
                 type=type,
                 status="pending",
                 approving_manager=manager,
-                reason=reason
+                reason=reason,
+                remarks=remarks
             )
     
             db.session.add(r)

@@ -5,6 +5,7 @@ export async function createRequest(
   type: string,
   date: Array<string>,
   reason?: string,
+  remarks?: string,
   files?: Array<File>
 ) {
   // The GraphQL mutation string for file upload
@@ -13,12 +14,14 @@ export async function createRequest(
       $staffId: Int!,
       $reason: String,
       $type: String!,
+      $remarks: String,
       $date: [String!]!,
       $files: [Upload]
     ) {
       createRequest(
         staffId: $staffId,
         reason: $reason,
+        remarks: $remarks,
         type: $type,
         date: $date,
         files: $files
@@ -40,6 +43,7 @@ export async function createRequest(
       variables: {
         staffId: staffId,
         reason: reason || null,
+        remarks: remarks || null,
         type: type,
         date: date,
         files: files.length > 0 ? files.map((file) => null) : null,

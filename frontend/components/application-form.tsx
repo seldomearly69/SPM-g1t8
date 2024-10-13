@@ -71,6 +71,7 @@ export default function ApplicationForm({
         data.type,
         formattedDates,
         data.reason,
+        data.remarks, // Ensure remarks is being sent over
         files
       );
 
@@ -142,14 +143,34 @@ export default function ApplicationForm({
               htmlFor="reason"
               className="block mb-2 text-sm font-medium text-gray-700"
             >
-              Reason for WFH Request
+              Reason Title
             </Label>
-            <Textarea
+            <Input
               id="reason"
-              rows={4}
+              type="text"
               required
               {...register("reason")}
-              placeholder="Please enter your reason for the WFH request (max 300 words)"
+              placeholder="Short title for your reason (max 50 words)"
+              maxLength={50}
+              style={{ width: "100%" }}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <Label
+              htmlFor="remarks"
+              className="block mb-2 text-sm font-medium text-gray-700"
+            >
+              Remarks
+            </Label>
+            <Textarea
+              id="remarks"
+              rows={4}
+              {...register("remarks", { required: true })}
+              placeholder="Please enter your remarks for the WFH request (max 300 words)"
               maxLength={300}
             />
           </motion.div>
