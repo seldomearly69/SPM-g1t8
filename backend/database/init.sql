@@ -31,13 +31,15 @@ CREATE TABLE requests (
     Type VARCHAR(4) NOT NULL,
     Status VARCHAR(8) NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
     Approving_manager INT REFERENCES users(Staff_ID),
+    created_at DATE DEFAULT CURRENT_DATE,
     Reason VARCHAR(300),
     Remarks VARCHAR(300)
 );
 
 CREATE TABLE files(
     File_id SERIAL PRIMARY KEY,
-    File_data BYTEA
+    File_name VARCHAR(100) NOT NULL,
+    File_data BYTEA NOT NULL
 );
 
 CREATE TABLE file_request_assoc (

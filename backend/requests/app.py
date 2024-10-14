@@ -6,7 +6,7 @@ from flask_graphql import GraphQLView
 from sqlalchemy import or_
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
-import os, json, ast
+import os, json, ast, base64
 from flask_cors import CORS
 from graphene_file_upload.scalars import Upload
 from graphene_file_upload.flask import FileUploadGraphQLView
@@ -66,6 +66,7 @@ class RequestModel(db.Model):
     type = db.Column(db.String(4), nullable=False)
     status = db.Column(db.String(8), nullable=False, default='pending')
     approving_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
+    created_at = db.Column(db.Date, nullable = False)
     reason = db.Column(db.String(300),nullable=True)
     remarks = db.Column(db.String(300),nullable=True)
 
@@ -76,6 +77,7 @@ class File(db.Model):
     __tablename__ = 'files'
     file_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     file_data = db.Column(db.LargeBinary, nullable=False)
+    file_name = db.Column(db.String(100),nullable=False)
 
 class FileRequestAssoc(db.Model):
     __tablename__ = 'file_request_assoc'
@@ -191,12 +193,25 @@ class Query1(graphene.ObjectType):
 schedule_schema = graphene.Schema(query=Query1)
 
 ### SCHEMA 2 (get_requests)
+class FileType(graphene.ObjectType):
+    file_id = graphene.Int()
+    file_data = graphene.String()
+
+    def resolve_file_data(parent, info):
+        # Encode the binary data as base64
+        return base64.b64encode(parent.file_data).decode('utf-8')
+    
 class Request(graphene.ObjectType):
     request_id = graphene.Int()
+    requesting_staff_name = graphene.String()
+    request_date = graphene.String()
+    department = graphene.String()
     date = graphene.String()
     type = graphene.String()
     status = graphene.String()
+    reason = graphene.String()
     remarks = graphene.String()
+
 
 class OwnRequests(graphene.ObjectType):
     approving_manager = graphene.String()
@@ -212,11 +227,19 @@ class Query2(graphene.ObjectType):
         Request,
         request_id = graphene.Int()
     )
+
+    subordinates_request = graphene.Field(
+       graphene.List(Request),
+       staff_id = graphene.Int()
+    )
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
     
     def resolve_request(self, info, request_id):
         return resolve_request(request_id)
+    
+    def resolve_subordinates_request(self,info,staff_id):
+        return resolve_subordinates_request(staff_id)
 
 # Define Mutations
 class CreateRequest(graphene.Mutation):
@@ -500,6 +523,7 @@ def resolve_own_requests(staff_id):
     requests = RequestModel.query.filter(RequestModel.requesting_staff == staff_id).all()
     manager = User.query.filter(User.staff_id == User.query.filter(User.staff_id == staff_id).first().reporting_manager).first()
     manager = manager.staff_fname + " " + manager.staff_lname
+
     ret = [{
         "request_id": r.request_id,
         "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
@@ -527,6 +551,25 @@ def resolve_request(request_id):
         }
     
     return None
+
+def resolve_subordinates_request(staff_id):
+    requests = RequestModel.query.filter(RequestModel.approving_manager == staff_id).all()
+    ret = []
+    for r in requests:
+        requesting_staff = User.query.filter(User.staff_id == r.requesting_staff).first()
+        ret.append({
+        "request_id": r.request_id,
+        "requesting_staff_name": requesting_staff.staff_fname + " " + requesting_staff.staff_lname,
+        "department": requesting_staff.dept,
+        "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
+        "request_date" : r.created_at,
+        "type": r.type,
+        "status": r.status,
+        "reason": r.reason,
+        "remarks": r.remarks
+    })
+
+    return ret
 
 if __name__ == '__main__':
 
