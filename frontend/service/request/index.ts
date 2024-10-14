@@ -30,35 +30,44 @@ export async function getArrangements(staffId: number) {
   return data;
 }
 
-export async function getEmployeesRequest(managerId: number) {
-  const gqlString = gql`
-    query request($managerId: Int!) {
-      request(managerId: $managerId) {
-        employeeName
-        employeeDepartment
-        requestedOn
+export async function getSubordinatesRequest(managerId: number) {
+  // Define the GraphQL query
+  const gqlString = `
+    query subordinatesRequest($staffId: Int!) {
+      subordinatesRequest(staffId: $staffId) {
+        requestId
+        requestingStaffName
+        department
+        date
         requestDate
         type
         status
         reason
-        files
+        remarks
       }
     }
   `;
 
+  // Perform the fetch request
   const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString,
-      variables: { managerId: managerId },
+      query: gqlString, // The query string itself
+      variables: { staffId: managerId }, // Passing managerId as staffId
     }),
   });
 
   const data = await res.json();
-  return data.data.request;
+
+  // Handle the result and return the correct data
+  if (data.errors) {
+    throw new Error(`GraphQL error: ${data.errors[0].message}`);
+  }
+
+  return data.data;
 }
 
 export async function getIndividualRequest(requestId: number) {

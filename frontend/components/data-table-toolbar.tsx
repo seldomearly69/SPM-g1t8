@@ -5,7 +5,12 @@ import { Input } from "./ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { Button } from "./ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { availability, department, schedule_status, type } from "@/config/request";
+import {
+  availability,
+  department,
+  schedule_status,
+  type,
+} from "@/config/request";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -21,15 +26,21 @@ export function DataTableToolbar<TData>({
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder="Filter by Employee Name"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={
+            (table
+              .getColumn("requestingStaffName")
+              ?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table
+              .getColumn("requestingStaffName")
+              ?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("isPending") && (
+        {table.getColumn("status") && (
           <DataTableFacetedFilter
-            column={table.getColumn("isPending")}
+            column={table.getColumn("status")}
             title="Status"
             options={schedule_status}
           />
@@ -41,14 +52,14 @@ export function DataTableToolbar<TData>({
             options={department}
           />
         )}
-        {table.getColumn("availability") && (
+        {/* {table.getColumn("availability") && (
           <DataTableFacetedFilter
             column={table.getColumn("availability")}
             title="Availability"
             options={availability}
           />
-        )}
-         {table.getColumn("type") && (
+        )} */}
+        {table.getColumn("type") && (
           <DataTableFacetedFilter
             column={table.getColumn("type")}
             title="Type"

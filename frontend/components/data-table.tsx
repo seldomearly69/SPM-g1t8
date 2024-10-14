@@ -43,7 +43,7 @@ export function DataTable<TData, TValue>({
   );
   const [sorting, setSorting] = React.useState<SortingState>([
     {
-      id: "name",
+      id: "requestingStaffName",
       desc: false,
     },
   ]);
