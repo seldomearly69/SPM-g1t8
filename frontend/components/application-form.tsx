@@ -52,6 +52,7 @@ export default function ApplicationForm({
   const [date, setDate] = useState<Date[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [statusCode, setStatusCode] = useState();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
 
   // Submission Logic is here
   const onSubmit = async (data: any) => {
@@ -80,6 +81,7 @@ export default function ApplicationForm({
       if (response.data.createRequest.success) {
         console.log("Status Code:", response.data.createRequest.success);
         setStatusCode(response.data.createRequest.success);
+        setShowSuccessPopup(true); // Show success popup upon successful submission
       } else {
         console.log("No status code returned from the backend");
       }
@@ -254,6 +256,21 @@ export default function ApplicationForm({
           </MonthlyCalendar>
         </div>
       </div>
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg shadow-lg">
+            <p className="text-xl font-semibold text-green-600">
+              Your application has been submitted successfully!
+            </p>
+            <button
+              onClick={() => setShowSuccessPopup(false)}
+              className="mt-4 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors duration-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

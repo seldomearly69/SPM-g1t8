@@ -10,6 +10,7 @@ import { getSubordinatesRequest } from "@/service/request";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
 
 interface ManageEmployeeArrangementsProps {
   user: User;
@@ -62,12 +63,14 @@ export default function ManageEmployeeArrangements({
   };
 
   return (
-    <div className="max-w-full mx-auto pr-4">
-      {" "}
-      {/* Added padding on the right */}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-full mx-auto pr-4"
+    >
       <h2 className="text-2xl font-bold mb-6">Manage Employee WFH Requests</h2>
       <Tabs defaultValue="pending" className="w-full">
-        {/* Adjusted to scale width dynamically */}
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="acceptedRejected">
@@ -76,7 +79,6 @@ export default function ManageEmployeeArrangements({
         </TabsList>
         <TabsContent value="pending">
           <Card className="w-full">
-            {/* Adjusted to scale width dynamically */}
             <CardHeader>
               <CardTitle>Pending Requests</CardTitle>
             </CardHeader>
@@ -93,7 +95,6 @@ export default function ManageEmployeeArrangements({
         </TabsContent>
         <TabsContent value="acceptedRejected">
           <Card className="w-full">
-            {/* Adjusted to scale width dynamically */}
             <CardHeader>
               <CardTitle>Accepted / Rejected Requests</CardTitle>
             </CardHeader>
@@ -111,6 +112,6 @@ export default function ManageEmployeeArrangements({
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }
