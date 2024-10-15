@@ -175,6 +175,10 @@ class FileType(graphene.ObjectType):
     file_key = graphene.String()
     file_name = graphene.String()
 
+class FileLink(graphene.ObjectType):
+    file_key = graphene.String()
+    file_link = graphene.String()
+
 class OwnRequests(graphene.ObjectType):
     approving_manager = graphene.String()
     requests = graphene.List(Request)
@@ -198,6 +202,12 @@ class Query2(graphene.ObjectType):
        graphene.List(Request),
        staff_id = graphene.Int()
     )
+
+    file_link = graphene.Field(
+        FileLink,
+        file_key = graphene.String()
+    )
+
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
     
@@ -206,6 +216,9 @@ class Query2(graphene.ObjectType):
     
     def resolve_subordinates_request(self,info,staff_id):
         return resolve_subordinates_request(staff_id)
+
+    def resolve_file_link(self,info,file_key):
+        return resolve_file_link(file_key)
 
 # Define Mutations
 class CreateRequest(graphene.Mutation):
@@ -232,7 +245,7 @@ class CreateRequest(graphene.Mutation):
                 s3_client.upload_fileobj(
                     f,
                     BUCKET_NAME,
-                    f.filename + str(filekey)
+                    str(filekey)
                 )
 
                 file = File(file_key = filekey, file_name = f.filename)
@@ -518,11 +531,8 @@ def resolve_own_requests(staff_id):
     ret = []
     for r in requests:
         files = FileRequestAssoc.query.filter(FileRequestAssoc.request_id == r.request_id).all()
-        files = [s3_client.generate_presigned_url(
-                    'get_object',
-                    Params={'Bucket': BUCKET_NAME, 'Key': f.file_key},
-                    ExpiresIn=3600
-                ) for f in files]
+        files = [f.file_key for f in files]
+        
         u = User.query.filter(User.staff_id == r.requesting_staff).first()
         ret.append({
             "request_id": r.request_id,
@@ -545,13 +555,16 @@ def resolve_own_requests(staff_id):
 def resolve_request(request_id):
     r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
     if r:
+        files = FileRequestAssoc.query.filter(FileRequestAssoc.request_id == r.request_id).all()
+        files = [f.file_key for f in files]
         return {
             "request_id": r.request_id,
             "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
             "type": r.type,
             "status": r.status,
             "reason": r.reason,
-            "remarks": r.remarks
+            "remarks": r.remarks,
+            "files": files
         }
     
     return None
@@ -560,6 +573,8 @@ def resolve_subordinates_request(staff_id):
     requests = RequestModel.query.filter(RequestModel.approving_manager == staff_id).all()
     ret = []
     for r in requests:
+        files = FileRequestAssoc.query.filter(FileRequestAssoc.request_id == r.request_id).all()
+        files = [f.file_key for f in files]
         requesting_staff = User.query.filter(User.staff_id == r.requesting_staff).first()
         ret.append({
         "request_id": r.request_id,
@@ -570,10 +585,19 @@ def resolve_subordinates_request(staff_id):
         "type": r.type,
         "status": r.status,
         "reason": r.reason,
-        "remarks": r.remarks
+        "remarks": r.remarks,
+        "files": files
     })
 
     return ret
+
+def resolve_file_link(file_key):
+    return {"file_key": file_key, "file_link": 
+                s3_client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': BUCKET_NAME, 'Key': file_key},
+                ExpiresIn=3600
+            )}
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
