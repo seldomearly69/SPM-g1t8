@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from app import app, db, RequestModel
 
 log_file_path = "/var/log/cron.log"
-
 def log_message(message):
     with open(log_file_path, "a") as log_file:
         log_file.write(f"{datetime.now()}: {message}\n")
@@ -14,8 +13,7 @@ with app.app_context():
         current = datetime.now()
         log_message(f"Starting job at {current.hour} hour.")
         
-        # Check if it's 5 AM or 11 PM
-        if current.hour == 6:
+        if current.hour == 15:
             time_type = "AM"
             current = (current + timedelta(days=1)).date().isoformat().split("-")
         elif current.hour == 23:

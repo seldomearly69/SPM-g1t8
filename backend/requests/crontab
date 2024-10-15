@@ -1,1 +1,6 @@
+# Define environment variables here
+POSTGRES_USER=myuser
+POSTGRES_PASSWORD=mypassword
+POSTGRES_DB=mydatabase
+
 * * * * * /usr/local/bin/python /app/autoreject.py >> /var/log/cron.log 2>&1

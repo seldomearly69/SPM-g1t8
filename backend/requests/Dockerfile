@@ -18,9 +18,6 @@ RUN chmod 0644 /etc/cron.d/mycron
 # Apply the cron job
 RUN crontab /etc/cron.d/mycron
 
-# Remove any stale cron lock file
-RUN rm -f /var/run/crond.pid
-
 RUN chmod a+x /app/autoreject.py
 
 ENTRYPOINT ["/bin/bash", "-c", "cron & python app.py"]
