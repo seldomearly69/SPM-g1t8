@@ -1,18 +1,16 @@
 import { gql } from "@apollo/client";
 
-export async function getArrangements(
-  staffId: number
-) {
+export async function getArrangements(staffId: number) {
   const gqlString = gql`
     query ownRequests($staffId: Int!) {
       ownRequests(staffId: $staffId) {
         approvingManager
         requests {
-            requestId
-            date
-            type
-            status
-            remarks
+          requestId
+          date
+          type
+          status
+          remarks
         }
       }
     }
@@ -32,9 +30,48 @@ export async function getArrangements(
   return data;
 }
 
+export async function getSubordinatesRequest(managerId: number) {
+  // Define the GraphQL query
+  const gqlString = `
+    query subordinatesRequest($staffId: Int!) {
+      subordinatesRequest(staffId: $staffId) {
+        requestId
+        requestingStaffName
+        department
+        date
+        type
+        status
+        reason
+        remarks
+        createdAt
+      }
+    }
+  `;
+
+  // Perform the fetch request
+  const res = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString, // The query string itself
+      variables: { staffId: managerId }, // Passing managerId as staffId
+    }),
+  });
+
+  const data = await res.json();
+
+  // Handle the result and return the correct data
+  if (data.errors) {
+    throw new Error(`GraphQL error: ${data.errors[0].message}`);
+  }
+
+  return data.data;
+}
 
 export async function getIndividualRequest(requestId: number) {
-  const gqlString = gql`
+  const gqlString = `
     query request($requestId: Int!) {
       request(requestId: $requestId) {
         requestId
@@ -43,7 +80,8 @@ export async function getIndividualRequest(requestId: number) {
         status
         remarks
       }
-    }`;
+    }
+  `;
 
   const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
@@ -52,11 +90,11 @@ export async function getIndividualRequest(requestId: number) {
     },
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
-      variables: { requestId: requestId},
+      variables: { requestId: requestId },
     }),
   });
   const data = await res.json();
- 
+
   return data;
 }
 
@@ -67,7 +105,8 @@ export async function withdrawRequest(requestId: number, reason: string) {
         requestId
         status
       }
-    }`;
+    }
+  `;
 
   const res = await fetch("http://localhost:5002/get_requests", {
     method: "POST",
@@ -109,4 +148,3 @@ export async function fetchPendingRequests() {
   const data = await response.json();
   return data.data.pendingRequests;
 }
-  

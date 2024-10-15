@@ -45,6 +45,7 @@ export default function ApplicationForm({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [date, setDate] = useState<{date: Date, type: string}[]>([]);
   const [statusCode, setStatusCode] = useState();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
 
   // Submission Logic is here
   const onSubmit = async (data: any) => {
@@ -64,6 +65,7 @@ export default function ApplicationForm({
         user.staffId,
         formattedDates,
         data.reason,
+        data.remarks, // Ensure remarks is being sent over
         files
       );
 
@@ -72,6 +74,7 @@ export default function ApplicationForm({
       if (response.data.createRequest.success) {
         console.log("Status Code:", response.data.createRequest.success);
         setStatusCode(response.data.createRequest.success);
+        setShowSuccessPopup(true); // Show success popup upon successful submission
       } else {
         console.log("No status code returned from the backend");
       }
@@ -107,14 +110,34 @@ export default function ApplicationForm({
               htmlFor="reason"
               className="block mb-2 text-sm font-medium text-gray-700"
             >
-              Reason for WFH Request
+              Reason Title
             </Label>
-            <Textarea
+            <Input
               id="reason"
-              rows={4}
+              type="text"
               required
               {...register("reason")}
-              placeholder="Please enter your reason for the WFH request (max 300 words)"
+              placeholder="Short title for your reason (max 50 words)"
+              maxLength={50}
+              style={{ width: "100%" }}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <Label
+              htmlFor="remarks"
+              className="block mb-2 text-sm font-medium text-gray-700"
+            >
+              Remarks
+            </Label>
+            <Textarea
+              id="remarks"
+              rows={4}
+              {...register("remarks", { required: true })}
+              placeholder="Please enter your remarks for the WFH request (max 300 words)"
               maxLength={300}
             />
           </motion.div>
@@ -190,6 +213,21 @@ export default function ApplicationForm({
             </MonthlyCalendar>
         </div>
       </div>
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg shadow-lg">
+            <p className="text-xl font-semibold text-green-600">
+              Your application has been submitted successfully!
+            </p>
+            <button
+              onClick={() => setShowSuccessPopup(false)}
+              className="mt-4 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors duration-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

@@ -7,8 +7,7 @@ const dateSchema = z.object({
 
 export const applicationSchema = z.object({
   reason: z.string().min(1, "Reason is required"),
-
-  // Add check to see if FileList exists to avoid ReferenceError
+  remarks: z.string().min(1, "Reason is required"),
   file:
     typeof window !== "undefined" && typeof FileList !== "undefined"
       ? z

@@ -47,11 +47,6 @@ export const dashboardConfig: DashboardConfig = {
         icon: "users",
       },
       {
-        title: "Manage Employees",
-        href: "/dashboard/manage-employees",
-        icon: "users",
-      },
-      {
         title: "Overall Schedule",
         href: "/dashboard/overall-schedule",
         icon: "calendar",
@@ -64,8 +59,20 @@ export const dashboardConfig: DashboardConfig = {
           href: "/overall-schedule",
           icon: "calendar",
         },
+        {
+          title: "Manage Employees",
+          href: "/dashboard/manage-employees",
+          icon: "users",
+        },
       ],
       2: [],
+      3: [
+        {
+          title: "Manage Employees",
+          href: "/dashboard/manage-employees",
+          icon: "users",
+        },
+      ],
     },
   },
 };

@@ -16,7 +16,6 @@ interface DashboardLayoutProps {
 export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
-
   // Get the current user
   const user = await getCurrentUser();
 
@@ -24,8 +23,6 @@ export default async function DashboardLayout({
   if (!user) {
     return notFound();
   }
-
-
 
   return (
     <div className="flex min-h-screen flex-col space-y-6">
@@ -46,7 +43,7 @@ export default async function DashboardLayout({
         </motion.div>
       </header>
       <div className="flex flex-1 gap-12 md:grid-cols-[300px_1fr]">
-        <aside className="hidden w-[300px] flex-col md:block flex-shrink-0">
+        <aside className="hidden w-[200px] flex-col md:block flex-shrink-0">
           <div className="fixed top-[5rem] h-[calc(100vh-5rem)] overflow-y-auto">
             <DashboardNav
               sideBarNav={dashboardConfig.sidebarNav}
@@ -55,8 +52,8 @@ export default async function DashboardLayout({
           </div>
         </aside>
         <main className="container space-y-6">
-            <BreadcrumbLayout />
-            {children}
+          <BreadcrumbLayout />
+          {children}
         </main>
       </div>
       <Footer />

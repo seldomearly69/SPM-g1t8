@@ -1,15 +1,15 @@
 from collections import defaultdict
-from flask import Flask, jsonify
-from flask import request
+from flask import Flask, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
-from sqlalchemy import or_
-import graphene
+from sqlalchemy import or_ , func
+import graphene, boto3
 from graphene_sqlalchemy import SQLAlchemyObjectType
-import os, json, ast
+import os, json, ast, base64, datetime
 from flask_cors import CORS
 from graphene_file_upload.scalars import Upload
 from graphene_file_upload.flask import FileUploadGraphQLView
+
 
 days_in_month = {
     1: 31,   # January
@@ -28,6 +28,16 @@ days_in_month = {
 
 app = Flask(__name__)
 CORS(app)
+
+# Initialize S3 client
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+    region_name='ap-southeast-2'  # Replace with your region
+)
+
+BUCKET_NAME = 'spmbucket123'  # Replace with your S3 bucket name
 
 POSTGRES_USER=os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD=os.getenv("POSTGRES_PASSWORD")
@@ -66,6 +76,7 @@ class RequestModel(db.Model):
     type = db.Column(db.String(4), nullable=False)
     status = db.Column(db.String(8), nullable=False, default='pending')
     approving_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
+    created_at = db.Column(db.Date, nullable = False, default=func.current_date())
     reason = db.Column(db.String(300),nullable=True)
     remarks = db.Column(db.String(300),nullable=True)
 
@@ -74,12 +85,12 @@ class RequestModel(db.Model):
 
 class File(db.Model):
     __tablename__ = 'files'
-    file_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    file_data = db.Column(db.LargeBinary, nullable=False)
+    file_key = db.Column(db.String(100), primary_key = True)
+    file_name = db.Column(db.String(100),nullable=False)
 
 class FileRequestAssoc(db.Model):
     __tablename__ = 'file_request_assoc'
-    file_id = db.Column(db.Integer, db.ForeignKey('files.file_id'), primary_key=True)
+    file_key = db.Column(db.String(100), db.ForeignKey('files.file_key'), primary_key=True)
     request_id = db.Column(db.Integer, db.ForeignKey('requests.request_id'), primary_key=True)
 
 # Custom Scalar for JSON
@@ -193,10 +204,19 @@ schedule_schema = graphene.Schema(query=Query1)
 ### SCHEMA 2 (get_requests)
 class Request(graphene.ObjectType):
     request_id = graphene.Int()
+    requesting_staff_name = graphene.String()
+    department = graphene.String()
     date = graphene.String()
     type = graphene.String()
     status = graphene.String()
+    reason = graphene.String()
     remarks = graphene.String()
+    files = graphene.List(graphene.String)
+    created_at = graphene.String()
+
+class FileType(graphene.ObjectType):
+    file_key = graphene.String()
+    file_name = graphene.String()
 
 class OwnRequests(graphene.ObjectType):
     approving_manager = graphene.String()
@@ -212,17 +232,26 @@ class Query2(graphene.ObjectType):
         Request,
         request_id = graphene.Int()
     )
+
+    subordinates_request = graphene.Field(
+       graphene.List(Request),
+       staff_id = graphene.Int()
+    )
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
     
     def resolve_request(self, info, request_id):
         return resolve_request(request_id)
+    
+    def resolve_subordinates_request(self,info,staff_id):
+        return resolve_subordinates_request(staff_id)
 
 # Define Mutations
 class CreateRequest(graphene.Mutation):
     class Arguments:
         staff_id = graphene.Int(required=True)
         reason = graphene.String(required=False)
+        remarks = graphene.String(required=False)
         type = graphene.String(required=True)
         date = graphene.List(graphene.String, required=True)
         files = graphene.List(Upload, required=False)
@@ -230,28 +259,34 @@ class CreateRequest(graphene.Mutation):
     success = graphene.Boolean()
     message = graphene.String()
 
-    def mutate(self, info, staff_id, type, date,files = None, reason=None):
+    def mutate(self, info, staff_id, type, date,files = None, reason=None, remarks=None):
         # try:
         # Log the incoming request files
-        print("Request Files: ", request.files)
+        # print("Request Files: ", request.files)
         
         # Log the form data
-        print("Form Data: ", request.form)
-
-        print("FFF")
-
-
+        # print("Form Data: ", request.form)
+        print(staff_id)
         manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
-        f_ids = []
+        f_keys = []
         if files:
+            
             for f in files:
-                file_binary = f.read()
-                file = File(file_data = file_binary)
+                filekey = f.filename + str(datetime.datetime.now())
+
+                # Upload the file to S3
+                s3_client.upload_fileobj(
+                    f,
+                    BUCKET_NAME,
+                    f.filename + str(filekey)
+                )
+
+                file = File(file_key = filekey, file_name = f.filename)
                 db.session.add(file)
                 db.session.commit()
 
-                f_ids.append(file.file_id)
-            print(f_ids)
+                f_keys.append(file.file_key)
+            print(f_keys)
 
         for d in date:    
             d = d.split("T")[0]  # This removes the time part and keeps only the date
@@ -265,7 +300,8 @@ class CreateRequest(graphene.Mutation):
                 type=type,
                 status="pending",
                 approving_manager=manager,
-                reason=reason
+                reason=reason,
+                remarks=remarks
             )
     
             db.session.add(r)
@@ -273,8 +309,8 @@ class CreateRequest(graphene.Mutation):
 
 
             # rid = r.request_id
-            for id in f_ids:
-                assoc = FileRequestAssoc(file_id = id, request_id = r.request_id)
+            for k in f_keys:
+                assoc = FileRequestAssoc(file_key = k, request_id = r.request_id)
                 db.session.add(assoc)
                 db.session.commit()
                 
@@ -285,8 +321,33 @@ class CreateRequest(graphene.Mutation):
 
         return CreateRequest(success=True, message="Request created successfully")
 
+class AcceptRejectRequest(graphene.Mutation):
+    class Arguments:
+        request_id = graphene.Int(required=True)
+        new_status = graphene.String(required=True)
+        remarks = graphene.String(required = False)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, request_id, new_status, remarks = None):
+        r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
+        if not r:
+            return AcceptRejectRequest(success = False, message="Request not found")
+        
+        r.status = new_status
+        if remarks:
+            r.remarks = remarks
+        try:
+            db.session.commit()
+            return AcceptRejectRequest(success = True, message="Request updated successfully")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return AcceptRejectRequest(success = False, message=e)
+
 class Mutation1(graphene.ObjectType):
     create_request = CreateRequest.Field()
+    accept_reject_request = AcceptRejectRequest.Field()
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
@@ -501,14 +562,27 @@ def resolve_own_requests(staff_id):
     requests = RequestModel.query.filter(RequestModel.requesting_staff == staff_id).all()
     manager = User.query.filter(User.staff_id == User.query.filter(User.staff_id == staff_id).first().reporting_manager).first()
     manager = manager.staff_fname + " " + manager.staff_lname
-    ret = [{
-        "request_id": r.request_id,
-        "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
-        "type": r.type,
-        "status": r.status,
-        "reason": r.reason,
-        "remarks": r.remarks
-    } for r in requests]
+
+    for r in requests:
+        files = FileRequestAssoc.query.filter(FileRequestAssoc.request_id == r.request_id).all()
+        files = [s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': BUCKET_NAME, 'Key': f.file_key},
+                    ExpiresIn=3600
+                ) for f in files]
+        u = User.query.filter(User.staff_id == r.requesting_staff).first()
+        ret = [{
+            "request_id": r.request_id,
+            "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
+            "requesting_staff_name": u.staff_fname + " " + u.staff_lname,
+            "department": u.dept,
+            "type": r.type,
+            "status": r.status,
+            "reason": r.reason,
+            "remarks": r.remarks,
+            "files" : files,
+            "created_at": r.created_at
+        }]
 
     return {
         "approving_manager": manager,
@@ -528,6 +602,25 @@ def resolve_request(request_id):
         }
     
     return None
+
+def resolve_subordinates_request(staff_id):
+    requests = RequestModel.query.filter(RequestModel.approving_manager == staff_id).all()
+    ret = []
+    for r in requests:
+        requesting_staff = User.query.filter(User.staff_id == r.requesting_staff).first()
+        ret.append({
+        "request_id": r.request_id,
+        "requesting_staff_name": requesting_staff.staff_fname + " " + requesting_staff.staff_lname,
+        "department": requesting_staff.dept,
+        "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
+        "created_at" : r.created_at,
+        "type": r.type,
+        "status": r.status,
+        "reason": r.reason,
+        "remarks": r.remarks
+    })
+
+    return ret
 
 if __name__ == '__main__':
 

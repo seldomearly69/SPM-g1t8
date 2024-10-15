@@ -1,44 +1,117 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { DataTable } from "@/components/data-table"
-import { request_columns } from "@/components/columns"
-import { useRouter } from 'next/navigation'
-import { User } from "@/types"
+import { useState, useEffect } from "react";
+import { DataTable } from "@/components/data-table";
+import { request_columns } from "@/components/columns";
+import { useRouter } from "next/navigation";
+import { User } from "@/types";
+import { getSubordinatesRequest } from "@/service/request";
 
-// Mock data - replace with actual API call
-const mockEmployeeRequests = [
-    { requestId: 1, employeeName: "Alice Johnson", department: "Engineering", date: "2023-05-23", type: "AM", requestedOn: "2023-05-19",  status: "pending", remarks: "need to wfh" },
-    { requestId: 2, employeeName: "Bob Smith", department: "Engineering", date: "2023-06-23", type: "AM", requestedOn: "2023-05-30", status: "pending", remarks: "need to wfh" },
-    { requestId: 3, employeeName: "Charlie Brown", department: "Engineering", date: "2023-07-23", type: "AM", requestedOn: "2023-07-14",  status: "pending", remarks: "No remarks" },
-  ]
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
 
-interface ManageEmployeeArrangementsProps { 
-    user: User
+interface ManageEmployeeArrangementsProps {
+  user: User;
 }
 
-export default function ManageEmployeeArrangements({user}: ManageEmployeeArrangementsProps) {
-  const [employeeRequests, setEmployeeRequests] = useState(mockEmployeeRequests)
-  const router = useRouter()
+export default function ManageEmployeeArrangements({
+  user,
+}: ManageEmployeeArrangementsProps) {
+  const [employeeRequests, setEmployeeRequests] = useState<any[]>([]); // Updated to handle real data
+  const router = useRouter();
 
   useEffect(() => {
-    // TODO: Fetch actual employee requests data from API
-    // setEmployeeRequests(await fetchEmployeeRequests())
-  }, [])
+    // Fetch actual employee requests data from API
+    const fetchPendingRequests = async () => {
+      try {
+        const data = await getSubordinatesRequest(user.staffId);
+        if (data && data.subordinatesRequest) {
+          console.log(data);
+          setEmployeeRequests(data.subordinatesRequest);
+        } else {
+          setEmployeeRequests([]);
+        }
+      } catch (error) {
+        console.error("Error fetching subordinates' requests:", error);
+      }
+    };
+    fetchPendingRequests();
+  }, [user.staffId]);
 
-  
+  const handleRowClick = (row: {
+    requestId: number;
+    requestingStaffName: string;
+    department: string;
+    date: string;
+    type: string;
+    createdAt: string;
+    remarks: string;
+  }) => {
+    const queryParams = new URLSearchParams({
+      employeeName: row.requestingStaffName,
+      department: row.department,
+      date: row.date,
+      type: row.type,
+      createdAt: row.createdAt,
+      remarks: row.remarks,
+    }).toString();
 
-  const handleRowClick = (row: any) => {
-    router.push(`/dashboard/manage-employees/${row.id}`)
-  }
-
+    // Append query parameters to the pathname
+    router.push(`/dashboard/manage-employees/${row.requestId}?${queryParams}`);
+  };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6" >Manage Employee WFH Requests</h2>
-
-      <DataTable columns={request_columns} data={employeeRequests } onRowClick={handleRowClick} />
-      
-    </div>
-  )
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-full mx-auto pr-4"
+    >
+      <h2 className="text-2xl font-bold mb-6">Manage Employee WFH Requests</h2>
+      <Tabs defaultValue="pending" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="pending">Pending</TabsTrigger>
+          <TabsTrigger value="acceptedRejected">
+            Accepted / Rejected
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="pending">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Pending Requests</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <DataTable
+                columns={request_columns}
+                data={employeeRequests.filter(
+                  (request) => request.status === "pending"
+                )}
+                onRowClick={handleRowClick}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="acceptedRejected">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Accepted / Rejected Requests</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <DataTable
+                columns={request_columns}
+                data={employeeRequests.filter(
+                  (request) =>
+                    request.status === "accepted" ||
+                    request.status === "rejected"
+                )}
+                onRowClick={handleRowClick}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </motion.div>
+  );
 }
