@@ -16,5 +16,5 @@ export const applicationSchema = z.object({
           .or(z.array(z.instanceof(File)).optional())
       : z.array(z.instanceof(File)).optional(),
 
-  date: z.array(dateSchema).nonempty(),
+  date_type: z.array(dateSchema).nonempty(),
 });

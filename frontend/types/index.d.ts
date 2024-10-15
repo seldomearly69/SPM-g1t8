@@ -107,7 +107,7 @@ export type Availability = {
   department: string;
   availability: string;
   type: "AM" | "PM" | "full";
-  isPending: boolean;
+  isPending: string;
 };
 
 export type IndividualRequest = {

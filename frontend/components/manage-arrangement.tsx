@@ -6,61 +6,11 @@ import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DataTable } from "@/components/data-table";
 import { individual_request_columns, request_columns } from "@/components/columns";
-import { getArrangements } from "@/service/request";
+import { getOwnRequest } from "@/service/request";
 import { useRouter } from "next/navigation"
 import { ScrollArea } from "./ui/scroll-area";
 import { User } from "@/types";
 
-// Mock data - replace with actual API call
-const mockArrangements = [
-  {
-    requestId: 1,
-    startDate: "2023-05-15",
-    endDate: "2023-05-19",
-    type: "full-time",
-    status: "approved",
-  },
-  {
-    id: 2,
-    startDate: "2023-06-01",
-    endDate: "2023-06-30",
-    type: "part-time",
-    status: "pending",
-  },
-  {
-    id: 3,
-    startDate: "2023-07-10",
-    endDate: "2023-07-14",
-    type: "flexible",
-    status: "approved",
-  },
-  {
-    id: 4,
-    startDate: "2023-07-15",
-    endDate: "2023-07-17",
-    type: "flexible",
-    status: "rejected",
-  },
-];
-
-const mockPendingArrangements = [
-  { requestId: 1, date: "2024-11-15", type: "PM", status: "pending", remarks: "remarks" },
-  { requestId: 2, date: "2024-11-16", type: "AM", status: "pending", remarks: "remarks" },
-  { requestId: 3, date: "2024-11-20", type: "PM", status: "pending", remarks: "remarks" },
-  { requestId: 4, date: "2024-11-21", type: "AM", status: "pending", remarks: "remarks" },
-  { requestId: 5, date: "2024-11-22", type: "PM", status: "pending", remarks: "remarks" },
-  { requestId: 6, date: "2024-11-23", type: "AM", status: "pending", remarks: "remarks" },
-  { requestId: 7, date: "2024-11-24", type: "PM", status: "pending", remarks: "remarks" },
-  { requestId: 8, date: "2024-11-25", type: "AM", status: "pending", remarks: "remarks" },
-  { requestId: 9, date: "2024-11-26", type: "PM", status: "pending", remarks: "remarks" },
-  { requestId: 2, date: "2024-11-16", type: "AM", status: "pending", remarks: "remarks" },
-  { requestId: 1, date: "2024-11-15", type: "PM", status: "pending", remarks: "remarks" },
-  { requestId: 2, date: "2024-11-16", type: "AM", status: "pending", remarks: "remarks" },
-  { requestId: 1, date: "2024-11-17", type: "PM", status: "approved", remarks: "remarks" },
-  { requestId: 2, date: "2024-11-18", type: "AM", status: "rejected", remarks: "remasdfasdfasdfasdfasdfasdfasdfasdfsdfarks" },
-  { requestId: 1, date: "2024-11-19", type: "PM", status: "approved", remarks: "remarks" },
-  { requestId: 2, date: "2024-11-20", type: "AM", status: "rejected", remarks: "remarks" },
-]
 
 
 interface ManageArrangementsProps {
@@ -68,13 +18,13 @@ interface ManageArrangementsProps {
     }
 
 export default function ManageArrangementsPage({user}: ManageArrangementsProps) {
-  const [arrangements, setArrangements] = useState(mockPendingArrangements);
-  const [pendingArrangements, setPendingArrangements] = useState(mockPendingArrangements);
+  const [arrangements, setArrangements] = useState([]);
+  const [pendingArrangements, setPendingArrangements] = useState([]);
   const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => { 
-      const data = await getArrangements(user.staffId)
+      const data = await getOwnRequest(user.staffId)
       console.log(data)
       setArrangements(data.data.ownRequests.requests)
     }

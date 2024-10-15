@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-export async function getArrangements(staffId: number) {
+export async function getOwnRequest(staffId: number) {
   const gqlString = gql`
     query ownRequests($staffId: Int!) {
       ownRequests(staffId: $staffId) {
@@ -89,7 +89,7 @@ export async function getIndividualRequest(requestId: number) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
+      query: gqlString,
       variables: { requestId: requestId },
     }),
   });

@@ -50,7 +50,7 @@ export default function ApplicationForm({
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
-    const formattedDates = data.date.map((d: {date: Date, type: string}) => {
+    const formattedDates = data.date_type.map((d: {date: Date, type: string}) => {
       
       return {date: format(d.date, "yyyy-MM-dd"), type: d.type}
     });
@@ -58,7 +58,9 @@ export default function ApplicationForm({
     // Convert FileList to array or handle it being empty
     const files = data.file ? Array.from(data.file) : [];
 
-    console.log("Form Data Submitted:", { ...data, date: formattedDates });
+    console.log(data);
+    
+    console.log("Form Data Submitted:", { ...data, date_type: formattedDates });
 
     try {
       const response = await createRequest(
@@ -91,7 +93,7 @@ export default function ApplicationForm({
 
 
   useEffect(() => {
-    setValue("date", date);
+    setValue("date_type", date);
   }, [date]);
 
   console.log(date);
