@@ -4,7 +4,7 @@ import {
   QuestionMarkCircledIcon,
   StopwatchIcon,
 } from "@radix-ui/react-icons";
-import { CircleIcon } from "lucide-react";
+import { CircleIcon, StopCircleIcon } from "lucide-react";
 
 export const request_status = [
   {
@@ -26,13 +26,18 @@ export const request_status = [
 
 export const schedule_status = [
   {
-    value: true,
+    value: "pending",
     label: "pending",
     icon: StopwatchIcon,
   },
   {
-    value: false,
-    label: "confirmed",
+    value: "approved",
+    label: "approved",
+    icon: CrossCircledIcon,
+  },
+  {
+    value: "rejected",
+    label: "rejected",
     icon: CheckCircledIcon,
   },
 ];

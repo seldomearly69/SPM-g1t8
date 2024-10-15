@@ -106,7 +106,7 @@ export default function ManageEmployeeArrangements({
                 columns={request_columns}
                 data={employeeRequests.filter(
                   (request) =>
-                    request.status === "accepted" ||
+                    request.status === "approved" ||
                     request.status === "rejected"
                 )}
                 onRowClick={handleRowClick}
