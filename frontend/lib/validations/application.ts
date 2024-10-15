@@ -1,7 +1,11 @@
 import * as z from "zod";
 
+const dateSchema = z.object({
+  date: z.date(),
+  type: z.enum(["AM", "PM"]),
+});
+
 export const applicationSchema = z.object({
-  type: z.enum(["AM", "PM", "full"]),
   reason: z.string().min(1, "Reason is required"),
   remarks: z.string().min(1, "Reason is required"),
   file:
@@ -12,5 +16,5 @@ export const applicationSchema = z.object({
           .or(z.array(z.instanceof(File)).optional())
       : z.array(z.instanceof(File)).optional(),
 
-  date: z.array(z.date()).nonempty(),
+  date_type: z.array(dateSchema).nonempty(),
 });

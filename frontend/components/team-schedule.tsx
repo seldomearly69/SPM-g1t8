@@ -223,6 +223,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                       <DataTable
                         columns={availability_columns}
                         data={dialogData.length > 0 ? dialogData[0].availability.concat(dialogData[1].availability) : []}
+                        hasToolbar={true}
                       />
                       <ScrollBar orientation="horizontal" />
                     </ScrollArea>

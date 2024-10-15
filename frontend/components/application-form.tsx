@@ -13,20 +13,15 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import React, { useEffect, useState } from "react";
 import { Label } from "./ui/label";
-import {
-  DefaultMonthlyEventItem,
-  MonthlyBody,
-  MonthlyCalendar,
-  MonthlyDay,
-  MonthlyNav,
-} from "./monthly-calendar";
 import { createRequest } from "@/service/apply";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { applicationSchema } from "@/lib/validations/application";
-import { format, isSameDay } from "date-fns";
-import { cn, daysInWeek } from "@/lib/utils";
 import { z } from "zod";
+import { CustomMonthlyDay, DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "./monthly-calendar";
+import { cn } from "@/lib/utils";
+import { format, isSameDay } from "date-fns";
+import { EventType } from "@/types";
 
 type FormData = z.infer<typeof applicationSchema>;
 
@@ -41,35 +36,35 @@ export default function ApplicationForm({
 }: ApplicationFormProps) {
   const {
     register,
-    control,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(applicationSchema),
   });
-
-  const [date, setDate] = useState<Date[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [date, setDate] = useState<{date: Date, type: string}[]>([]);
   const [statusCode, setStatusCode] = useState();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
 
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
-    const formattedDates = data.date.map((d: string) => {
-      return new Date(d).toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+    const formattedDates = data.date_type.map((d: {date: Date, type: string}) => {
+      
+      return {date: format(d.date, "yyyy-MM-dd"), type: d.type}
     });
 
     // Convert FileList to array or handle it being empty
     const files = data.file ? Array.from(data.file) : [];
 
-    console.log("Form Data Submitted:", { ...data, date: formattedDates });
+    console.log(data);
+    
+    console.log("Form Data Submitted:", { ...data, date_type: formattedDates });
 
     try {
       const response = await createRequest(
         user.staffId,
-        data.type,
         formattedDates,
         data.reason,
         data.remarks, // Ensure remarks is being sent over
@@ -95,47 +90,19 @@ export default function ApplicationForm({
     console.log("Form submission errors:", errors); // Check what validation errors are thrown
   };
 
+
+
   useEffect(() => {
-    setValue("date", date);
+    setValue("date_type", date);
   }, [date]);
+
+  console.log(date);
+  
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <Label
-              htmlFor="type"
-              className="block mb-2 text-sm font-medium text-gray-700"
-            >
-              WFH Type
-            </Label>
-            <Controller
-              control={control}
-              name="type"
-              render={({ field }) => (
-                <Select
-                  required
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select WFH Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="AM">AM</SelectItem>
-                    <SelectItem value="PM">PM</SelectItem>
-                    <SelectItem value="full">Full Day</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -220,40 +187,32 @@ export default function ApplicationForm({
             currentMonth={selectedDate || new Date()}
             onCurrentMonthChange={setSelectedDate}
           >
-            <MonthlyNav />
-            <MonthlyBody events={[]} className="border-none">
-              <MonthlyDay
+          <MonthlyNav />
+            <MonthlyBody events={date || []} className="border-none">
+              <CustomMonthlyDay<EventType>
                 className={({ date: dayDate }) =>
-                  cn(
+                    cn(
                     "h-20 border-none m-0.5 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-400",
                     {
-                      "bg-blue-500": date.some((selectedDate) =>
-                        isSameDay(selectedDate, dayDate)
-                      ),
-                    }
-                  )
+                        "bg-blue-500": date?.some(d => isSameDay(d.date, dayDate))
+                    })}
+                onDateClick={setDate}
+                renderDay={data =>
+                    data.map((item, index) => (
+                        <DefaultMonthlyEventItem
+                            key={index}
+                            availability={item.availability || ""}
+                            date={item.date}
+                            type={item.type}
+                            isPending={item.is_pending || false}
+                        />
+                    ))
                 }
-                onDateClick={(day) => {
-                  console.log(day.toLocaleDateString());
-
-                  setDate((prev) =>
-                    prev.some((d) => isSameDay(d, day))
-                      ? prev.filter((d) => !isSameDay(d, day))
-                      : [...prev, day]
-                  );
-                }}
-                renderDay={(data) =>
-                  data.map((item, index) => (
-                    <DefaultMonthlyEventItem
-                      key={index}
-                      title={item.title}
-                      date={format(item.date, "k:mm")}
-                    />
-                  ))
-                }
-              />
-            </MonthlyBody>
-          </MonthlyCalendar>
+                />
+                
+                  
+              </MonthlyBody>
+            </MonthlyCalendar>
         </div>
       </div>
       {showSuccessPopup && (

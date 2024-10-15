@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-export async function getArrangements(staffId: number) {
+export async function getOwnRequest(staffId: number) {
   const gqlString = gql`
     query ownRequests($staffId: Int!) {
       ownRequests(staffId: $staffId) {
@@ -15,7 +15,7 @@ export async function getArrangements(staffId: number) {
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/get_requests", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -83,13 +83,13 @@ export async function getIndividualRequest(requestId: number) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/get_requests", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
+      query: gqlString,
       variables: { requestId: requestId },
     }),
   });
