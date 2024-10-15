@@ -54,8 +54,8 @@ export type OmittedDaysProps = {
 };
 
 export type MonthlyDayProps<DayData> = {
-  renderDay: (events: DayData[]) => ReactNode;
-  onDateClick: (date: Date) => void;
+  renderDay?: (events: DayData[]) => ReactNode;
+  onDateClick: (handler: (prev?: any[]) => any[]) => void;
   className?: ({date: Date}) => string;
 };
 
