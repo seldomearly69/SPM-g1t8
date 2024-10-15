@@ -13,7 +13,7 @@ with app.app_context():
         current = datetime.now()
         log_message(f"Starting job at {current.hour} hour.")
         
-        if current.hour == 15:
+        if current.hour == 6:
             time_type = "AM"
             current = (current + timedelta(days=1)).date().isoformat().split("-")
         elif current.hour == 23:
