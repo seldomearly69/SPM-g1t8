@@ -2,13 +2,14 @@ from collections import defaultdict
 from flask import Flask, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
-from sqlalchemy import or_ , func
+from sqlalchemy import or_
 import graphene, boto3
 from graphene_sqlalchemy import SQLAlchemyObjectType
 import os, json, ast, base64, datetime
 from flask_cors import CORS
 from graphene_file_upload.scalars import Upload
 from graphene_file_upload.flask import FileUploadGraphQLView
+
 
 
 days_in_month = {
@@ -48,51 +49,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-class Role(db.Model):
-    __tablename__ = 'roles'
-    role_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20), nullable=False)
-
-class User(db.Model):
-    __tablename__ = 'users'
-    staff_id = db.Column(db.Integer, primary_key=True)
-    staff_fname = db.Column(db.String(50), nullable=False)
-    staff_lname = db.Column(db.String(50), nullable=False)
-    dept = db.Column(db.String(50), nullable=False)
-    position = db.Column(db.String(50), nullable=False)
-    country = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(100), nullable=False, unique=True)
-    reporting_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
-    role = db.Column(db.Integer, db.ForeignKey('roles.role_id'))
-    password = db.Column(db.String(255), nullable=False)
-
-class RequestModel(db.Model):
-    __tablename__ = 'requests'
-    request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    requesting_staff = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
-    year = db.Column(db.Integer, nullable=False)
-    month = db.Column(db.Integer, nullable=False)
-    day = db.Column(db.Integer, nullable=False)
-    type = db.Column(db.String(4), nullable=False)
-    status = db.Column(db.String(8), nullable=False, default='pending')
-    approving_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
-    created_at = db.Column(db.Date, nullable = False, default=func.current_date())
-    reason = db.Column(db.String(300),nullable=True)
-    remarks = db.Column(db.String(300),nullable=True)
-
-    def __repr__(self):
-        return f"<RequestModel(request_id={self.request_id}, requesting_staff={self.requesting_staff}, year={self.year}, month={self.month}, day={self.day}, type='{self.type}', status='{self.status}', approving_manager={self.approving_manager}, remarks='{self.remarks}')>"
-
-class File(db.Model):
-    __tablename__ = 'files'
-    file_key = db.Column(db.String(100), primary_key = True)
-    file_name = db.Column(db.String(100),nullable=False)
-
-class FileRequestAssoc(db.Model):
-    __tablename__ = 'file_request_assoc'
-    file_key = db.Column(db.String(100), db.ForeignKey('files.file_key'), primary_key=True)
-    request_id = db.Column(db.Integer, db.ForeignKey('requests.request_id'), primary_key=True)
-
+from models import *
 # Custom Scalar for JSON
 class JSON(graphene.Scalar):
     """
@@ -222,6 +179,10 @@ class OwnRequests(graphene.ObjectType):
     approving_manager = graphene.String()
     requests = graphene.List(Request)
 
+class DateTypeInput(graphene.InputObjectType):
+    date = graphene.String(required=True)
+    type = graphene.String(required=True)
+
 class Query2(graphene.ObjectType):
     own_requests = graphene.Field(
         OwnRequests,
@@ -252,21 +213,14 @@ class CreateRequest(graphene.Mutation):
         staff_id = graphene.Int(required=True)
         reason = graphene.String(required=False)
         remarks = graphene.String(required=False)
-        type = graphene.String(required=True)
-        date = graphene.List(graphene.String, required=True)
+        date_type = graphene.List(DateTypeInput, required=True)
         files = graphene.List(Upload, required=False)
 
     success = graphene.Boolean()
     message = graphene.String()
 
-    def mutate(self, info, staff_id, type, date,files = None, reason=None, remarks=None):
-        # try:
-        # Log the incoming request files
-        # print("Request Files: ", request.files)
-        
-        # Log the form data
-        # print("Form Data: ", request.form)
-        print(staff_id)
+    def mutate(self, info, staff_id, date_type ,files = None, reason=None, remarks=None):
+
         manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
         f_keys = []
         if files:
@@ -288,16 +242,15 @@ class CreateRequest(graphene.Mutation):
                 f_keys.append(file.file_key)
             print(f_keys)
 
-        for d in date:    
-            d = d.split("T")[0]  # This removes the time part and keeps only the date
-            d = d.split("-")
+        for dt in date_type:    
+            d = dt["date"].split("-")
             
             r = RequestModel(
                 requesting_staff=staff_id,
                 year=d[0],
                 month=d[1],
                 day=d[2],
-                type=type,
+                type=dt["type"],
                 status="pending",
                 approving_manager=manager,
                 reason=reason,
