@@ -515,7 +515,7 @@ def resolve_own_requests(staff_id):
     requests = RequestModel.query.filter(RequestModel.requesting_staff == staff_id).all()
     manager = User.query.filter(User.staff_id == User.query.filter(User.staff_id == staff_id).first().reporting_manager).first()
     manager = manager.staff_fname + " " + manager.staff_lname
-
+    ret = []
     for r in requests:
         files = FileRequestAssoc.query.filter(FileRequestAssoc.request_id == r.request_id).all()
         files = [s3_client.generate_presigned_url(
@@ -524,7 +524,7 @@ def resolve_own_requests(staff_id):
                     ExpiresIn=3600
                 ) for f in files]
         u = User.query.filter(User.staff_id == r.requesting_staff).first()
-        ret = [{
+        ret.append({
             "request_id": r.request_id,
             "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
             "requesting_staff_name": u.staff_fname + " " + u.staff_lname,
@@ -535,7 +535,7 @@ def resolve_own_requests(staff_id):
             "remarks": r.remarks,
             "files" : files,
             "created_at": r.created_at
-        }]
+        })
 
     return {
         "approving_manager": manager,
