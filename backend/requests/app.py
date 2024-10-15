@@ -321,8 +321,33 @@ class CreateRequest(graphene.Mutation):
 
         return CreateRequest(success=True, message="Request created successfully")
 
+class AcceptRejectRequest(graphene.Mutation):
+    class Arguments:
+        request_id = graphene.Int(required=True)
+        new_status = graphene.String(required=True)
+        remarks = graphene.String(required = False)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, request_id, new_status, remarks = None):
+        r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
+        if not r:
+            return AcceptRejectRequest(success = False, message="Request not found")
+        
+        r.status = new_status
+        if remarks:
+            r.remarks = remarks
+        try:
+            db.session.commit()
+            return AcceptRejectRequest(success = True, message="Request updated successfully")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return AcceptRejectRequest(success = False, message=e)
+
 class Mutation1(graphene.ObjectType):
     create_request = CreateRequest.Field()
+    accept_reject_request = AcceptRejectRequest.Field()
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
@@ -540,7 +565,11 @@ def resolve_own_requests(staff_id):
 
     for r in requests:
         files = FileRequestAssoc.query.filter(FileRequestAssoc.request_id == r.request_id).all()
-        files = [f.file_key for f in files]
+        files = [s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': BUCKET_NAME, 'Key': f.file_key},
+                    ExpiresIn=3600
+                ) for f in files]
         u = User.query.filter(User.staff_id == r.requesting_staff).first()
         ret = [{
             "request_id": r.request_id,
