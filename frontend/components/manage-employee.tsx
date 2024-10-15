@@ -28,7 +28,7 @@ export default function ManageEmployeeArrangements({
       try {
         const data = await getSubordinatesRequest(user.staffId);
         if (data && data.subordinatesRequest) {
-          // Set all employee requests from the backend data
+          console.log(data);
           setEmployeeRequests(data.subordinatesRequest);
         } else {
           setEmployeeRequests([]);
@@ -46,7 +46,7 @@ export default function ManageEmployeeArrangements({
     department: string;
     date: string;
     type: string;
-    requestDate: string;
+    createdAt: string;
     remarks: string;
   }) => {
     const queryParams = new URLSearchParams({
@@ -54,7 +54,7 @@ export default function ManageEmployeeArrangements({
       department: row.department,
       date: row.date,
       type: row.type,
-      requestedOn: row.requestDate,
+      createdAt: row.createdAt,
       remarks: row.remarks,
     }).toString();
 

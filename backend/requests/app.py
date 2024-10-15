@@ -584,7 +584,7 @@ def resolve_subordinates_request(staff_id):
         "requesting_staff_name": requesting_staff.staff_fname + " " + requesting_staff.staff_lname,
         "department": requesting_staff.dept,
         "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
-        "request_date" : r.created_at,
+        "created_at" : r.created_at,
         "type": r.type,
         "status": r.status,
         "reason": r.reason,
