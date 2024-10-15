@@ -32,7 +32,7 @@ export const request_columns: ColumnDef<Request>[] = [
     header: "Type",
   },
   {
-    accessorKey: "requestDate",
+    accessorKey: "createdAt",
     header: "Requested On",
   },
   {

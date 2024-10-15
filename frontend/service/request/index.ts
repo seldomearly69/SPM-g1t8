@@ -39,11 +39,11 @@ export async function getSubordinatesRequest(managerId: number) {
         requestingStaffName
         department
         date
-        requestDate
         type
         status
         reason
         remarks
+        createdAt
       }
     }
   `;
