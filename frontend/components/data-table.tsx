@@ -25,9 +25,11 @@ import {
 import { DataTableToolbar } from "./data-table-toolbar";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  onRowClick?: (row: TData) => void;
+    columns: ColumnDef<TData, TValue>[]
+    data: TData[]
+    onRowClick?: (row: TData) => void
+    hasToolbar?: boolean
+    sort?: string
 }
 
 export function DataTable<TData, TValue>({
