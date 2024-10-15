@@ -575,6 +575,10 @@ def resolve_subordinates_request(staff_id):
 
     return ret
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()  # This removes the session, releasing the connection
+
 if __name__ == '__main__':
 
     app.run(host='0.0.0.0', port=5002, debug=True)

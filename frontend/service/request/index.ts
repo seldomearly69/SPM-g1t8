@@ -70,6 +70,39 @@ export async function getSubordinatesRequest(managerId: number) {
   return data.data;
 }
 
+export async function approveRequest(
+  requestId: number,
+  newStatus: string,
+  remarks: string
+) {
+  const gqlString = `
+  mutation acceptRejectRequest($requestId: Int!, $newStatus: String!, $remarks: String) {
+    acceptRejectRequest(requestId: $requestId, newStatus: $newStatus, remarks: $remarks) {
+      success
+      message
+    }
+  }
+`;
+
+  const res = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString,
+      variables: {
+        requestId: requestId, // Replace with actual request ID
+        newStatus: newStatus, // Replace with new status like 'approved' or 'rejected'
+        remarks: remarks, // Optional, can be null or a string
+      },
+    }),
+  });
+  const data = await res.json();
+
+  return data;
+}
+
 export async function getIndividualRequest(requestId: number) {
   const gqlString = `
     query request($requestId: Int!) {

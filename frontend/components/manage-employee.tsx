@@ -27,8 +27,8 @@ export default function ManageEmployeeArrangements({
     const fetchPendingRequests = async () => {
       try {
         const data = await getSubordinatesRequest(user.staffId);
+        console.log(data);
         if (data && data.subordinatesRequest) {
-          console.log(data);
           setEmployeeRequests(data.subordinatesRequest);
         } else {
           setEmployeeRequests([]);
@@ -47,14 +47,17 @@ export default function ManageEmployeeArrangements({
     date: string;
     type: string;
     createdAt: string;
+    reason: string;
     remarks: string;
   }) => {
     const queryParams = new URLSearchParams({
+      requestId: row.requestId.toString(),
       employeeName: row.requestingStaffName,
       department: row.department,
       date: row.date,
       type: row.type,
       createdAt: row.createdAt,
+      reason: row.reason,
       remarks: row.remarks,
     }).toString();
 
