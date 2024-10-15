@@ -16,7 +16,7 @@ export default function ManageEmployeeArrangementsItem() {
   const department = searchParams.get("department");
   const date = searchParams.get("date");
   const type = searchParams.get("type");
-  const requestedOn = searchParams.get("requestedOn");
+  const createdAt = searchParams.get("createdAt");
   const remarks = searchParams.get("remarks");
 
   const [isMounted, setIsMounted] = useState(false);
@@ -35,7 +35,7 @@ export default function ManageEmployeeArrangementsItem() {
     !department ||
     !date ||
     !type ||
-    !requestedOn ||
+    !createdAt ||
     !remarks
   ) {
     return <div>Missing required query parameters...</div>;
@@ -60,7 +60,7 @@ export default function ManageEmployeeArrangementsItem() {
         </div>
         <div>
           <Label htmlFor="requested-on">Requested On</Label>
-          <Input id="requested-on" value={requestedOn} readOnly />
+          <Input id="requested-on" value={createdAt} readOnly />
         </div>
         <div className="col-span-2">
           <Label className="block mb-2">WFH Date</Label>
