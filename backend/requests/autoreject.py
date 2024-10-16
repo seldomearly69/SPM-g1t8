@@ -42,6 +42,7 @@ with app.app_context():
         
         db.session.commit()
         log_message("Successfully updated all pending requests.")
+        db.session.remove()
         
     except Exception as e:
         log_message(f"Error: {str(e)}")
