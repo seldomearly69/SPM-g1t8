@@ -239,8 +239,9 @@ class CreateRequest(graphene.Mutation):
         if files:
             
             for f in files:
-                filekey = f.filename + str(datetime.datetime.now())
-
+                filekey = f.filename.split(".")
+                filekey.insert(1, str(datetime.datetime.now()))
+                filekey = filekey[0] + filekey[1] + "." + filekey[2]
                 # Upload the file to S3
                 s3_client.upload_fileobj(
                     f,
