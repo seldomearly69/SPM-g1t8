@@ -75,8 +75,8 @@ export async function getFileLink(fileKey: string) {
   const gqlString = `
     query getFileLink($fileKey: String!) {
       fileLink(fileKey: $fileKey) {
-        file_key
-        file_link
+        fileKey
+        fileLink
       }
     }
   `;
@@ -101,7 +101,12 @@ export async function getFileLink(fileKey: string) {
     throw new Error(`GraphQL error: ${data.errors[0].message}`);
   }
 
-  return data.data.fileLink; // Return the file link object
+  // Ensure that the expected keys are in the response
+  if (data.data && data.data.fileLink && data.data.fileLink.fileLink) {
+    return data.data.fileLink; // Return the file link object
+  } else {
+    throw new Error("Invalid response format");
+  }
 }
 
 export async function approveRequest(

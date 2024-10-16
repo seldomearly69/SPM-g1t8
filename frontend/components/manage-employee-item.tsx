@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSearchParams } from "next/navigation"; // Use this to get query params
 import { useEffect, useState } from "react";
 import { approveRequest } from "@/service/request";
+import { getFileLink } from "@/service/request";
 import {
   Dialog,
   DialogContent,
@@ -90,6 +91,7 @@ export default function ManageEmployeeArrangementsItem() {
       const fileUrls = files.split(","); // Split the string into an array of URLs
 
       fileUrls.forEach(async (fileUrl) => {
+        console.log(fileUrl);
         try {
           await downloadFile(fileUrl.trim()); // Download the file directly
         } catch (error) {
@@ -99,32 +101,23 @@ export default function ManageEmployeeArrangementsItem() {
     }
   };
 
-  // Function to download the file
   const downloadFile = async (fileLink: string) => {
     try {
-      const response = await fetch(fileLink);
-      if (!response.ok) {
-        throw new Error(`Failed to download file: ${response.statusText}`);
+      const response = await getFileLink(fileLink);
+
+      console.log(response);
+      const downloadUrl = response.fileLink;
+      if (downloadUrl) {
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileLink.split("/").pop(); // Extract the file name from the URL
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        console.error("Download URL not found for file:", fileLink);
       }
-
-      const blob = await response.blob(); // Get the file data as a blob
-      const url = window.URL.createObjectURL(blob); // Create a temporary URL for the file
-      const a = document.createElement("a"); // Create a download link
-      a.href = url;
-      a.download = getFileNameFromUrl(fileLink);
-      document.body.appendChild(a);
-      a.click(); // Trigger the download
-      a.remove(); // Clean up the link
-
-      window.URL.revokeObjectURL(url); // Release the object URL
-    } catch (error) {
-      console.error("Download failed:", error);
-    }
-  };
-
-  // Helper function to extract the file name from the URL
-  const getFileNameFromUrl = (fileUrl: string) => {
-    return fileUrl.split("/").pop(); // Extract the file name from the URL
+    } catch (e) {}
   };
 
   // Example usage:
