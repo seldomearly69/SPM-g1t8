@@ -35,6 +35,7 @@ export default function ManageEmployeeArrangementsItem() {
   const reason = searchParams?.get("reason") ?? "";
   const remarks = searchParams?.get("remarks") ?? "";
   const status = searchParams?.get("status") ?? "";
+  const files = searchParams?.get("files") ?? ""; // This is the comma-separated string of file URLs
 
   // Ensure the component is mounted
   useEffect(() => {
@@ -83,6 +84,51 @@ export default function ManageEmployeeArrangementsItem() {
     window.history.back();
   };
 
+  // Retrieve file URLs from the comma-separated string
+  const retrieveFileUrls = () => {
+    if (files) {
+      const fileUrls = files.split(","); // Split the string into an array of URLs
+
+      fileUrls.forEach(async (fileUrl) => {
+        try {
+          await downloadFile(fileUrl.trim()); // Download the file directly
+        } catch (error) {
+          console.error("Error fetching file link:", error);
+        }
+      });
+    }
+  };
+
+  // Function to download the file
+  const downloadFile = async (fileLink: string) => {
+    try {
+      const response = await fetch(fileLink);
+      if (!response.ok) {
+        throw new Error(`Failed to download file: ${response.statusText}`);
+      }
+
+      const blob = await response.blob(); // Get the file data as a blob
+      const url = window.URL.createObjectURL(blob); // Create a temporary URL for the file
+      const a = document.createElement("a"); // Create a download link
+      a.href = url;
+      a.download = getFileNameFromUrl(fileLink);
+      document.body.appendChild(a);
+      a.click(); // Trigger the download
+      a.remove(); // Clean up the link
+
+      window.URL.revokeObjectURL(url); // Release the object URL
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
+  // Helper function to extract the file name from the URL
+  const getFileNameFromUrl = (fileUrl: string) => {
+    return fileUrl.split("/").pop(); // Extract the file name from the URL
+  };
+
+  // Example usage:
+  // retrieveFileUrls(); // This line was causing the downloadFile to run on load. It's now commented out to prevent this.
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">WFH Request Details</h1>
@@ -121,8 +167,14 @@ export default function ManageEmployeeArrangementsItem() {
         )}
       </div>
 
+      {files && (
+        <div className="mt-6 flex justify-start space-x-4">
+          <Button onClick={retrieveFileUrls}>Download File</Button>
+        </div>
+      )}
+
       {/* Action buttons */}
-      <div className="mt-6 flex justify-end space-x-4">
+      <div className="mt-4 flex justify-end space-x-4">
         {status === "pending" && (
           <>
             <Button onClick={handleApprove}>Approve</Button>

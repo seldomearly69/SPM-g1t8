@@ -50,8 +50,9 @@ export default function ManageEmployeeArrangements({
     reason: string;
     remarks: string;
     status: string;
+    files: string[];
   }) => {
-    const queryParams = new URLSearchParams({
+    let queryParams = new URLSearchParams({
       requestId: row.requestId.toString(),
       employeeName: row.requestingStaffName,
       department: row.department,
@@ -62,6 +63,10 @@ export default function ManageEmployeeArrangements({
       remarks: row.remarks,
       status: row.status,
     }).toString();
+
+    if (row.files.length > 0) {
+      queryParams = queryParams + `&files=${row.files.join(",")}`; // Convert array of file addresses to a comma-separated string
+    }
 
     // Append query parameters to the pathname
     router.push(`/dashboard/manage-employees/${row.requestId}?${queryParams}`);
