@@ -44,6 +44,7 @@ export async function getSubordinatesRequest(managerId: number) {
         reason
         remarks
         createdAt
+        files
       }
     }
   `;
@@ -68,6 +69,39 @@ export async function getSubordinatesRequest(managerId: number) {
   }
 
   return data.data;
+}
+
+export async function getFileLink(fileKey: string) {
+  const gqlString = `
+    query getFileLink($fileKey: String!) {
+      fileLink(fileKey: $fileKey) {
+        file_key
+        file_link
+      }
+    }
+  `;
+
+  const res = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString,
+      variables: {
+        fileKey: fileKey, // The file key to retrieve the link for
+      },
+    }),
+  });
+
+  const data = await res.json();
+
+  // Check for errors
+  if (data.errors) {
+    throw new Error(`GraphQL error: ${data.errors[0].message}`);
+  }
+
+  return data.data.fileLink; // Return the file link object
 }
 
 export async function approveRequest(

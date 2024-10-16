@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export async function createRequest(
   staffId: number,
-  date_type: Array<{date: string, type: string}>,
+  date_type: Array<{ date: string; type: string }>,
   reason?: string,
   remarks?: string,
   files?: Array<File>
@@ -29,11 +29,9 @@ export async function createRequest(
     }
   `;
 
-
   // Create a FormData object to handle the multipart request
   const formData = new FormData();
 
-  
   // Add the query and variables as part of the form data
   formData.append(
     "operations",
@@ -42,13 +40,12 @@ export async function createRequest(
       variables: {
         staffId: staffId,
         reason: reason || null,
-        remarks: remarks || null,
+        remarks: remarks || "",
         dateType: date_type,
         files: files.length > 0 ? files.map((file) => null) : null,
       },
     })
   );
-
 
   // Assuming `files` is an array of File objects.
   if (files && files.length > 0) {

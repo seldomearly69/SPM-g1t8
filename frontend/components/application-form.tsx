@@ -18,7 +18,22 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { applicationSchema } from "@/lib/validations/application";
 import { z } from "zod";
-import { CustomMonthlyDay, DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, MonthlyNav } from "./monthly-calendar";
+import {
+  CustomMonthlyDay,
+  DefaultMonthlyEventItem,
+  MonthlyBody,
+  MonthlyCalendar,
+  MonthlyDay,
+  MonthlyNav,
+} from "./monthly-calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { EventType } from "@/types";
@@ -41,25 +56,29 @@ export default function ApplicationForm({
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(applicationSchema),
+    defaultValues: {
+      remarks: "", // Ensure remarks is initialized with an empty string
+    },
   });
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [date, setDate] = useState<{date: Date, type: string}[]>([]);
+  const [date, setDate] = useState<{ date: Date; type: string }[]>([]);
   const [statusCode, setStatusCode] = useState();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
 
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
-    const formattedDates = data.date_type.map((d: {date: Date, type: string}) => {
-      
-      return {date: format(d.date, "yyyy-MM-dd"), type: d.type}
-    });
+    const formattedDates = data.date_type.map(
+      (d: { date: Date; type: string }) => {
+        return { date: format(d.date, "yyyy-MM-dd"), type: d.type };
+      }
+    );
 
     // Convert FileList to array or handle it being empty
     const files = data.file ? Array.from(data.file) : [];
 
     console.log(data);
-    
+
     console.log("Form Data Submitted:", { ...data, date_type: formattedDates });
 
     try {
@@ -90,14 +109,11 @@ export default function ApplicationForm({
     console.log("Form submission errors:", errors); // Check what validation errors are thrown
   };
 
-
-
   useEffect(() => {
     setValue("date_type", date);
   }, [date]);
 
   console.log(date);
-  
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -112,34 +128,13 @@ export default function ApplicationForm({
               htmlFor="reason"
               className="block mb-2 text-sm font-medium text-gray-700"
             >
-              Reason Title
-            </Label>
-            <Input
-              id="reason"
-              type="text"
-              required
-              {...register("reason")}
-              placeholder="Short title for your reason (max 50 words)"
-              maxLength={50}
-              style={{ width: "100%" }}
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            <Label
-              htmlFor="remarks"
-              className="block mb-2 text-sm font-medium text-gray-700"
-            >
-              Remarks
+              Reason
             </Label>
             <Textarea
-              id="remarks"
+              id="reason"
               rows={4}
-              {...register("remarks", { required: true })}
-              placeholder="Please enter your remarks for the WFH request (max 300 words)"
+              {...register("reason", { required: true })}
+              placeholder="Please enter your reasons for the WFH request (max 300 words)"
               maxLength={300}
             />
           </motion.div>
@@ -187,48 +182,61 @@ export default function ApplicationForm({
             currentMonth={selectedDate || new Date()}
             onCurrentMonthChange={setSelectedDate}
           >
-          <MonthlyNav />
+            <MonthlyNav />
             <MonthlyBody events={date || []} className="border-none">
               <CustomMonthlyDay<EventType>
                 className={({ date: dayDate }) =>
-                    cn(
+                  cn(
                     "h-20 border-none m-0.5 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-400",
                     {
-                        "bg-blue-500": date?.some(d => isSameDay(d.date, dayDate))
-                    })}
-                onDateClick={setDate}
-                renderDay={data =>
-                    data.map((item, index) => (
-                        <DefaultMonthlyEventItem
-                            key={index}
-                            availability={item.availability || ""}
-                            date={item.date}
-                            type={item.type}
-                            isPending={item.is_pending || false}
-                        />
-                    ))
+                      "bg-blue-500": date?.some((d) =>
+                        isSameDay(d.date, dayDate)
+                      ),
+                    }
+                  )
                 }
-                />
-                
-                  
-              </MonthlyBody>
-            </MonthlyCalendar>
+                onDateClick={setDate}
+                renderDay={(data) =>
+                  data.map((item, index) => (
+                    <DefaultMonthlyEventItem
+                      key={index}
+                      availability={item.availability || ""}
+                      date={item.date}
+                      type={item.type}
+                      isPending={item.is_pending || false}
+                    />
+                  ))
+                }
+              />
+            </MonthlyBody>
+          </MonthlyCalendar>
         </div>
       </div>
       {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg shadow-lg">
-            <p className="text-xl font-semibold text-green-600">
-              Your application has been submitted successfully!
-            </p>
-            <button
-              onClick={() => setShowSuccessPopup(false)}
-              className="mt-4 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors duration-300"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <Dialog
+          open={showSuccessPopup}
+          onOpenChange={() => setShowSuccessPopup(false)}
+        >
+          <DialogContent className="md:max-w-[425px] text-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg">
+                Application Submitted!
+              </DialogTitle>
+              <DialogDescription className="text-md">
+                Your Application has been submitted and will be reviewed by your
+                immediate superior
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                onClick={() => setShowSuccessPopup(false)}
+                className="text-md"
+              >
+                Ok
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </form>
   );
