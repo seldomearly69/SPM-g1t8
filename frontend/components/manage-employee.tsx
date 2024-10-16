@@ -49,6 +49,7 @@ export default function ManageEmployeeArrangements({
     createdAt: string;
     reason: string;
     remarks: string;
+    status: string;
   }) => {
     const queryParams = new URLSearchParams({
       requestId: row.requestId.toString(),
@@ -59,6 +60,7 @@ export default function ManageEmployeeArrangements({
       createdAt: row.createdAt,
       reason: row.reason,
       remarks: row.remarks,
+      status: row.status,
     }).toString();
 
     // Append query parameters to the pathname

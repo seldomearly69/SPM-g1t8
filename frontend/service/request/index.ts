@@ -44,6 +44,7 @@ export async function getSubordinatesRequest(managerId: number) {
         reason
         remarks
         createdAt
+        files
       }
     }
   `;

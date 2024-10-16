@@ -34,6 +34,7 @@ export default function ManageEmployeeArrangementsItem() {
   const createdAt = searchParams?.get("createdAt") ?? "";
   const reason = searchParams?.get("reason") ?? "";
   const remarks = searchParams?.get("remarks") ?? "";
+  const status = searchParams?.get("status") ?? "";
 
   // Ensure the component is mounted
   useEffect(() => {
@@ -122,10 +123,19 @@ export default function ManageEmployeeArrangementsItem() {
 
       {/* Action buttons */}
       <div className="mt-6 flex justify-end space-x-4">
-        <Button onClick={handleApprove}>Approve</Button>
-        <Button onClick={handleReject} variant="outline">
-          Reject
-        </Button>
+        {status === "pending" && (
+          <>
+            <Button onClick={handleApprove}>Approve</Button>
+            <Button onClick={handleReject} variant="outline">
+              Reject
+            </Button>
+          </>
+        )}
+        {status === "approved" && (
+          <Button onClick={handleReject} variant="outline">
+            Reject
+          </Button>
+        )}
       </div>
 
       {/* Dialogs */}
