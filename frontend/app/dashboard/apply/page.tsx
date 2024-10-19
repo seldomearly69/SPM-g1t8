@@ -1,6 +1,7 @@
 import * as motion from "framer-motion/client";
 import ApplicationForm from "@/components/application-form";
 import { getCurrentUser } from "@/lib/session";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default async function ApplyWFHPage() {
   const user = await getCurrentUser();
@@ -19,7 +20,12 @@ export default async function ApplyWFHPage() {
       >
         Apply for Work From Home
       </motion.h2>
-      <ApplicationForm user={user} />
+      <Card>
+          <CardHeader></CardHeader>
+          <CardContent>
+            <ApplicationForm user={user} />
+          </CardContent>
+        </Card>
     </motion.div>
   );
 }

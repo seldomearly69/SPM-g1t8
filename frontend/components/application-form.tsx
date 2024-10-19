@@ -2,19 +2,11 @@
 
 import { motion } from "framer-motion";
 import { Input } from "./ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import React, { useEffect, useState } from "react";
 import { Label } from "./ui/label";
 import { createRequest } from "@/service/apply";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { applicationSchema } from "@/lib/validations/application";
 import { z } from "zod";
@@ -23,7 +15,6 @@ import {
   DefaultMonthlyEventItem,
   MonthlyBody,
   MonthlyCalendar,
-  MonthlyDay,
   MonthlyNav,
 } from "./monthly-calendar";
 import {
@@ -37,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { EventType } from "@/types";
+import { Textarea } from "./ui/textarea";
 
 type FormData = z.infer<typeof applicationSchema>;
 
@@ -75,7 +67,7 @@ export default function ApplicationForm({
     );
 
     // Convert FileList to array or handle it being empty
-    const files = data.file ? Array.from(data.file) : [];
+    const files: File[] = data.file ? Array.from(data.file) : [];
 
     console.log(data);
 
@@ -117,7 +109,7 @@ export default function ApplicationForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="space-y-6">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
