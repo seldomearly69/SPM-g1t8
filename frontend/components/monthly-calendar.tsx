@@ -240,7 +240,7 @@ export function CustomMonthlyDay<DayData>({ renderDay, onDateClick, className}: 
         <PopoverTrigger>
           <div
             title={`Events for day ${dayNumber}`}
-            className={cn("h-48 p-2 border-b-2 border-r-2", className?.({date: day}))}
+            className={cn("h-48 flex flex-col p-1 border-b-2 border-r-2", className?.({date: day}))}
           >
             <div className="flex justify-between">
               <div className="font-bold">{dayNumber}</div>
@@ -248,7 +248,7 @@ export function CustomMonthlyDay<DayData>({ renderDay, onDateClick, className}: 
                 {format(day, 'EEEE', { locale })}
               </div>
             </div>
-            <ul className="divide-gray-200 divide-y overflow-hidden max-h-36 overflow-y-auto">
+            <ul className="flex gap-1 justify-evenly w-full overflow-hidden max-h-36 overflow-y-auto">
               {renderDay && renderDay(events)}
             </ul>
           </div>
@@ -307,12 +307,26 @@ export const DefaultMonthlyEventItem = ({
         <Badge variant={isPending ? "warning" : "success"} className="w-full">
           <div className="flex text-sm flex-1 justify-between">
             <h3 className="font-medium">{availability}</h3>
-            <p className="text-gray-500">{type}</p>
+            <p className="text-gray-500 text-xs">{type}</p>
           </div>
         </Badge>
       </li>
     );
   };
+
+export const ApplyMonthlyEventItem = ({
+    availability,
+    type,
+
+  }: DefaultEventItemProps) => {
+    return (
+      <li>
+        <Badge variant="secondary" className="w-full p-1">
+            <p className="text-gray-700 text-[10px]">{type}</p>
+        </Badge>
+      </li>
+    );
+  }
 
   
 export const TeamMonthlyEventItem = ({
