@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { applicationSchema } from "@/lib/validations/application";
 import { z } from "zod";
 import {
+  ApplyMonthlyEventItem,
   CustomMonthlyDay,
   DefaultMonthlyEventItem,
   MonthlyBody,
@@ -25,10 +26,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn, hasMoreThanTwoDays } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { EventType } from "@/types";
 import { Textarea } from "./ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 type FormData = z.infer<typeof applicationSchema>;
 
@@ -45,6 +47,7 @@ export default function ApplicationForm({
     register,
     handleSubmit,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(applicationSchema),
@@ -56,7 +59,7 @@ export default function ApplicationForm({
   const [date, setDate] = useState<{ date: Date; type: string }[]>([]);
   const [statusCode, setStatusCode] = useState();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
-
+  const { toast } = useToast()
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
@@ -103,72 +106,81 @@ export default function ApplicationForm({
 
   useEffect(() => {
     setValue("date_type", date);
+    if (hasMoreThanTwoDays(date)) {
+        toast({
+            title: "Error",
+            description: "You cannot select more than 2 days in a week",
+            variant: "destructive",
+        })
+    }
   }, [date]);
 
-  console.log(date);
+  console.log(errors);
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            <Label
-              htmlFor="reason"
-              className="block mb-2 text-sm font-medium text-gray-700"
+        <div className="flex flex-col justify-between">
+          <div className="space-y-6 pt-10">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
             >
-              Reason
-            </Label>
-            <Textarea
-              id="reason"
-              rows={4}
-              {...register("reason", { required: true })}
-              placeholder="Please enter your reasons for the WFH request (max 300 words)"
-              maxLength={300}
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            <Input
-              type="file"
-              accept="*"
-              {...register("file", { required: false })}
-              multiple
-            />
-          </motion.div>
-          {statusCode !== 200 && (
+              <Label
+                htmlFor="reason"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
+                Reason
+              </Label>
+              <Textarea
+                id="reason"
+                rows={4}
+                {...register("reason", { required: true })}
+                placeholder="Please enter your reasons for the WFH request (max 300 words)"
+                maxLength={300}
+              />
+            </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.5 }}
             >
-              <Label
-                htmlFor="error"
-                className="block mb-2 text-sm font-medium text-red-700"
-              >
-                {statusCode}
-              </Label>
+              <Input
+                type="file"
+                accept="*"
+                {...register("file", { required: false })}
+                multiple
+              />
             </motion.div>
-          )}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300"
+            {statusCode !== 200 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
+                <Label
+                  htmlFor="error"
+                  className="block mb-2 text-sm font-medium text-red-700"
+                >
+                  {statusCode}
+                </Label>
+              </motion.div>
+            )}
+            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
             >
-              Submit Application
-            </Button>
-          </motion.div>
-        </div>
+              <Button
+                type="submit"
+                className="w-full"
+              >
+                Submit Application
+              </Button>
+            </motion.div>
+          </div>
         <div>
           <MonthlyCalendar
             currentMonth={selectedDate || new Date()}
@@ -179,9 +191,9 @@ export default function ApplicationForm({
               <CustomMonthlyDay<EventType>
                 className={({ date: dayDate }) =>
                   cn(
-                    "h-20 border-none m-0.5 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-400",
+                    "h-20 border-none m-0.5 rounded-md flex items-center justify-evenly cursor-pointer hover:bg-secondary hover:text-secondary-foreground",
                     {
-                      "bg-blue-500": date?.some((d) =>
+                      "bg-primary text-primary-foreground": date?.some((d) =>
                         isSameDay(d.date, dayDate)
                       ),
                     }
@@ -190,7 +202,7 @@ export default function ApplicationForm({
                 onDateClick={setDate}
                 renderDay={(data) =>
                   data.map((item, index) => (
-                    <DefaultMonthlyEventItem
+                    <ApplyMonthlyEventItem
                       key={index}
                       availability={item.availability || ""}
                       date={item.date}
