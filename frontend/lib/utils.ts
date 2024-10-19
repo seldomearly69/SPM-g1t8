@@ -20,8 +20,13 @@ export const daysInWeek = ({ locale = enUS }: DaysInWeekProps) => [
 
 export const hasMoreThanTwoDays = (dates: {date: Date, type: string}[]) => {
   const weekMap = new Map<string, number>()
+  const uniqueDates = new Set<string>()
 
   dates.forEach(({date}) => {
+    uniqueDates.add(date.toISOString())
+  })
+  
+  uniqueDates.forEach((date) => {
     const weekKey = `${getYear(date)}-${getWeek(date)}`
     weekMap.set(weekKey, (weekMap.get(weekKey) || 0) + 1)
   })

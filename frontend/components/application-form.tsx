@@ -109,8 +109,8 @@ export default function ApplicationForm({
     if (hasMoreThanTwoDays(date)) {
         toast({
             title: "Error",
-            description: "You cannot select more than 2 days in a week",
-            variant: "destructive",
+            description: "You exceeded the maximum number of days allowed for a week",
+            variant: "warning",
         })
     }
   }, [date]);
