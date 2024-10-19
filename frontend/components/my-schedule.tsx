@@ -22,7 +22,7 @@ const mockSchedule = [
   ]
 
 interface MyScheduleProps {
-user: User;
+    user: User;
 }
   
 

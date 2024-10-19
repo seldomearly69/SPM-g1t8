@@ -15,6 +15,8 @@ import React, { ReactNode, useContext } from 'react';
 import { cn, daysInWeek } from '@/lib/utils';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
 type CalendarState = {
   days: Date[];
@@ -62,6 +64,7 @@ export const MonthlyCalendar = ({
   );
 };
 
+
 export const MonthlyNav = () => {
   const { locale, currentMonth, onCurrentMonthChange } = useMonthlyCalendar();
 
@@ -103,6 +106,7 @@ export const MonthlyNav = () => {
   );
 };
 
+
 export const handleOmittedDays = ({
   days,
   omitDays,
@@ -129,6 +133,7 @@ export const handleOmittedDays = ({
 
   return { headings, daysToRender, padding };
 };
+
 
 const MonthlyBodyContext = React.createContext({} as any);
 
@@ -174,7 +179,7 @@ export function MonthlyBody<DayData>({
               className={cn(headingClassName, className, "text-sm font-bold")}
               title="Day of Week"
             >
-              {day.label}
+              {day.label.slice(0, 3)}
             </div>
           ))}
           {padding.map((_, index) => (
@@ -201,7 +206,7 @@ export function MonthlyBody<DayData>({
   }
 
 
-export function MonthlyDay<DayData>({ renderDay, onDateClick, className}: MonthlyDayProps<DayData>) {
+  export function MonthlyDay<DayData>({ renderDay, onDateClick, className}: MonthlyDayProps<DayData>) {
     const { locale } = useMonthlyCalendar();
     const { day, events } = useMonthlyBody<DayData>()
     const dayNumber = format(day, 'd', { locale });
@@ -218,9 +223,74 @@ export function MonthlyDay<DayData>({ renderDay, onDateClick, className}: Monthl
           </div>
         </div>
         <ul className="divide-gray-200 divide-y overflow-hidden max-h-36 overflow-y-auto">
-          {renderDay(events)}
+          {renderDay && renderDay(events)}
         </ul>
       </div>
+    );
+  }
+
+
+export function CustomMonthlyDay<DayData>({ renderDay, onDateClick, className}: MonthlyDayProps<DayData>) {
+    const { locale } = useMonthlyCalendar();
+    const { day, events } = useMonthlyBody<DayData>()
+    const dayNumber = format(day, 'd', { locale });
+    return (
+      <Popover>
+        <PopoverTrigger>
+            <div
+            title={`Events for day ${dayNumber}`}
+            className={cn("h-48 p-2 border-b-2 border-r-2", className?.({date: day}))}
+            >
+            <div className="flex justify-between">
+              <div className="font-bold">{dayNumber}</div>
+              <div className="xl:hidden block">
+                {format(day, 'EEEE', { locale })}
+              </div>
+            </div>
+            <ul className="divide-gray-200 divide-y overflow-hidden max-h-36 overflow-y-auto">
+          
+              {renderDay && renderDay(events)}
+            </ul>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent>
+          <ToggleGroup
+              type="multiple"
+              value={events.map(e => e.type)}
+              onValueChange={(value) => {
+
+                  onDateClick((prev?: any[]) => {
+                    const currentEvents = prev || []
+                    const currentDayEvents = currentEvents.filter(e => isSameDay(e.date, day));
+                    const otherDayEvents = currentEvents.filter(e => !isSameDay(e.date, day));
+                    
+                    console.log(currentDayEvents);
+                    
+                    const typesToAdd = value.filter(type => !currentDayEvents.some(e => e.type === type));
+                    const typesToKeep = currentDayEvents.filter(e => value.includes(e.type));
+                    
+                    console.log(typesToKeep);
+                    
+                    const newEvents = [
+                      ...typesToKeep,
+                      ...typesToAdd.map(type => ({ date: day, type }))
+                    ];
+                    
+                    return [...otherDayEvents, ...newEvents];
+
+              })}}>
+              
+              <ToggleGroupItem value="AM">
+                AM
+              </ToggleGroupItem>
+              <ToggleGroupItem value="PM">
+                PM
+              </ToggleGroupItem>
+            </ToggleGroup>
+
+        </PopoverContent>
+      </Popover>
+   
     );
   }
 
@@ -244,6 +314,7 @@ export const DefaultMonthlyEventItem = ({
     );
   };
 
+  
 export const TeamMonthlyEventItem = ({
     availability,
     type,

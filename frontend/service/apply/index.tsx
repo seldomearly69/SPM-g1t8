@@ -2,8 +2,7 @@ import { gql } from "@apollo/client";
 
 export async function createRequest(
   staffId: number,
-  type: string,
-  date: Array<string>,
+  date_type: Array<{ date: string; type: string }>,
   reason?: string,
   remarks?: string,
   files?: Array<File>
@@ -13,17 +12,15 @@ export async function createRequest(
     mutation createRequest(
       $staffId: Int!,
       $reason: String,
-      $type: String!,
       $remarks: String,
-      $date: [String!]!,
+      $dateType: [DateTypeInput!]!,
       $files: [Upload]
     ) {
       createRequest(
         staffId: $staffId,
         reason: $reason,
         remarks: $remarks,
-        type: $type,
-        date: $date,
+        dateType: $dateType,
         files: $files
       ) {
         success
@@ -43,13 +40,13 @@ export async function createRequest(
       variables: {
         staffId: staffId,
         reason: reason || null,
-        remarks: remarks || null,
-        type: type,
-        date: date,
+        remarks: remarks || "",
+        dateType: date_type,
         files: files.length > 0 ? files.map((file) => null) : null,
       },
     })
   );
+
   // Assuming `files` is an array of File objects.
   if (files && files.length > 0) {
     const map: { [key: string]: string[] } = {};

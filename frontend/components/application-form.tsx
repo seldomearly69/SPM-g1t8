@@ -13,20 +13,30 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import React, { useEffect, useState } from "react";
 import { Label } from "./ui/label";
+import { createRequest } from "@/service/apply";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { applicationSchema } from "@/lib/validations/application";
+import { z } from "zod";
 import {
+  CustomMonthlyDay,
   DefaultMonthlyEventItem,
   MonthlyBody,
   MonthlyCalendar,
   MonthlyDay,
   MonthlyNav,
 } from "./monthly-calendar";
-import { createRequest } from "@/service/apply";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { applicationSchema } from "@/lib/validations/application";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
-import { cn, daysInWeek } from "@/lib/utils";
-import { z } from "zod";
+import { EventType } from "@/types";
 
 type FormData = z.infer<typeof applicationSchema>;
 
@@ -41,34 +51,39 @@ export default function ApplicationForm({
 }: ApplicationFormProps) {
   const {
     register,
-    control,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(applicationSchema),
+    defaultValues: {
+      remarks: "", // Ensure remarks is initialized with an empty string
+    },
   });
-
-  const [date, setDate] = useState<Date[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [date, setDate] = useState<{ date: Date; type: string }[]>([]);
   const [statusCode, setStatusCode] = useState();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
 
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
-    const formattedDates = data.date.map((d: string) => {
-      return new Date(d).toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
-    });
+    const formattedDates = data.date_type.map(
+      (d: { date: Date; type: string }) => {
+        return { date: format(d.date, "yyyy-MM-dd"), type: d.type };
+      }
+    );
 
     // Convert FileList to array or handle it being empty
     const files = data.file ? Array.from(data.file) : [];
 
-    console.log("Form Data Submitted:", { ...data, date: formattedDates });
+    console.log(data);
+
+    console.log("Form Data Submitted:", { ...data, date_type: formattedDates });
 
     try {
       const response = await createRequest(
         user.staffId,
-        data.type,
         formattedDates,
         data.reason,
         data.remarks, // Ensure remarks is being sent over
@@ -80,6 +95,7 @@ export default function ApplicationForm({
       if (response.data.createRequest.success) {
         console.log("Status Code:", response.data.createRequest.success);
         setStatusCode(response.data.createRequest.success);
+        setShowSuccessPopup(true); // Show success popup upon successful submission
       } else {
         console.log("No status code returned from the backend");
       }
@@ -94,46 +110,15 @@ export default function ApplicationForm({
   };
 
   useEffect(() => {
-    setValue("date", date);
+    setValue("date_type", date);
   }, [date]);
+
+  console.log(date);
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <Label
-              htmlFor="type"
-              className="block mb-2 text-sm font-medium text-gray-700"
-            >
-              WFH Type
-            </Label>
-            <Controller
-              control={control}
-              name="type"
-              render={({ field }) => (
-                <Select
-                  required
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select WFH Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="AM">AM</SelectItem>
-                    <SelectItem value="PM">PM</SelectItem>
-                    <SelectItem value="full">Full Day</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -143,34 +128,13 @@ export default function ApplicationForm({
               htmlFor="reason"
               className="block mb-2 text-sm font-medium text-gray-700"
             >
-              Reason Title
-            </Label>
-            <Input
-              id="reason"
-              type="text"
-              required
-              {...register("reason")}
-              placeholder="Short title for your reason (max 50 words)"
-              maxLength={50}
-              style={{ width: "100%" }}
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            <Label
-              htmlFor="remarks"
-              className="block mb-2 text-sm font-medium text-gray-700"
-            >
-              Remarks
+              Reason
             </Label>
             <Textarea
-              id="remarks"
+              id="reason"
               rows={4}
-              {...register("remarks", { required: true })}
-              placeholder="Please enter your remarks for the WFH request (max 300 words)"
+              {...register("reason", { required: true })}
+              placeholder="Please enter your reasons for the WFH request (max 300 words)"
               maxLength={300}
             />
           </motion.div>
@@ -219,33 +183,27 @@ export default function ApplicationForm({
             onCurrentMonthChange={setSelectedDate}
           >
             <MonthlyNav />
-            <MonthlyBody events={[]} className="border-none">
-              <MonthlyDay
+            <MonthlyBody events={date || []} className="border-none">
+              <CustomMonthlyDay<EventType>
                 className={({ date: dayDate }) =>
                   cn(
                     "h-20 border-none m-0.5 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-400",
                     {
-                      "bg-blue-500": date.some((selectedDate) =>
-                        isSameDay(selectedDate, dayDate)
+                      "bg-blue-500": date?.some((d) =>
+                        isSameDay(d.date, dayDate)
                       ),
                     }
                   )
                 }
-                onDateClick={(day) => {
-                  console.log(day.toLocaleDateString());
-
-                  setDate((prev) =>
-                    prev.some((d) => isSameDay(d, day))
-                      ? prev.filter((d) => !isSameDay(d, day))
-                      : [...prev, day]
-                  );
-                }}
+                onDateClick={setDate}
                 renderDay={(data) =>
                   data.map((item, index) => (
                     <DefaultMonthlyEventItem
                       key={index}
-                      title={item.title}
-                      date={format(item.date, "k:mm")}
+                      availability={item.availability || ""}
+                      date={item.date}
+                      type={item.type}
+                      isPending={item.is_pending || false}
                     />
                   ))
                 }
@@ -254,6 +212,32 @@ export default function ApplicationForm({
           </MonthlyCalendar>
         </div>
       </div>
+      {showSuccessPopup && (
+        <Dialog
+          open={showSuccessPopup}
+          onOpenChange={() => setShowSuccessPopup(false)}
+        >
+          <DialogContent className="md:max-w-[425px] text-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg">
+                Application Submitted!
+              </DialogTitle>
+              <DialogDescription className="text-md">
+                Your Application has been submitted and will be reviewed by your
+                immediate superior
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                onClick={() => setShowSuccessPopup(false)}
+                className="text-md"
+              >
+                Ok
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </form>
   );
 }

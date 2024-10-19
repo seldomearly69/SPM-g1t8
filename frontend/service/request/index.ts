@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-export async function getArrangements(staffId: number) {
+export async function getOwnRequest(staffId: number) {
   const gqlString = gql`
     query ownRequests($staffId: Int!) {
       ownRequests(staffId: $staffId) {
@@ -15,7 +15,7 @@ export async function getArrangements(staffId: number) {
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/get_requests", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -30,18 +30,53 @@ export async function getArrangements(staffId: number) {
   return data;
 }
 
-export async function getEmployeesRequest(managerId: number) {
-  const gqlString = gql`
-    query request($managerId: Int!) {
-      request(managerId: $managerId) {
-        employeeName
-        employeeDepartment
-        requestedOn
-        requestDate
+export async function getSubordinatesRequest(managerId: number) {
+  // Define the GraphQL query
+  const gqlString = `
+    query subordinatesRequest($staffId: Int!) {
+      subordinatesRequest(staffId: $staffId) {
+        requestId
+        requestingStaffName
+        department
+        date
         type
         status
         reason
+        remarks
+        createdAt
         files
+      }
+    }
+  `;
+
+  // Perform the fetch request
+  const res = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString, // The query string itself
+      variables: { staffId: managerId }, // Passing managerId as staffId
+    }),
+  });
+
+  const data = await res.json();
+
+  // Handle the result and return the correct data
+  if (data.errors) {
+    throw new Error(`GraphQL error: ${data.errors[0].message}`);
+  }
+
+  return data.data;
+}
+
+export async function getFileLink(fileKey: string) {
+  const gqlString = `
+    query getFileLink($fileKey: String!) {
+      fileLink(fileKey: $fileKey) {
+        fileKey
+        fileLink
       }
     }
   `;
@@ -53,12 +88,58 @@ export async function getEmployeesRequest(managerId: number) {
     },
     body: JSON.stringify({
       query: gqlString,
-      variables: { managerId: managerId },
+      variables: {
+        fileKey: fileKey, // The file key to retrieve the link for
+      },
     }),
   });
 
   const data = await res.json();
-  return data.data.request;
+
+  // Check for errors
+  if (data.errors) {
+    throw new Error(`GraphQL error: ${data.errors[0].message}`);
+  }
+
+  // Ensure that the expected keys are in the response
+  if (data.data && data.data.fileLink && data.data.fileLink.fileLink) {
+    return data.data.fileLink; // Return the file link object
+  } else {
+    throw new Error("Invalid response format");
+  }
+}
+
+export async function approveRequest(
+  requestId: number,
+  newStatus: string,
+  remarks: string
+) {
+  const gqlString = `
+  mutation acceptRejectRequest($requestId: Int!, $newStatus: String!, $remarks: String) {
+    acceptRejectRequest(requestId: $requestId, newStatus: $newStatus, remarks: $remarks) {
+      success
+      message
+    }
+  }
+`;
+
+  const res = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString,
+      variables: {
+        requestId: requestId, // Replace with actual request ID
+        newStatus: newStatus, // Replace with new status like 'approved' or 'rejected'
+        remarks: remarks, // Optional, can be null or a string
+      },
+    }),
+  });
+  const data = await res.json();
+
+  return data;
 }
 
 export async function getIndividualRequest(requestId: number) {
@@ -74,13 +155,13 @@ export async function getIndividualRequest(requestId: number) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/get_requests", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
+      query: gqlString,
       variables: { requestId: requestId },
     }),
   });

@@ -31,21 +31,20 @@ CREATE TABLE requests (
     Type VARCHAR(4) NOT NULL,
     Status VARCHAR(8) NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
     Approving_manager INT REFERENCES users(Staff_ID),
-    created_at DATE DEFAULT CURRENT_DATE,
+    created_at DATE NOT NULL DEFAULT CURRENT_DATE,
     Reason VARCHAR(300),
     Remarks VARCHAR(300)
 );
 
 CREATE TABLE files(
-    File_id SERIAL PRIMARY KEY,
     File_name VARCHAR(100) NOT NULL,
-    File_data BYTEA NOT NULL
+    File_key VARCHAR(100) PRIMARY KEY
 );
 
 CREATE TABLE file_request_assoc (
     Request_id INT REFERENCES requests(request_id),
-    File_id INT REFERENCES files(File_id),
-    PRIMARY KEY (Request_id, File_id)
+    File_key VARCHAR(100) REFERENCES files(File_key),
+    PRIMARY KEY (Request_id, File_key)
 );
 
 INSERT INTO roles VALUES 
@@ -57,26 +56,25 @@ COPY users (Staff_ID, Staff_FName, Staff_LName, Dept, Position, Country, Email, 
 FROM '/tmp/employee.csv'
 DELIMITER ','
 CSV HEADER;
-
 INSERT INTO requests (Requesting_staff, Year, Month, Day, Type, Status, Approving_manager, Reason, Remarks) VALUES
-(130002, 2024, 1, 15, 'AM', 'approved', 130002, 'approve plz','Approved for morning leave'), -- Jack reports to himself
-(140001, 2024, 2, 10, 'PM', 'pending', 130002, 'approve plz', 'Pending approval from manager'), -- Derek reports to Jack
-(150008, 2024, 3, 5, 'FULL', 'rejected', 130002, 'approve plz','Rejected due to project deadline'), -- Eric reports to Jack
-(151408, 2024, 4, 25, 'AM', 'approved', 130002, 'approve plz','Morning leave approved for urgent matters'), -- Philip reports to Jack
-(140894, 2024, 5, 30, 'PM', 'pending', 140001, 'approve plz','Pending for review'), -- Rahim reports to Derek
-(130002, 2024, 6, 10, 'FULL', 'approved', 130002, 'approve plz','Approved for full day leave for family event'), -- Jack reports to himself
-(140001, 2024, 7, 22, 'PM', 'rejected', 130002, 'approve plz','Leave request rejected due to team shortage'), -- Derek reports to Jack
-(150008, 2024, 8, 18, 'FULL', 'approved', 130002, 'approve plz','Approved for vacation'), -- Eric reports to Jack
-(151408, 2024, 9, 12, 'AM', 'pending', 130002, 'approve plz','Pending approval'), -- Philip reports to Jack
-(140894, 2024, 10, 3, 'PM', 'approved', 140001, 'approve plz','Approved for personal matters'), -- Rahim reports to Derek
-(130002, 2024, 11, 14, 'FULL', 'pending', 130002, 'approve plz', 'Pending manager review'), -- Jack reports to himself
-(140001, 2024, 12, 1, 'AM', 'approved', 130002, 'approve plz','Morning leave approved for medical appointment'), -- Derek reports to Jack
-(150008, 2024, 1, 19, 'PM', 'rejected', 130002, 'approve plz','Rejected due to overlapping leave requests'), -- Eric reports to Jack
-(151408, 2024, 2, 8, 'FULL', 'approved', 130002, 'approve plz','Approved for annual leave'), -- Philip reports to Jack
-(140894, 2024, 3, 23, 'AM', 'pending', 140001, 'approve plz','Pending approval for emergency leave'),
-(140941, 2024, 11, 23, 'AM', 'pending', 140879, 'approve plz','Pending approval for emergency leave'),
-(140894, 2024, 11, 23, 'PM', 'approved', 140879, 'approve plz', 'Approved'),
-(140894, 2024, 11, 24, 'AM', 'rejected', 140879, 'approve plz','Rejected'); -- Rahim reports to Derek
+(130002, 2024, 1, 15, 'AM', 'approved', 130002, 'Urgent medical appointment', 'Approved for morning leave due to doctors visit'), 
+(140001, 2024, 2, 10, 'PM', 'pending', 130002, 'Client meeting scheduled', ''), 
+(150008, 2024, 3, 5, 'FULL', 'rejected', 130002, 'Team project nearing deadline', 'Rejected due to critical project deadline'), 
+(151408, 2024, 4, 25, 'AM', 'approved', 130002, 'Childs school event', 'Morning leave approved for attending childs school event'), 
+(140894, 2024, 5, 30, 'PM', 'pending', 140001, 'Family commitment in the afternoon', ''), 
+(130002, 2024, 6, 10, 'FULL', 'approved', 130002, 'Family event scheduled', 'Approved for full day leave for family event'), 
+(140001, 2024, 7, 22, 'PM', 'rejected', 130002, 'Overlapping with other team leave requests', 'Leave request rejected due to team shortage'), 
+(150008, 2024, 8, 18, 'FULL', 'approved', 130002, 'Annual vacation planned', 'Approved for vacation'), 
+(151408, 2024, 9, 12, 'AM', 'pending', 130002, 'Client presentation prep', ''), 
+(140894, 2024, 10, 3, 'PM', 'approved', 140001, 'Urgent personal matter', 'Approved for personal matters'), 
+(130002, 2024, 11, 14, 'FULL', 'pending', 130002, 'Relatives visiting from overseas', ''), 
+(140001, 2024, 12, 1, 'AM', 'approved', 130002, 'Scheduled medical appointment', 'Morning leave approved for medical appointment'), 
+(150008, 2024, 1, 19, 'PM', 'rejected', 130002, 'Team critical tasks on same day', 'Rejected due to overlapping leave requests'), 
+(151408, 2024, 2, 8, 'FULL', 'approved', 130002, 'Annual family holiday', 'Approved for annual leave'), 
+(140894, 2024, 3, 23, 'AM', 'pending', 140001, 'Morning family commitment', ''), 
+(140941, 2024, 11, 23, 'AM', 'pending', 140879, 'Doctors appointment scheduled', ''), 
+(140894, 2024, 11, 23, 'PM', 'approved', 140879, 'Personal time needed', 'Approved'), 
+(140894, 2024, 11, 24, 'AM', 'rejected', 140879, 'Business review meeting scheduled', 'Rejected due to business meeting');
 
 
 -- CREATE TABLE departments (
