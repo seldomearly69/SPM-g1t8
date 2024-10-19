@@ -1,14 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react";
-
 import { motion } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DataTable } from "@/components/data-table";
-import { individual_request_columns, request_columns } from "@/components/columns";
+import { individual_request_columns} from "@/components/columns";
 import { getOwnRequest } from "@/service/request";
 import { useRouter } from "next/navigation"
-import { ScrollArea } from "./ui/scroll-area";
 import { User } from "@/types";
 
 
@@ -19,7 +17,6 @@ interface ManageArrangementsProps {
 
 export default function ManageArrangementsPage({user}: ManageArrangementsProps) {
   const [arrangements, setArrangements] = useState([]);
-  const [pendingArrangements, setPendingArrangements] = useState([]);
   const router = useRouter()
 
   useEffect(() => {
@@ -38,10 +35,6 @@ export default function ManageArrangementsPage({user}: ManageArrangementsProps) 
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
-        Manage WFH Arrangements
-      </h2>
       <motion.div
         className="space-y-6"
         initial={{ opacity: 0 }}
@@ -76,6 +69,5 @@ export default function ManageArrangementsPage({user}: ManageArrangementsProps) 
           </Tabs>
       </motion.div>
        
-    </div>
   );
 }
