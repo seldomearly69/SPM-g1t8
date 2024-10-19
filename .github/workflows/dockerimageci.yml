@@ -28,3 +28,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      
+      # Build the Docker image
+      - name: Build Docker image
+        run: docker-compose up --build -d
+
+      # Run the tests
+      - name: Run unit tests
+        run: |
+          docker exec -it requests bash -c "pytest tests/ --maxfail=1 --disable-warnings -q"
+          
+      
+
+
