@@ -25,11 +25,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest          # Ensure pytest is installed
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest  # Ensure pytest is installed
 
       # Run the unit tests with relative path
       - name: Run unit tests
         run: |
           pytest backend/requests/unit_tests.py --maxfail=1 --disable-warnings -q
-
