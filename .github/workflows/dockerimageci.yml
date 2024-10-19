@@ -34,11 +34,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # Build the Docker image
+      # Build the Docker image using the path to docker-compose.yml
       - name: Build Docker image
-        run: docker-compose build
+        run: docker-compose -f backend/docker-compose.yml build
 
-      # Run the tests within the Docker container
+      # Run the tests within the Docker container using the path to docker-compose.yml
       - name: Run unit tests
         run: |
-          docker-compose run --rm requests pytest backend/requests/unit_tests.py --maxfail=1 --disable-warnings -q
+          docker-compose -f backend/docker-compose.yml run --rm requests pytest backend/requests/unit_tests.py --maxfail=1 --disable-warnings -q
