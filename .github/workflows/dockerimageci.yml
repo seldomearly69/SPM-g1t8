@@ -48,4 +48,4 @@ jobs:
       # Run the tests within the Docker container using the path to docker-compose.yml
       - name: Run unit tests
         run: |
-          docker-compose -f backend/docker-compose.yml run --rm requests pytest backend/requests/unit_tests.py --maxfail=1 --disable-warnings -q
+          docker-compose -f backend/docker-compose.yml run --rm requests pytest unit_tests.py --maxfail=1 --disable-warnings -q
