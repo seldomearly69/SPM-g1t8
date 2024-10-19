@@ -234,26 +234,26 @@ export function CustomMonthlyDay<DayData>({ renderDay, onDateClick, className}: 
     const { locale } = useMonthlyCalendar();
     const { day, events } = useMonthlyBody<DayData>()
     const dayNumber = format(day, 'd', { locale });
+
     return (
       <Popover>
         <PopoverTrigger>
-            <div
+          <div
             title={`Events for day ${dayNumber}`}
             className={cn("h-48 p-2 border-b-2 border-r-2", className?.({date: day}))}
-            >
+          >
             <div className="flex justify-between">
               <div className="font-bold">{dayNumber}</div>
-              <div className="xl:hidden block">
+              <div className="md:hidden block">
                 {format(day, 'EEEE', { locale })}
               </div>
             </div>
             <ul className="divide-gray-200 divide-y overflow-hidden max-h-36 overflow-y-auto">
-          
               {renderDay && renderDay(events)}
             </ul>
           </div>
         </PopoverTrigger>
-        <PopoverContent>
+        <PopoverContent className="w-36">
           <ToggleGroup
               type="multiple"
               value={events.map(e => e.type)}

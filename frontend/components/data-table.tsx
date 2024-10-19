@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTableToolbar } from "./data-table-toolbar";
+import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -36,19 +37,19 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   onRowClick,
+  hasToolbar,
+  sort
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [sorting, setSorting] = React.useState<SortingState>([
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
     {
-      id: "requestingStaffName",
+      id: sort ?? "requestId",
       desc: false,
     },
   ]);
+
   const table = useReactTable({
     data,
     columns,
@@ -71,9 +72,10 @@ export function DataTable<TData, TValue>({
     enableColumnFilters: true,
   });
 
+  
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} />
+      {hasToolbar && <DataTableToolbar table={table} />}
       <div className="rounded-md border max-h-[400px] overflow-y-auto">
         <Table>
           <TableHeader>
