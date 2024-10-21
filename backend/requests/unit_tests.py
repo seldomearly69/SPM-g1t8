@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from amqp_connection import *
 from app import app, db, User, RequestModel, resolve_own_schedule, resolve_team_schedule, resolve_department_schedule, resolve_own_requests, resolve_request, resolve_subordinates_request, resolve_manager_list
 from datetime import date
 import json
@@ -8,7 +7,12 @@ import json
 class FlaskAppTestCase(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
+    @patch('app.create_connection')  # Mock the RabbitMQ connection
+    def setUpClass(cls, mock_create_connection):
+        """Set up the Flask test client and test database."""
+        # Mock the connection to RabbitMQ
+        mock_connection = MagicMock()
+        mock_create_connection.return_value = mock_connection
         """Set up the Flask test client and test database."""
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         app.config['TESTING'] = True
