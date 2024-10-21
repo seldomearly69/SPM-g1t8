@@ -80,46 +80,49 @@ export default function ManageEmployeeArrangements({
       className="max-w-full mx-auto pr-4"
     >
       <h2 className="text-2xl font-bold mb-6">Manage Employee WFH Requests</h2>
-      <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="acceptedRejected">
-            Accepted / Rejected
-          </TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="pending" className="h-full space-y-6">
+        <div className="space-between flex items-center justify-center">
+          <TabsList>
+            <TabsTrigger value="pending" className="relative">
+              Pending
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="relative">
+              Approved
+            </TabsTrigger>
+            <TabsTrigger value="rejected" className="relative">
+              Rejected
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
         <TabsContent value="pending">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Pending Requests</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <DataTable
-                columns={request_columns}
-                data={employeeRequests.filter(
-                  (request) => request.status === "pending"
-                )}
-                onRowClick={handleRowClick}
-              />
-            </CardContent>
-          </Card>
+          <DataTable
+            columns={request_columns}
+            data={employeeRequests.filter(
+              (request) => request.status === "pending"
+            )}
+            onRowClick={handleRowClick}
+          />
         </TabsContent>
-        <TabsContent value="acceptedRejected">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Accepted / Rejected Requests</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <DataTable
-                columns={request_columns}
-                data={employeeRequests.filter(
-                  (request) =>
-                    request.status === "approved" ||
-                    request.status === "rejected"
-                )}
-                onRowClick={handleRowClick}
-              />
-            </CardContent>
-          </Card>
+
+        <TabsContent value="approved">
+          <DataTable
+            columns={request_columns}
+            data={employeeRequests.filter(
+              (request) => request.status === "approved"
+            )}
+            onRowClick={handleRowClick}
+          />
+        </TabsContent>
+
+        <TabsContent value="rejected">
+          <DataTable
+            columns={request_columns}
+            data={employeeRequests.filter(
+              (request) => request.status === "rejected"
+            )}
+            onRowClick={handleRowClick}
+          />
         </TabsContent>
       </Tabs>
     </motion.div>

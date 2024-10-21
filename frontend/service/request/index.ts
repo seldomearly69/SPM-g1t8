@@ -10,6 +10,7 @@ export async function getOwnRequest(staffId: number) {
           date
           type
           status
+          reason
           remarks
         }
       }
@@ -170,24 +171,24 @@ export async function getIndividualRequest(requestId: number) {
   return data;
 }
 
-export async function withdrawRequest(requestId: number, reason: string) {
+export async function withdrawRequest(requestId: number) {
   const gqlString = gql`
-    mutation withdrawRequest($requestId: Int!, $reason: String!) {
-      withdrawRequest(requestId: $requestId, reason: $reason) {
-        requestId
-        status
+    mutation withdrawPendingRequest($requestId: Int!) {
+      withdrawPendingRequest(requestId: $requestId) {
+        success
+        message
       }
     }
   `;
 
-  const res = await fetch("http://localhost:5002/get_requests", {
+  const res = await fetch("http://localhost:5002/requests", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
-      variables: { requestId: requestId, reason: reason },
+      variables: { requestId: requestId },
     }),
   });
   const data = await res.json();
