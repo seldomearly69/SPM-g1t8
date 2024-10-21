@@ -2,9 +2,17 @@ import * as motion from "framer-motion/client";
 import ApplicationForm from "@/components/application-form";
 import { getCurrentUser } from "@/lib/session";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useEffect } from "react";
+import { getOwnRequest } from "@/service/request";
 
 export default async function ApplyWFHPage() {
-  const user = await getCurrentUser();
+    const user = await getCurrentUser();
+    const data = await getOwnRequest(user?.staffId);
+    const requests = data.data.ownRequests.requests.map((request: any) => ({
+      date: request.date,
+      type: request.type,
+      status: request.status,
+    }));
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -23,7 +31,7 @@ export default async function ApplyWFHPage() {
       <Card>
           <CardHeader></CardHeader>
           <CardContent>
-            <ApplicationForm user={user} />
+            <ApplicationForm user={user} requests={requests} />
           </CardContent>
         </Card>
     </motion.div>
