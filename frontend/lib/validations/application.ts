@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 const dateSchema = z.object({
-  date: z.date(),
+  date: z.string(),
   type: z.enum(["AM", "PM"]),
 });
 

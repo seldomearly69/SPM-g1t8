@@ -113,17 +113,29 @@ export const handleOmittedDays = ({
   locale,
 }: OmittedDaysProps) => {
   let headings = daysInWeek({ locale });
-  let daysToRender = days;
+  let daysToRender = days.map(day => {
+    
+    if (day < new Date()) {
+      return {
+        day,
+        is_past: true
+      }
+    }
+    return {day, is_past: false};
+  })
+
   //omit the headings and days of the week that were passed in
   if (omitDays) {
     headings = daysInWeek({ locale }).filter(
       day => !omitDays.includes(day.day)
     );
-    daysToRender = days.filter(day => !omitDays.includes(getDay(day)));
+    console.log("days to render", daysToRender);
+    
+    daysToRender = daysToRender.filter(({ day }) => !omitDays.includes(getDay(day)));
   }
 
   // omit the padding if an omitted day was before the start of the month
-  let firstDayOfMonth = getDay(daysToRender[0]) as number;
+  let firstDayOfMonth = getDay(daysToRender[0].day) as number;
   if (omitDays) {
     const subtractOmittedDays = omitDays.filter(day => day < firstDayOfMonth)
       .length;
@@ -152,6 +164,7 @@ const headingClasses = {
 export function MonthlyBody<DayData>({
     omitDays,
     events,
+    requests,
     children,
     className
   }: MonthlyBodyProps<DayData>) {
@@ -189,12 +202,14 @@ export function MonthlyBody<DayData>({
               title="Empty Day"
             />
           ))}
-          {daysToRender.map(day => (
+          {daysToRender.map(({day, is_past}) => (
             <MonthlyBodyContext.Provider
               key={day.toISOString()}
               value={{
                 day,
                 events: (events || []).filter(data => isSameDay(data.date, day)),
+                is_past,
+                requests
               }}
             >
               {children}
@@ -210,8 +225,10 @@ export function MonthlyBody<DayData>({
     const { locale } = useMonthlyCalendar();
     const { day, events } = useMonthlyBody<DayData>()
     const dayNumber = format(day, 'd', { locale });
+    
     return (
       <div
+        key={day.toISOString()}
         title={`Events for day ${dayNumber}`}
         className={cn("h-48 p-2 border-b-2 border-r-2", className?.({date: day}))}
         onClick={() => onDateClick(day)}
@@ -222,9 +239,7 @@ export function MonthlyBody<DayData>({
             {format(day, 'EEEE', { locale })}
           </div>
         </div>
-        <ul className="divide-gray-200 divide-y overflow-hidden max-h-36 overflow-y-auto">
           {renderDay && renderDay(events)}
-        </ul>
       </div>
     );
   }
@@ -232,31 +247,49 @@ export function MonthlyBody<DayData>({
 
 export function CustomMonthlyDay<DayData>({ renderDay, onDateClick, className}: MonthlyDayProps<DayData>) {
     const { locale } = useMonthlyCalendar();
-    const { day, events } = useMonthlyBody<DayData>()
+    const { day, events, is_past, requests } = useMonthlyBody<DayData>()
     const dayNumber = format(day, 'd', { locale });
 
     return (
-      <Popover>
+      is_past ?  
+        <button
+          key={day.toISOString()}
+          title={`Events for day ${dayNumber}`}
+          disabled={is_past}
+          className={cn(
+            "disabled:font-light flex flex-col p-1 h-20 border-none m-0.5 rounded-md flex items-center justify-evenly",
+            requests.some((r: { date: string, status: string, type: string }) => isSameDay(r.date, day))
+              ? requests.find((r: { date: string, status: string, type: string }) => isSameDay(r.date, day))?.status === "pending"
+                ? "bg-warning text-warning-foreground"
+                : "bg-secondary text-secondary-foreground"
+              : "",
+            className?.({date: day}))}
+        >
+          {dayNumber}
+        </button> :  
+        
+        <Popover>
         <PopoverTrigger>
           <div
+            key={day.toISOString()}
             title={`Events for day ${dayNumber}`}
-            className={cn("h-48 flex flex-col p-1 border-b-2 border-r-2", className?.({date: day}))}
+            className={cn("h-48 flex flex-col p-1 h-20 border-none m-0.5 rounded-md flex items-center justify-evenly cursor-pointer hover:bg-secondary hover:text-secondary-foreground", 
+            requests.some((r: { date: string, status: string, type: string }) => isSameDay(r.date, day))
+              ? requests.find((r: { date: string, status: string, type: string }) => isSameDay(r.date, day))?.status === "pending"
+                ? "bg-warning text-warning-foreground"
+                : "bg-secondary text-secondary-foreground"
+              : "",
+            className?.({date: day}))}
           >
-            <div className="flex justify-between">
               <div className="font-bold">{dayNumber}</div>
-              <div className="md:hidden block">
-                {format(day, 'EEEE', { locale })}
-              </div>
-            </div>
-            <ul className="flex gap-1 justify-evenly w-full overflow-hidden max-h-36 overflow-y-auto">
-              {renderDay && renderDay(events)}
-            </ul>
+            {renderDay && renderDay(events)}
+
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-36">
           <ToggleGroup
               type="multiple"
-              value={events.map(e => e.type)}
+              value={events.map((e: any) => e.type)}
               onValueChange={(value) => {
 
                   onDateClick((prev?: any[]) => {
@@ -264,32 +297,43 @@ export function CustomMonthlyDay<DayData>({ renderDay, onDateClick, className}: 
                     const currentDayEvents = currentEvents.filter(e => isSameDay(e.date, day));
                     const otherDayEvents = currentEvents.filter(e => !isSameDay(e.date, day));
                     
-                    console.log(currentDayEvents);
                     
                     const typesToAdd = value.filter(type => !currentDayEvents.some(e => e.type === type));
                     const typesToKeep = currentDayEvents.filter(e => value.includes(e.type));
                     
-                    console.log(typesToKeep);
                     
                     const newEvents = [
                       ...typesToKeep,
-                      ...typesToAdd.map(type => ({ date: day, type }))
+                      ...typesToAdd.map(type => ({ date: format(day, "yyyy-MM-dd"), type }))
                     ];
                     
                     return [...otherDayEvents, ...newEvents];
 
               })}}>
-              
-              <ToggleGroupItem value="AM">
-                AM
-              </ToggleGroupItem>
-              <ToggleGroupItem value="PM">
-                PM
-              </ToggleGroupItem>
+             
+             {(() => {
+                const toggleTypes = ['AM', 'PM'];
+                const availableToggleTypes = toggleTypes.filter(toggleType => 
+                  !requests.some((r: { date: string, type: string }) => 
+                    isSameDay(r.date, day) && r.type === toggleType
+                  )
+                );
+
+                if (availableToggleTypes.length === 0) {
+                  return <div className="text-center text-gray-500 text-sm">No available selection</div>;
+                }
+
+                return availableToggleTypes.map(toggleType => (
+                  <ToggleGroupItem key={toggleType} value={toggleType}>
+                    {toggleType}
+                  </ToggleGroupItem>
+                ));
+              })()}
             </ToggleGroup>
 
         </PopoverContent>
       </Popover>
+     
    
     );
   }
