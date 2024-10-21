@@ -129,7 +129,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
           return {
           type: schedule.type,
           office: schedule.availableCount.office,
-          wfh: schedule.availableCount.home
+          wfh: schedule.availableCount.wfh
         }})
         console.log(chartData)
         setChartData(chartData)
@@ -218,15 +218,15 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                       </DialogTitle>
                     </DialogHeader>
                    
-                    <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0 ">
-                      <AvailabilityChartArea chartData={chartData.length > 0 ? chartData : []}/>
-                      <DataTable
-                        columns={availability_columns}
-                        data={dialogData.length > 0 ? dialogData[0].availability.concat(dialogData[1].availability) : []}
-                        hasToolbar={true}
-                      />
-                      <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
+                      <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0 ">
+                        <AvailabilityChartArea chartData={chartData.length > 0 ? chartData : []}/>
+                        <DataTable
+                          columns={availability_columns}
+                          data={dialogData.length > 0 ? dialogData[0].availability.concat(dialogData[1].availability) : []}
+                          hasToolbar={true}
+                        />
+                        <ScrollBar orientation="horizontal" />
+                      </ScrollArea>
                   </DialogContent>
                 </Dialog>
               </MonthlyBody>

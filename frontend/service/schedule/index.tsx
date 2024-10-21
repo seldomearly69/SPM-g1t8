@@ -183,3 +183,30 @@ export async function getDepartmentSchedule(
   return data;
 }
 
+
+export async function getOverallSchedule(
+  month: number,
+  year: number,
+) {
+  const gqlString = gql`
+    query overallAvailability($month: Int!, $year: Int!) {
+      overallAvailability(month: $month, year: $year) {
+        overallAvailability
+      }
+    }
+  `;
+  const res = await fetch("http://localhost:5002/schedule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString?.loc?.source?.body,
+      variables: { month: month, year: year},
+    }),
+  });
+  const data = await res.json();
+  return data;
+}
+
+
