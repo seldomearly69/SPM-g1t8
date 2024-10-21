@@ -28,19 +28,21 @@ import {
 } from "@/components/ui/dialog";
 import { cn, hasMoreThanTwoDays } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
-import { EventType } from "@/types";
+import { EventType, User } from "@/types";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 type FormData = z.infer<typeof applicationSchema>;
 
 interface ApplicationFormProps extends React.HTMLAttributes<HTMLDivElement> {
-  user: any;
+  user: User;
+  requests: any;
 }
 
 export default function ApplicationForm({
   className,
   user,
+  requests,
   ...props
 }: ApplicationFormProps) {
   const {
@@ -56,30 +58,26 @@ export default function ApplicationForm({
     },
   });
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [date, setDate] = useState<{ date: Date; type: string }[]>([]);
+  const [date, setDate] = useState<{ date: string; type: "AM" | "PM" }[]>([]);
   const [statusCode, setStatusCode] = useState();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
   const { toast } = useToast()
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
-    const formattedDates = data.date_type.map(
-      (d: { date: Date; type: string }) => {
-        return { date: format(d.date, "yyyy-MM-dd"), type: d.type };
-      }
-    );
+   
 
     // Convert FileList to array or handle it being empty
     const files: File[] = data.file ? Array.from(data.file) : [];
 
     console.log(data);
 
-    console.log("Form Data Submitted:", { ...data, date_type: formattedDates });
+    console.log("Form Data Submitted:", { ...data, date_type: date });
 
     try {
       const response = await createRequest(
         user.staffId,
-        formattedDates,
+        date,
         data.reason,
         data.remarks, // Ensure remarks is being sent over
         files
@@ -105,17 +103,18 @@ export default function ApplicationForm({
   };
 
   useEffect(() => {
-    setValue("date_type", date);
-    if (hasMoreThanTwoDays(date)) {
+    setValue("date_type", date as [{ date: string; type: "AM" | "PM" }]);
+
+    const combinedDates = date.concat(requests.map((r: any) => ({date: r.date, type: r.type})));
+    if (combinedDates.length > 0 && hasMoreThanTwoDays(combinedDates)) {
         toast({
             title: "Error",
-            description: "You exceeded the maximum number of days allowed for a week",
+            description: "You exceeded the maximum number of days allowed for this month",
             variant: "warning",
         })
     }
   }, [date]);
 
-  console.log(errors);
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -187,12 +186,13 @@ export default function ApplicationForm({
             onCurrentMonthChange={setSelectedDate}
           >
             <MonthlyNav />
-            <MonthlyBody events={date || []} className="border-none">
+            <MonthlyBody 
+              events={date || []} 
+              requests={requests} 
+              className="border-none">
               <CustomMonthlyDay<EventType>
                 className={({ date: dayDate }) =>
-                  cn(
-                    "h-20 border-none m-0.5 rounded-md flex items-center justify-evenly cursor-pointer hover:bg-secondary hover:text-secondary-foreground",
-                    {
+                  cn({
                       "bg-primary text-primary-foreground": date?.some((d) =>
                         isSameDay(d.date, dayDate)
                       ),
@@ -200,17 +200,23 @@ export default function ApplicationForm({
                   )
                 }
                 onDateClick={setDate}
-                renderDay={(data) =>
-                  data.map((item, index) => (
-                    <ApplyMonthlyEventItem
-                      key={index}
-                      availability={item.availability || ""}
-                      date={item.date}
-                      type={item.type}
-                      isPending={item.is_pending || false}
-                    />
-                  ))
+                renderDay={(data) => {
+                  
+                  return (
+                    <ul className="flex gap-1 justify-evenly w-full overflow-hidden max-h-36 overflow-y-auto empty:hidden">
+                      {data.map((item, index) => (
+                        <ApplyMonthlyEventItem
+                          key={index}
+                          availability={item.availability || ""}
+                          date={item.date}
+                          type={item.type}
+                          isPending={item.is_pending || false}
+                        />
+                      ))}
+                    </ul>
+                  )
                 }
+              }
               />
             </MonthlyBody>
           </MonthlyCalendar>

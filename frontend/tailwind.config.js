@@ -40,7 +40,9 @@ module.exports = {
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
-        }
+        },
+        success: "hsl(var(--success))",
+        pending: "hsl(var(--warning))"
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],

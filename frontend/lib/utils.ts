@@ -2,7 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { DaysInWeekProps } from "@/types";
 import { enUS } from "date-fns/locale";
 import { ClassValue, clsx } from "clsx";
-import { getWeek, getYear } from "date-fns";
+import { getMonth, getWeek, getYear } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,20 +18,21 @@ export const daysInWeek = ({ locale = enUS }: DaysInWeekProps) => [
   { day: 6, label: locale.localize?.day(6) },
 ];
 
-export const hasMoreThanTwoDays = (dates: {date: Date, type: string}[]) => {
-  const weekMap = new Map<string, number>()
+export const hasMoreThanTwoDays = (dates: {date: string, type: string}[]) => {
+  
+  const monthMap = new Map<string, number>()
   const uniqueDates = new Set<string>()
 
   dates.forEach(({date}) => {
-    uniqueDates.add(date.toISOString())
+    uniqueDates.add(date)
   })
   
   uniqueDates.forEach((date) => {
-    const weekKey = `${getYear(date)}-${getWeek(date)}`
-    weekMap.set(weekKey, (weekMap.get(weekKey) || 0) + 1)
+    const monthKey = `${getYear(date)}-${getMonth(date)}`
+    monthMap.set(monthKey, (monthMap.get(monthKey) || 0) + 1)
   })
 
-  for (const count of weekMap.values()) {
+  for (const count of monthMap.values()) {
     if (count > 2) {
       return true
     }

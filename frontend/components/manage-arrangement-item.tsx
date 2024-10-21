@@ -38,6 +38,7 @@ export default function ManageIndividualRequest({
   const router = useRouter();
 
   const handleWithdraw = async () => {
+    
     const data = await withdrawRequest(request.requestId);
     if (data.data.withdrawPendingRequest.success) {
       setSuccessMessage(
@@ -125,7 +126,7 @@ export default function ManageIndividualRequest({
           {request?.status == "approved" ? (
             <PopoverTrigger asChild>
               <Button size="sm" className="hover:text-red-500">
-                Withdraw
+                Cancel
               </Button>
             </PopoverTrigger>
           ) : request?.status == "pending" ? (

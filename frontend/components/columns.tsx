@@ -15,7 +15,7 @@ export const request_columns: ColumnDef<Request>[] = [
     header: "ID",
   },
   {
-    accessorKey: "name",
+    accessorKey: "requestingStaffName",
     header: "Employee Name",
     id: "requestingStaffName",
   },

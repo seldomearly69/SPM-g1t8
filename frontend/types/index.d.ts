@@ -44,6 +44,7 @@ export type DaysInWeekProps = {
 
 export type BodyState<DayData> = {
   day: Date;
+  is_past: boolean;
   events: DayData[];
 };
 
@@ -67,6 +68,7 @@ export type MonthlyBodyProps<DayData> = {
   */
   omitDays?: number[];
   events: (DayData & { date: string | Date })[];
+  requests: { date: string; type: string }[];
   children: ReactNode;
 };
 
