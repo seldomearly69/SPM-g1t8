@@ -17,6 +17,13 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
 
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672  # RabbitMQ AMQP port
+          - 15672:15672  # RabbitMQ management web UI
+
     steps:
       # Checkout the repository
       - name: Checkout code
