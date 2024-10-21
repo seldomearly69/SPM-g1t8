@@ -48,17 +48,13 @@ services:
 #################################
   rabbitmq:
     container_name: amqp
-    image: "rabbitmq:3-management"
+    build: ./amqp
     ports:
       - "15672:15672"  # Expose RabbitMQ management interface
       - "5672:5672"    # Expose RabbitMQ main port
-    environment:
-      - RABBITMQ_DEFAULT_USER=username
-      - RABBITMQ_DEFAULT_PASS=password
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - ./rabbitmq_definitions.json:/etc/rabbitmq/rabbitmq_definitions.json
-      - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+      
     networks:
       - internal_network
 #################################
@@ -79,6 +75,7 @@ volumes:
   pgdata:
     driver: local
   rabbitmq_data:
+    driver: local
 
 networks:
   internal_network:

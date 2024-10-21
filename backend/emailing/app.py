@@ -4,10 +4,11 @@ import smtplib
 import amqp_connection
 import time
 import json
+import os
 
 queue_name="email_queue"
-booking_email = "esdt04g6@gmail.com"
-app_password = "alzqxkgqkzetuhbk"
+booking_email = os.getenv("EMAIL_USER")
+app_password = os.getenv("EMAIL_PASSWORD")
 
 def send_email(recipient, subject, body):
     try:
