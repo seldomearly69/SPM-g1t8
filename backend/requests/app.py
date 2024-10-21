@@ -5,11 +5,11 @@ from flask_graphql import GraphQLView
 from sqlalchemy import or_
 import graphene, boto3
 from graphene_sqlalchemy import SQLAlchemyObjectType
-import os, json, ast, base64, datetime
+import os, json, ast, datetime, sys
 from flask_cors import CORS
 from graphene_file_upload.scalars import Upload
 from graphene_file_upload.flask import FileUploadGraphQLView
-
+from amqp_connection import *
 
 
 days_in_month = {
@@ -48,6 +48,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{POSTGRES_USER}:{POSTGRES
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+connection = create_connection()
+channel = connection.channel()
+#if the exchange is not yet created, exit the program
+if not check_exchange(channel, exchangename, exchangetype):
+    print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
+    sys.exit(0)  # Exit with a success status
 
 from models import *
 # Custom Scalar for JSON
@@ -258,7 +265,9 @@ class CreateRequest(graphene.Mutation):
 
     def mutate(self, info, staff_id, date_type ,files = None, reason=None, remarks=None):
 
-        manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
+        requesting_staff = User.query.filter(User.staff_id == staff_id).first()
+        manager = requesting_staff.reporting_manager
+        
         f_keys = []
         if files:
             
@@ -308,7 +317,8 @@ class CreateRequest(graphene.Mutation):
 
         # except Exception as e:
         #     return CreateRequest(success = False, message = str(e))
-        
+        notification = requesting_staff.staff_fname + " " + requesting_staff.staff_lname + " has submitted a wfh request at " + str(datetime.datetime.now())
+        publish_to_broker(notification, "New WFH request", User.query.filter(User.staff_id == manager).first().email , channel)
 
         return CreateRequest(success=True, message="Request created successfully")
 

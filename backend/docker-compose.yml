@@ -43,11 +43,42 @@ services:
       - internal_network
     environment:
       PYTHONUNBUFFERED: 1
-
+#################################
+# RabbitMQ 
+#################################
+  rabbitmq:
+    container_name: amqp
+    image: "rabbitmq:3-management"
+    ports:
+      - "15672:15672"  # Expose RabbitMQ management interface
+      - "5672:5672"    # Expose RabbitMQ main port
+    environment:
+      - RABBITMQ_DEFAULT_USER=username
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq_definitions.json:/etc/rabbitmq/rabbitmq_definitions.json
+      - ./rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+    networks:
+      - internal_network
+#################################
+# Emailing service
+#################################
+  emailing:
+    build: ./emailing
+    ports:
+      - "5003:5003"
+    depends_on:
+      - rabbitmq
+    environment:
+      PYTHONUNBUFFERED: 1
+    networks:
+      - internal_network
 
 volumes:
   pgdata:
     driver: local
+  rabbitmq_data:
 
 networks:
   internal_network:
