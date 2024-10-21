@@ -38,6 +38,22 @@ export const request_columns: ColumnDef<Request>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      return (
+        <Badge
+          className={cn(
+            "w-20 justify-center ",
+            row.original.status == "pending"
+              ? "bg-yellow-500"
+              : row.original.status == "approved"
+              ? "bg-emerald-500"
+              : "bg-red-500"
+          )}
+        >
+          {row.original.status}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "reason",
@@ -154,8 +170,12 @@ export const individual_request_columns: ColumnDef<IndividualRequest>[] = [
     header: "Type",
   },
   {
+    accessorKey: "reason",
+    header: "Reason",
+  },
+  {
     accessorKey: "remarks",
-    header: "Remarks",
+    header: "Superior Remarks",
   },
   {
     accessorKey: "status",
@@ -165,7 +185,7 @@ export const individual_request_columns: ColumnDef<IndividualRequest>[] = [
         <Badge
           className={cn(
             "w-20 justify-center ",
-            row.original.status =="pending"
+            row.original.status == "pending"
               ? "bg-yellow-500"
               : row.original.status == "approved"
               ? "bg-emerald-500"
@@ -204,11 +224,14 @@ export const availability_columns: ColumnDef<Availability>[] = [
     accessorKey: "isPending",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.original.isPending === "true" ? "Pending" : "Confirmed";
+      const status =
+        row.original.isPending === "true" ? "Pending" : "Confirmed";
       return (
         <Badge
           className={
-            row.original.isPending === "true"? "bg-yellow-500" : "bg-emerald-500"
+            row.original.isPending === "true"
+              ? "bg-yellow-500"
+              : "bg-emerald-500"
           }
         >
           {status}
@@ -216,7 +239,9 @@ export const availability_columns: ColumnDef<Availability>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.original.isPending === "true"? "Pending" : "Confirmed");
+      return value.includes(
+        row.original.isPending === "true" ? "Pending" : "Confirmed"
+      );
     },
   },
 ];

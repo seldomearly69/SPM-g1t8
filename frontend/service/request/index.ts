@@ -10,6 +10,7 @@ export async function getOwnRequest(staffId: number) {
           date
           type
           status
+          reason
           remarks
         }
       }

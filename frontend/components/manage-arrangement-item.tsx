@@ -11,7 +11,14 @@ import { User } from "@/types";
 import { Popover } from "@radix-ui/react-popover";
 import { PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useRouter } from "next/navigation";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 interface ManageIndividualRequestProps {
   user: User;
   params: { request_id: string };
@@ -26,26 +33,60 @@ export default function ManageIndividualRequest({
   const [status, setStatus] = useState<"pending" | "approved" | "rejected">(
     "pending"
   );
-  const [reason, setReason] = useState("");
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   const handleWithdraw = async () => {
     const data = await withdrawRequest(request.requestId);
-    if (data.success) {
-      window.location.reload();
+    if (data.data.withdrawPendingRequest.success) {
+      setSuccessMessage(
+        `Request #${params.request_id} has been successfully withdrawn.`
+      );
+      setSuccessDialog(true); // Open the success dialog
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
       const data = await getIndividualRequest(parseInt(params.request_id));
-      console.log(data);
       setRequest(data.data.request);
     };
     fetchData();
   }, [params.request_id]);
 
   if (!request) return <div>Loading...</div>;
+
+  // Success Dialog Component
+  function SuccessDialog({
+    isOpen,
+    onClose,
+    successMessage,
+    redirectBack,
+  }: {
+    isOpen: boolean;
+    onClose: (isOpen: boolean) => void;
+    successMessage: string;
+    redirectBack: () => void;
+  }) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="md:max-w-[425px] text-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg">Request Managed!</DialogTitle>
+            <DialogDescription className="text-md">
+              {successMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={redirectBack} className="text-md">
+              Ok
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6">
@@ -123,7 +164,13 @@ export default function ManageIndividualRequest({
           </div>
         </PopoverContent>
       </Popover>
-      <div></div>
+      {/* Success Dialog */}
+      <SuccessDialog
+        isOpen={successDialog}
+        onClose={setSuccessDialog}
+        successMessage={successMessage}
+        redirectBack={() => window.location.reload()}
+      />
     </div>
   );
 }
