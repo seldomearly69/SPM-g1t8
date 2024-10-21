@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
+from amqp import *
 from app import app, db, User, RequestModel, resolve_own_schedule, resolve_team_schedule, resolve_department_schedule, resolve_own_requests, resolve_request, resolve_subordinates_request, resolve_manager_list
 from datetime import date
 import json
