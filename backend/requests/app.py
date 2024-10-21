@@ -110,6 +110,12 @@ class ManagerList(graphene.ObjectType):
     director_name = graphene.String()
     manager_list = graphene.List(Manager)
 
+class OverallSchedule(graphene.ObjectType):
+    overall_schedule = graphene.List(DaySchedule)
+
+class OverallAvailability(graphene.ObjectType):
+    overall_availability = graphene.Field(JSON)
+
 class Query1(graphene.ObjectType):
 
     own_schedule = graphene.Field(
@@ -139,7 +145,19 @@ class Query1(graphene.ObjectType):
         staff_id=graphene.Int(),
         team_managers = graphene.List(graphene.Int)
     ) # Add department schedule query (Shawn)
+    
+    overall_schedule = graphene.Field(
+        OverallSchedule,
+        month=graphene.Int(), 
+        year=graphene.Int(),
+        day = graphene.Int()
+    )
 
+    overall_availability = graphene.Field(
+        OverallAvailability,
+        month = graphene.Int(),
+        year = graphene.Int()
+    )
 
     # Add resolver for department schedule (Shawn)
     def resolve_department_schedule(self, info, month, year, staff_id, team_managers=None):
@@ -155,6 +173,12 @@ class Query1(graphene.ObjectType):
     
     def resolve_manager_list(self,info,director_id):
         return resolve_manager_list(director_id)
+
+    def resolve_overall_schedule(self,info,month,year,day):
+        return resolve_overall_schedule(month,year,day)
+    
+    def resolve_overall_availability(self,info,month,year):
+        return resolve_overall_availability(month,year)
     
 schedule_schema = graphene.Schema(query=Query1)
 
@@ -353,6 +377,82 @@ def resolve_manager_list(director_id):
     return {
         "director_name": user.staff_fname + " " + user.staff_lname,
         "manager_list": [{"staff_id":m.staff_id, "position": m.position, "name": m.staff_fname + " " + m.staff_lname} for m in m_list]
+    }
+
+def resolve_overall_availability(month,year):
+    total = User.query.count()
+    overall_availability = {}
+    for i in range(1,days_in_month[month]+1):
+        overall_availability[i] = total - RequestModel.query.filter(
+            RequestModel.month == month,
+            RequestModel.year == year,
+            RequestModel.day == i,
+            RequestModel.status.in_(['approved', 'pending'])
+        ).count()
+
+
+    return {"overall_availability": overall_availability}
+
+def resolve_overall_schedule(month,year,day):
+    filters = [
+        RequestModel.month == month,
+        RequestModel.year == year,
+        RequestModel.day == day,
+        RequestModel.status.in_(['approved', 'pending'])
+    ]
+    
+    employees = User.query.all()
+    # Query the database using the filters
+    requests = RequestModel.query.filter(*filters).all()
+    print("Reqeusts: " + str(requests))
+    # Create a mapping of requests by staff member and day
+    schedules_by_staff = {u.staff_id : {"AM": None, "PM": None} for u in employees}
+    for request in requests:
+        if request.type == "AM" or request.type == "PM":
+            schedules_by_staff[request.requesting_staff][request.type] = request
+        elif request.type == "FULL":
+            schedules_by_staff[request.requesting_staff]["AM"] = request
+            schedules_by_staff[request.requesting_staff]["PM"] = request
+    print(schedules_by_staff)
+
+    overall_schedule = []
+    print(schedules_by_staff)
+    for d in range(day,day+1):
+        for period in ["AM","PM"]:
+
+            overall_availability = []
+            count = len(employees)
+            
+            for member in employees:
+                request = schedules_by_staff[member.staff_id][period]
+                if request:
+                    count -= 1
+                    availability = "wfh"
+                    if request.status == "pending":
+                        is_pending = True
+                    else:
+                        
+                        is_pending = False
+                else:
+                    availability = "office"
+                    is_pending = False
+                    
+                overall_availability.append({
+                    "name": member.staff_fname + " " + member.staff_lname,
+                    "type": period,
+                    "department": member.dept,
+                    "availability": availability,
+                    "is_pending": is_pending
+                })
+
+            overall_schedule.append({
+                "date": f"{year:04d}-{month:02d}-{d:02d}",
+                "type": period,
+                "available_count": {"office": count, "wfh": len(employees)-count},
+                "availability": overall_availability
+            })
+    return {
+        "overall_schedule": overall_schedule
     }
 
 def resolve_own_schedule(month, year, staff_id):
