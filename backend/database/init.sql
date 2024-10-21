@@ -29,7 +29,7 @@ CREATE TABLE requests (
     Month INT NOT NULL,
     Day INT NOT NULL,
     Type VARCHAR(4) NOT NULL,
-    Status VARCHAR(8) NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+    Status VARCHAR(9) NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
     Approving_manager INT REFERENCES users(Staff_ID),
     created_at DATE NOT NULL DEFAULT CURRENT_DATE,
     Reason VARCHAR(300),

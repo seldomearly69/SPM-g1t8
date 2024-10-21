@@ -312,9 +312,30 @@ class AcceptRejectRequest(graphene.Mutation):
             db.session.rollback()  # Rollback in case of error
             return AcceptRejectRequest(success = False, message=e)
 
+class WithdrawPendingRequest(graphene.Mutation):
+    class Arguments:
+        request_id = graphene.Int(required=True)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, request_id):
+        r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
+        if not r:
+            return WithdrawPendingRequest(success = False, message="Request not found")
+        
+        r.status = "withdrawn"
+        try:
+            db.session.commit()
+            return WithdrawPendingRequest(success = True, message="Request withdrawn successfully")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return WithdrawPendingRequest(success = False, message=e)
+        
 class Mutation1(graphene.ObjectType):
     create_request = CreateRequest.Field()
     accept_reject_request = AcceptRejectRequest.Field()
+    withdraw_pending_request = WithdrawPendingRequest.Field()
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
