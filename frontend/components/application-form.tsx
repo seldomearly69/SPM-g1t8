@@ -100,6 +100,13 @@ export default function ApplicationForm({
 
   const onError = (errors: any) => {
     console.log("Form submission errors:", errors); // Check what validation errors are thrown
+    Object.entries(errors).forEach(([field, error]) => {
+      toast({
+        title: "Error",
+        description: error.message, // Display the error message for each field
+        variant: "destructive",
+      });
+    });
   };
 
   useEffect(() => {
@@ -130,10 +137,11 @@ export default function ApplicationForm({
                 htmlFor="reason"
                 className="block mb-2 text-sm font-medium text-gray-700"
               >
-                Reason
+                Reason <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 id="reason"
+                required
                 rows={4}
                 {...register("reason", { required: true })}
                 placeholder="Please enter your reasons for the WFH request (max 300 words)"
