@@ -7,7 +7,12 @@ import json
 class FlaskAppTestCase(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
+    @patch('app.create_connection')  # Mock the RabbitMQ connection
+    def setUpClass(cls, mock_create_connection):
+        """Set up the Flask test client and test database."""
+        # Mock the connection to RabbitMQ
+        mock_connection = MagicMock()
+        mock_create_connection.return_value = mock_connection
         """Set up the Flask test client and test database."""
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         app.config['TESTING'] = True

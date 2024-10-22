@@ -1,18 +1,23 @@
-# Use the official Python image from the Docker Hub
-FROM python:3.8-slim
+# Use the official RabbitMQ base image
+FROM rabbitmq:3.11-management
 
-# Set the working directory in the container
-WORKDIR /app
+# Expose ports for RabbitMQ
+# - 5672: RabbitMQ main port (AMQP protocol)
+# - 15672: RabbitMQ management web UI
+EXPOSE 5672 15672
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Optional: Set environment variables to configure RabbitMQ
+# For example, you can configure a default user and password
+ENV RABBITMQ_DEFAULT_USER=username
+ENV RABBITMQ_DEFAULT_PASS=password
 
-# Install pika package for RabbitMQ
-RUN pip install pika
+# Optional: Enable RabbitMQ plugins
+# The management plugin is already included in the -management image
+RUN rabbitmq-plugins enable --offline rabbitmq_management
 
-# Make port 5672 available to the world outside this container
-# This is the default port for RabbitMQ
-EXPOSE 5672
+# Optional: Add custom configuration if needed (rabbitmq.conf or advanced.config)
+COPY rabbitmq.config /etc/rabbitmq/rabbitmq.config
+COPY rabbitmq_definitions.json /etc/rabbitmq/rabbitmq_definitions.json
 
-# Run amqp_setup.py when the container launches
-CMD ["python", "./amqp_setup.py"]
+# Set the entrypoint to RabbitMQ's default command
+CMD ["rabbitmq-server"]

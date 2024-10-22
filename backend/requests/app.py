@@ -121,7 +121,7 @@ class OverallSchedule(graphene.ObjectType):
     overall_schedule = graphene.List(DaySchedule)
 
 class OverallAvailability(graphene.ObjectType):
-    overall_availability = graphene.Field(JSON)
+    overall_availability = graphene.List(JSON)
 
 class Query1(graphene.ObjectType):
 
@@ -391,14 +391,20 @@ def resolve_manager_list(director_id):
 
 def resolve_overall_availability(month,year):
     total = User.query.count()
-    overall_availability = {}
+    overall_availability = []
     for i in range(1,days_in_month[month]+1):
-        overall_availability[i] = total - RequestModel.query.filter(
-            RequestModel.month == month,
-            RequestModel.year == year,
-            RequestModel.day == i,
-            RequestModel.status.in_(['approved', 'pending'])
-        ).count()
+        for type in ["AM","PM"]:
+            overall_availability.append({
+                "date": f'{year}-{i}-{month}',
+                "availability":total - RequestModel.query.filter(
+                    RequestModel.month == month,
+                    RequestModel.year == year,
+                    RequestModel.day == i,
+                    RequestModel.type == type,
+                    RequestModel.status.in_(['approved', 'pending'])
+                ).count(),
+                "type":type
+            })
 
 
     return {"overall_availability": overall_availability}
@@ -538,6 +544,8 @@ def resolve_team_schedule(month, year,day, staff_id):
     # Get all approved requests for the team members in the given month and year
 
     user = User.query.filter(User.staff_id == staff_id).first()
+    print(staff_id)
+    print(user.staff_id)
     return retrieve_team_schedule(user,month,year,day)
    
 
