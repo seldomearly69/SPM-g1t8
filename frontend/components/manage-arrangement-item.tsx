@@ -38,7 +38,6 @@ export default function ManageIndividualRequest({
   const router = useRouter();
 
   const handleWithdraw = async () => {
-    
     const data = await withdrawRequest(request.requestId);
     if (data.data.withdrawPendingRequest.success) {
       setSuccessMessage(
