@@ -15,8 +15,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    env_file:
-      - .env
     networks:
       - internal_network
 #################################
@@ -28,9 +26,10 @@ services:
     ports: 
       - "5001:5001"
     environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
       PYTHONUNBUFFERED: 1
-    env_file:
-      - .env
     networks:
       - internal_network
       
@@ -46,8 +45,6 @@ services:
       PYTHONUNBUFFERED: 1
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    env_file:
-      - .env
     networks:
       - internal_network
 
