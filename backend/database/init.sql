@@ -73,8 +73,6 @@ INSERT INTO requests (Requesting_staff, Year, Month, Day, Type, Status, Approvin
 (151408, 2024, 2, 8, 'FULL', 'approved', 130002, 'Annual family holiday', 'Approved for annual leave'), 
 (140894, 2024, 3, 23, 'AM', 'pending', 140001, 'Morning family commitment', ''), 
 (140941, 2024, 11, 23, 'AM', 'pending', 140879, 'Doctors appointment scheduled', ''), 
-(140894, 2024, 11, 23, 'PM', 'approved', 140879, 'Personal time needed', 'Approved'), 
-(140894, 2024, 11, 24, 'AM', 'rejected', 140879, 'Business review meeting scheduled', 'Rejected due to business meeting'),
 (140002, 2024, 11, 24, 'PM', 'pending', 140894, 'Personal time needed', ''),
 (140003, 2024, 11, 24, 'AM', 'approved', 140894, 'Personal time needed', 'Approved'),
 (140004, 2024, 11, 24, 'AM', 'approved', 140894, 'Personal time needed', 'Approved'),
