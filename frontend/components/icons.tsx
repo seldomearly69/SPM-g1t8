@@ -26,6 +26,8 @@ import {
     Users,
     FilePlus,
     Calendar,
+    Calendar1,
+    CalendarDays,
   } from "lucide-react"
   
   
@@ -44,7 +46,6 @@ import {
     ellipsis: MoreVertical,
     add: Plus,
     warning: AlertTriangle,
-    user: User,
     arrowRight: ArrowRight,
     help: HelpCircle,
     pizza: Pizza,
@@ -53,7 +54,10 @@ import {
     laptop: Laptop,
     check: Check,
     home: House,
+    user: User,
     users: Users,
     filePlus: FilePlus,
     calendar: Calendar,
+    calendar1: Calendar1,
+    calendarDays: CalendarDays,
   }
