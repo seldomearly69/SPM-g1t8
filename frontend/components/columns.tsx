@@ -221,7 +221,7 @@ export const availability_columns: ColumnDef<Availability>[] = [
     enableColumnFilter: true,
   },
   {
-    accessorKey: "isPending",
+    accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
       const status =

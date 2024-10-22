@@ -30,7 +30,11 @@ interface DataTableProps<TData, TValue> {
     data: TData[]
     onRowClick?: (row: TData) => void
     hasToolbar?: boolean
-    sort?: string
+    sort?: boolean
+    filterStatus?: boolean
+    filterType?: boolean
+    filterDepartment?: boolean
+    filterAvailability?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -38,17 +42,18 @@ export function DataTable<TData, TValue>({
   data,
   onRowClick,
   hasToolbar,
-  sort
+  sort,
+  filterStatus,
+  filterType,
+  filterDepartment,
+  filterAvailability,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: sort ?? "requestId",
-      desc: false,
-    },
-  ]);
+  const [sorting, setSorting] = useState<SortingState>(
+    sort ? [{ id: "requestId", desc: false }] : [] 
+  );
 
   const table = useReactTable({
     data,
@@ -75,7 +80,14 @@ export function DataTable<TData, TValue>({
   
   return (
     <div className="space-y-4 p-1">
-      {hasToolbar && <DataTableToolbar table={table} />}
+      {hasToolbar && 
+      <DataTableToolbar 
+        table={table} 
+        filterStatus={filterStatus} 
+        filterType={filterType} 
+        filterDepartment={filterDepartment} 
+        filterAvailability={filterAvailability}
+      />}
       <div className="rounded-md border max-h-[400px] overflow-y-auto no-scrollbar">
         <Table>
           <TableHeader>

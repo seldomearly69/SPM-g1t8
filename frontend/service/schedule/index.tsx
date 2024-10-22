@@ -124,6 +124,8 @@ export async function getTeamSchedule(
   year: number,
   staffId: number
 ) {
+  console.log(day, month, year, staffId);
+  
   const gqlString = gql`
     query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
       teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {

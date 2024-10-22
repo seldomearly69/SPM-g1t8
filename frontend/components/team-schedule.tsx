@@ -27,7 +27,6 @@ import { Availability, EventType, User } from "@/types";
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { AvailabilityChartArea } from "./availability-chart-area";
-import { mockSchedule } from "@/mock-schedule";
 
 const mockSchedule2 = [
   { date: new Date("2024-09-01"), availableCount: 3, type: "AM" },
@@ -45,41 +44,40 @@ const mockSchedule2 = [
 
 interface TeamScheduleProps {
   user: User;
+  _managerList: User[];
+  _teamSchedule: any[];
 }
 
-export default function TeamSchedule({ user }: TeamScheduleProps) {
-  const [teamSchedule, setTeamSchedule] = useState(mockSchedule2);
+export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
+  const [teamSchedule, setTeamSchedule] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedDialogDate, setSelectedDialogDate] = useState<Date | null>(null);
   const [chartData, setChartData] = useState<any[]>([]);
   const [dialogData, setDialogData] = useState<Availability[]>([]);
-  const [managerList, setManagerList] = useState<User[]>([]);
+  const [managerList, setManagerList] = useState<User[]>(_managerList);
   const [selectedManager, setSelectedManager] = useState<number>(0); // Added to store the selected manager's ID
   // const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar (redundant)
-
+  
+  
   useEffect(() => {
     const fetchSchedule = async () => {
+      let managerId: number;
       if (user.position === "Director") {
-
-        // Get all managers that fall under that director
-        const data = await getManagerList(user.staffId);
-        const managerList = data.data.managerList.managerList;
-
-        if (Array.isArray(managerList)) {
-          setManagerList(managerList);
-          console.log(managerList)
-          console.log(managerList[0]?.staffId)
-          // Get team schedule, by default will be the first manager's team
-          const teamSchedule = await getTeamSchedule(0, selectedDate?.getMonth() + 1, selectedDate?.getFullYear(), managerList[0]?.staffId ?? user.staffId);
-          console.log(teamSchedule)
-          setSelectedManager(parseInt(managerList[0]?.staffId, 10));
-          setTeamSchedule(teamSchedule.data.teamSchedule.teamSchedule)
-
+        // If director has manager under him
+        if (Array.isArray(managerList) && managerList.length > 0) {
+          // On initial load, set to the first manager
+          if (!selectedManager) {
+            managerId = parseInt(managerList[0]?.staffId, 10)
+            setSelectedManager(managerId);
+          // On subsequent loads, set managerId to the existing selected manager
+          } else {
+            managerId = selectedManager
+          }
         } else console.error("Manager list is not an array");
         
       } else {
-        // Get the schedule of the user's team
-        // Returns availableCount and type for each day
+          // For managers and staff
+          managerId = parseInt(user.reportingManager, 10)
           const data = await getTeamSchedule (
             0,
             selectedDate?.getMonth() + 1,
@@ -90,12 +88,22 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
           console.log(data)
           setSelectedManager(parseInt(user.reportingManager, 10));
           setTeamSchedule(data.data.teamSchedule.teamSchedule);
-          // Redundant, react will auto re-render
-          // setShowCalendar(true); 
+         
       }
+      
+      console.log(managerId);
+      
+      const team_schedule_data = await getTeamSchedule(
+        0, 
+        selectedDate?.getMonth() + 1, 
+        selectedDate?.getFullYear(), 
+        managerId
+      );
+      console.log(team_schedule_data)
+      setTeamSchedule(team_schedule_data.data.teamSchedule.teamSchedule)
     };
     fetchSchedule();
-  }, [selectedDate]);
+  }, [selectedDate, selectedManager]);
 
   const handleDialogOpen = async (open: boolean) => {
     if (open && selectedDialogDate) {
@@ -106,15 +114,27 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
         if (user.position === "Director") {
           // Get the schedule details of the team
           // Returns name, department, availability, type and status
-          data = await getTeamDetails(
-            selectedDialogDate?.getDate(),
-            selectedDialogDate?.getMonth() + 1,
-            selectedDialogDate?.getFullYear(),
-            selectedManager
-          );
+          
+          if (!selectedManager) {
+            data = await getTeamDetails(
+              selectedDialogDate?.getDate(),
+              selectedDialogDate?.getMonth() + 1,
+              selectedDialogDate?.getFullYear(),
+              user.staffId
+            );
+          } else {
+            data = await getTeamDetails(
+              selectedDialogDate?.getDate(),
+              selectedDialogDate?.getMonth() + 1,
+              selectedDialogDate?.getFullYear(),
+              user.staffId
+            );
+          }
+         
         } else {
           // Get the schedule details of the team
           // Returns name, department, availability, type and status
+          
           data = await getTeamDetails(
             selectedDialogDate?.getDate(),
             selectedDialogDate?.getMonth() + 1,
@@ -140,23 +160,6 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
     }
   };
 
-  const handleManagerChange = async (managerId: string ) => {
-    console.log(managerId)
-    // Update the selected manager's ID
-    setSelectedManager(parseInt(managerId, 10)); 
-
-    // Assuming there's a method to fetch team schedule based on manager ID // There is, it's getTeamSchedule
-    const data = await getTeamSchedule(
-      0,
-      selectedDate?.getMonth() + 1,
-      selectedDate?.getFullYear(),
-      parseInt(managerId, 10)
-    );
-    setTeamSchedule(data.data.teamSchedule.teamSchedule);
-
-    // Display the calendar after the user select the team to view // Redundant, react will auto re-render
-    // setShowCalendar(true); 
-  };
 
   return (
       <Card>
@@ -169,7 +172,7 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
             >
               <div className="ml-auto flex w-full space-x-5 sm:justify-end">
                   {user.position === "Director" && managerList.length > 0 && 
-                  <Select onValueChange={handleManagerChange} defaultValue={managerList[0]?.staffId.toString()}>
+                  <Select onValueChange={(value) => setSelectedManager(parseInt(value, 10))} defaultValue={managerList[0]?.staffId.toString()}>
                   <SelectTrigger>
                       <SelectValue 
                         placeholder="Select a Team" 
@@ -193,8 +196,8 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                   
                 }
                 <MonthlyNav />
+
               </div>
-            
               <MonthlyBody events={teamSchedule}>
                 <Dialog onOpenChange={handleDialogOpen}>
                   <DialogTrigger>
@@ -227,6 +230,10 @@ export default function TeamSchedule({ user }: TeamScheduleProps) {
                           columns={availability_columns}
                           data={dialogData.length > 0 ? dialogData[0].availability.concat(dialogData[1].availability) : []}
                           hasToolbar={true}
+                          sort={false}
+                          filterStatus={true}
+                          filterType={true}
+                          filterAvailability={true}
                         />
                         <ScrollBar orientation="horizontal" />
                       </ScrollArea>
