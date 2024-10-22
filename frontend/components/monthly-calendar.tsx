@@ -350,7 +350,7 @@ export const DefaultMonthlyEventItem = ({
     
     return (
       <li className="py-2">
-        <Badge variant={isPending ? "warning" : "success"} className="w-full">
+        <Badge variant={availability == "Leave" ? "secondary" :isPending ? "warning" : "success"} className="w-full">
           <div className="flex text-sm flex-1 justify-between">
             <h3 className="font-medium">{availability}</h3>
             <p className="text-gray-500 text-xs">{type}</p>

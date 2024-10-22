@@ -212,3 +212,27 @@ export async function getOverallSchedule(
 }
 
 
+export async function getLeaves(month: number, year: number, staffId: number) {
+  const gqlString = gql`
+    query ownLeaves($month: Int!, $year: Int!, $staffId: Int!) {
+      ownLeaves(month: $month, year: $year, staffId: $staffId) {
+        date
+        availability
+        type
+        isPending
+      }
+    }
+  `;
+  const res = await fetch("http://localhost:5002/schedule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString?.loc?.source?.body,
+      variables: { month: month, year: year, staffId: staffId },
+    }),
+  });
+  const data = await res.json();
+  return data;
+}

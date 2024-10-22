@@ -174,7 +174,7 @@ class Query1(graphene.ObjectType):
 
     own_leaves = graphene.Field(
         graphene.List(Leave),
-        staff_id = graphene.String(),
+        staff_id = graphene.Int(),
         month = graphene.Int(),
         year = graphene.Int()
     )

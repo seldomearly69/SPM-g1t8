@@ -5,7 +5,7 @@ import { DefaultMonthlyEventItem, MonthlyBody, MonthlyCalendar, MonthlyDay, Mont
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { EventType, User } from "@/types"
 import { startOfMonth, subHours } from "date-fns";
-import { getOwnSchedule } from "@/service/schedule";
+import { getLeaves, getOwnSchedule } from "@/service/schedule";
 
 // Mock data - replace with actual API call
 const mockSchedule = [
@@ -28,7 +28,6 @@ interface MyScheduleProps {
 
 export default function MySchedule({user}: MyScheduleProps) {
     const [schedule, setSchedule] = useState(mockSchedule)
-  
     const [currentMonth, setCurrentMonth] = useState<Date>(
         startOfMonth(new Date())
     );
@@ -39,8 +38,9 @@ export default function MySchedule({user}: MyScheduleProps) {
             // Get the schedule of the user by passing in month, year and user's staffId
             const data = await getOwnSchedule(currentMonth.getMonth() + 1, currentMonth.getFullYear(), user.staffId);
             console.log(data);
-            
-            setSchedule(data.data.ownSchedule.schedule)
+            const leaves = await getLeaves(currentMonth.getMonth() + 1, currentMonth.getFullYear(), user.staffId);
+            console.log(leaves);
+            setSchedule(data.data.ownSchedule.schedule.concat(leaves.data.ownLeaves))
         };
         fetchSchedule();
       }, [currentMonth])
