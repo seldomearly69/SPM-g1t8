@@ -142,7 +142,7 @@ class Query1(graphene.ObjectType):
 
     manager_list = graphene.Field(
         ManagerList,
-        director_id = graphene.Int(),
+        staff_id = graphene.Int(),
     )
 
     department_schedule = graphene.Field(
@@ -178,8 +178,8 @@ class Query1(graphene.ObjectType):
     def resolve_team_schedule(self, info, month, year, day, staff_id):
         return resolve_team_schedule(month, year, day, staff_id)
     
-    def resolve_manager_list(self,info,director_id):
-        return resolve_manager_list(director_id)
+    def resolve_manager_list(self,info,staff_id):
+        return resolve_manager_list(staff_id)
 
     def resolve_overall_schedule(self,info,month,year,day):
         return resolve_overall_schedule(month,year,day)
@@ -379,11 +379,11 @@ app.add_url_rule('/schedule', view_func=GraphQLView.as_view('graphql1', schema=s
 
 app.add_url_rule('/requests', view_func=FileUploadGraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
 
-def resolve_manager_list(director_id):
-    user = User.query.filter(User.staff_id == director_id).first()
+def resolve_manager_list(staff_id):
+    user = User.query.filter(User.staff_id == staff_id).first()
     if user.position != "Director":
-        raise Exception("User is not a director. This endpoint is for directors only")
-    m_list = User.query.filter(User.reporting_manager == director_id, User.role == 3).all()
+        return resolve_manager_list(user.reporting_manager)
+    m_list = User.query.filter(User.reporting_manager == staff_id, User.role == 3).all()
     return {
         "director_name": user.staff_fname + " " + user.staff_lname,
         "manager_list": [{"staff_id":m.staff_id, "position": m.position, "name": m.staff_fname + " " + m.staff_lname} for m in m_list]
