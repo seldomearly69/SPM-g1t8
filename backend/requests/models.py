@@ -27,7 +27,7 @@ class RequestModel(db.Model):
     month = db.Column(db.Integer, nullable=False)
     day = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(4), nullable=False)
-    status = db.Column(db.String(8), nullable=False, default='pending')
+    status = db.Column(db.String(20), nullable=False, default='pending')
     approving_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
     created_at = db.Column(db.Date, nullable = False, default=func.current_date())
     reason = db.Column(db.String(300),nullable=True)
@@ -45,3 +45,13 @@ class FileRequestAssoc(db.Model):
     __tablename__ = 'file_request_assoc'
     file_key = db.Column(db.String(100), db.ForeignKey('files.file_key'), primary_key=True)
     request_id = db.Column(db.Integer, db.ForeignKey('requests.request_id'), primary_key=True)
+
+class LeaveModel(db.Model):
+    __tablename__ = 'leaves'
+    leave_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    requesting_staff = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
+    year = db.Column(db.Integer, nullable=False)
+    month = db.Column(db.Integer, nullable=False)
+    day = db.Column(db.Integer, nullable=False)
+    type = db.Column(db.String(4), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')

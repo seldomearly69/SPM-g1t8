@@ -123,6 +123,12 @@ class OverallSchedule(graphene.ObjectType):
 class OverallAvailability(graphene.ObjectType):
     overall_availability = graphene.List(JSON)
 
+class Leave(graphene.ObjectType):
+    date = graphene.String()
+    availability = graphene.String()
+    type = graphene.String()
+    is_pending = graphene.Boolean()
+
 class Query1(graphene.ObjectType):
 
     own_schedule = graphene.Field(
@@ -166,6 +172,13 @@ class Query1(graphene.ObjectType):
         year = graphene.Int()
     )
 
+    own_leaves = graphene.Field(
+        graphene.List(Leave),
+        staff_id = graphene.String(),
+        month = graphene.Int(),
+        year = graphene.Int()
+    )
+
     # Add resolver for department schedule (Shawn)
     def resolve_department_schedule(self, info, month, year, staff_id, team_managers=None):
         return resolve_department_schedule(month, year, staff_id, team_managers)
@@ -186,6 +199,9 @@ class Query1(graphene.ObjectType):
     
     def resolve_overall_availability(self,info,month,year):
         return resolve_overall_availability(month,year)
+    
+    def resolve_own_leaves(self,info,staff_id,month,year):
+        return resolve_own_leaves(staff_id,month,year)
     
 schedule_schema = graphene.Schema(query=Query1)
 
@@ -239,6 +255,8 @@ class Query2(graphene.ObjectType):
         file_key = graphene.String()
     )
 
+
+
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
     
@@ -250,6 +268,7 @@ class Query2(graphene.ObjectType):
 
     def resolve_file_link(self,info,file_key):
         return resolve_file_link(file_key)
+
  
 # Define Mutations 
 class CreateRequest(graphene.Mutation):
@@ -652,7 +671,7 @@ def resolve_department_schedule(month, year, staff_id, team_managers=None):
 
     return {
         "department_name": user.dept,
-        "dept_schedule": [retrieve_team_schedule(m,month,year) for m in team_managers]
+        "dept_schedule": [resolve_team_schedule(month,year,0,m.staff_id) for m in team_managers]
     }
 
 
@@ -732,6 +751,13 @@ def resolve_file_link(file_key):
                 Params={'Bucket': BUCKET_NAME, 'Key': file_key},
                 ExpiresIn=3600
             )}
+
+def resolve_own_leaves(staff_id,month,year):
+    print(type(Leave))
+    leaves = LeaveModel.query.filter(LeaveModel.requesting_staff==staff_id,LeaveModel.month==month,LeaveModel.year==year).all()
+    leaves = [{"date": f"{l.year}-{l.month}-{l.day}", "availability": "Leave", "type": l.type, "is_pending": l.status == "pending"} for l in leaves]
+
+    return leaves
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

@@ -47,6 +47,15 @@ CREATE TABLE file_request_assoc (
     PRIMARY KEY (Request_id, File_key)
 );
 
+CREATE TABLE leaves (
+    Leave_id SERIAL PRIMARY KEY,
+    Requesting_staff INT REFERENCES users(Staff_ID),
+    Year INT NOT NULL,
+    Month INT NOT NULL,
+    Day INT NOT NULL,
+    Type VARCHAR(4) NOT NULL,
+    Status VARCHAR(20) NOT NULL DEFAULT 'pending'
+);
 INSERT INTO roles VALUES 
     (1, 'HR'),
     (2, 'Staff'),
@@ -85,6 +94,11 @@ INSERT INTO requests (Requesting_staff, Year, Month, Day, Type, Status, Approvin
 (140115, 2024, 11, 24, 'PM', 'pending', 140894, 'Personal time needed', ''),
 (140736, 2024, 11, 24, 'AM', 'pending', 140894, 'Personal time needed', '');
 
+INSERT INTO leaves (Requesting_staff, Year, Month, Day, Type, Status) VALUES
+(140001, 2024, 11, 29, 'AM', 'pending'),
+(140001, 2024, 11, 28, 'PM','pending'),
+(140001, 2024, 12, 1, 'FULL', 'approved'),
+(140001, 2024, 12, 2, 'FULL', 'pending');
 
 -- CREATE TABLE departments (
 --     department_id INT PRIMARY KEY,
