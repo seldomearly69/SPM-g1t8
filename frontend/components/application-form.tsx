@@ -119,8 +119,8 @@ export default function ApplicationForm({
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="flex flex-col justify-between">
-          <div className="space-y-6 pt-10">
+        <div className="flex flex-col justify-between order-2">
+          <div className="space-y-6 pt-14">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -180,7 +180,7 @@ export default function ApplicationForm({
               </Button>
             </motion.div>
           </div>
-        <div>
+        <div className="order-1">
           <MonthlyCalendar
             currentMonth={selectedDate || new Date()}
             onCurrentMonthChange={setSelectedDate}

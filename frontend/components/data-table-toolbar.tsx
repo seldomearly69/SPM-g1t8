@@ -14,13 +14,22 @@ import {
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
+  filterStatus?: boolean;
+  filterType?: boolean;
+  filterDepartment?: boolean;
+  filterAvailability?: boolean;
 }
 
 export function DataTableToolbar<TData>({
   table,
+  filterStatus,
+  filterType,
+  filterDepartment,
+  filterAvailability,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
+  
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -38,28 +47,28 @@ export function DataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("status") && (
+        {filterStatus && table.getColumn("status") && (
           <DataTableFacetedFilter
             column={table.getColumn("status")}
             title="Status"
             options={schedule_status}
           />
         )}
-        {table.getColumn("department") && (
+        {filterDepartment && table.getColumn("department") && (
           <DataTableFacetedFilter
             column={table.getColumn("department")}
             title="Department"
             options={department}
           />
         )}
-        {/* {table.getColumn("availability") && (
+        {filterAvailability && table.getColumn("availability") && (
           <DataTableFacetedFilter
             column={table.getColumn("availability")}
             title="Availability"
             options={availability}
           />
-        )} */}
-        {table.getColumn("type") && (
+        )}
+        {filterType && table.getColumn("type") && (
           <DataTableFacetedFilter
             column={table.getColumn("type")}
             title="Type"

@@ -69,7 +69,7 @@ export const MonthlyNav = () => {
   const { locale, currentMonth, onCurrentMonthChange } = useMonthlyCalendar();
 
   return (
-    <div className="flex justify-end mb-4">
+    <div className="flex justify-end mb-3">
       <Button
         type="button"
         onClick={(e) => {
@@ -178,6 +178,7 @@ export function MonthlyBody<DayData>({
     const headingClassName =
       'border-b-2 p-2 border-r-2 xl:flex justify-center items-center hidden';
 
+      
     return (
       <div className={cn("bg-white border-l-2 border-t-2", className)}>
         <div
