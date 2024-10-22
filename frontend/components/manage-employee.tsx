@@ -11,6 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
+import { PlusIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import AssignManagerForm from "./assign-manager-form";
 
 interface ManageEmployeeArrangementsProps {
   user: User;
@@ -72,6 +76,10 @@ export default function ManageEmployeeArrangements({
     router.push(`/dashboard/manage-employees/${row.requestId}?${queryParams}`);
   };
 
+  const handleAssignManager = () => {
+
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -81,7 +89,7 @@ export default function ManageEmployeeArrangements({
     >
       <h2 className="text-2xl font-bold mb-6">Manage Employee WFH Requests</h2>
       <Tabs defaultValue="pending" className="h-full space-y-6">
-        <div className="space-between flex items-center justify-center">
+        <div className="space-between flex items-center justify-center relative">
           <TabsList>
             <TabsTrigger value="pending" className="relative">
               Pending
@@ -93,6 +101,26 @@ export default function ManageEmployeeArrangements({
               Rejected
             </TabsTrigger>
           </TabsList>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+              className="flex items-center absolute right-1"
+              >
+              <PlusIcon className="w-4 h-4 mr-2" />
+               Assign Manager
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Assign Manager</DialogTitle>
+                <DialogDescription>
+                  Assign a manager to the employee
+                </DialogDescription>
+              </DialogHeader>
+              <AssignManagerForm />
+            </DialogContent>
+          </Dialog>
+        
         </div>
 
         <TabsContent value="pending">

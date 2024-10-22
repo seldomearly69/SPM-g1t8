@@ -108,7 +108,7 @@ export default function ApplicationForm({
     const combinedDates = date.concat(requests.map((r: any) => ({date: r.date, type: r.type})));
     if (combinedDates.length > 0 && hasMoreThanTwoDays(combinedDates)) {
         toast({
-            title: "Error",
+            title: "Notice",
             description: "You exceeded the maximum number of days allowed for this month",
             variant: "warning",
         })

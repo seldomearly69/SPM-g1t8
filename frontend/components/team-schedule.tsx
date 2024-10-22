@@ -45,7 +45,6 @@ const mockSchedule2 = [
 interface TeamScheduleProps {
   user: User;
   _managerList: User[];
-  _teamSchedule: any[];
 }
 
 export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
@@ -58,6 +57,8 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
   const [selectedManager, setSelectedManager] = useState<number>(0); // Added to store the selected manager's ID
   // const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar (redundant)
   
+  
+  console.log(managerList);
   
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -172,7 +173,9 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
             >
               <div className="ml-auto flex w-full space-x-5 sm:justify-end">
                   {user.position === "Director" && managerList.length > 0 && 
-                  <Select onValueChange={(value) => setSelectedManager(parseInt(value, 10))} defaultValue={managerList[0]?.staffId.toString()}>
+                  <Select 
+                    onValueChange={(value) => setSelectedManager(parseInt(value, 10))} 
+                    defaultValue={managerList[0]?.staffId.toString()}>
                   <SelectTrigger>
                       <SelectValue 
                         placeholder="Select a Team" 
