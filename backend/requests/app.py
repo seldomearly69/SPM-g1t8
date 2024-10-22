@@ -546,10 +546,6 @@ def resolve_team_schedule(month, year,day, staff_id):
     user = User.query.filter(User.staff_id == staff_id).first()
     print(staff_id)
     print(user.staff_id)
-    return retrieve_team_schedule(user,month,year,day)
-   
-
-def retrieve_team_schedule(user,month,year,day):
     if user.role == 3 or user.position == "Director" or user.position == "MD":
         print("staff id: " + str(user.staff_id))
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
@@ -644,6 +640,7 @@ def retrieve_team_schedule(user,month,year,day):
         "team_schedule": team_schedule
     }
 
+    
 def resolve_department_schedule(month, year, staff_id, team_managers=None):
     user = User.query.filter(User.staff_id == staff_id).first()
     if user.position != "Director":
