@@ -172,7 +172,9 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
             >
               <div className="ml-auto flex w-full space-x-5 sm:justify-end">
                   {user.position === "Director" && managerList.length > 0 && 
-                  <Select onValueChange={(value) => setSelectedManager(parseInt(value, 10))} defaultValue={managerList[0]?.staffId.toString()}>
+                  <Select 
+                    onValueChange={(value) => setSelectedManager(parseInt(value, 10))} 
+                    defaultValue={managerList[0]?.staffId.toString()}>
                   <SelectTrigger>
                       <SelectValue 
                         placeholder="Select a Team" 

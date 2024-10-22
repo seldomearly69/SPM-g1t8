@@ -18,3 +18,7 @@ export const applicationSchema = z.object({
 
   date_type: z.array(dateSchema).nonempty(),
 });
+
+export const assignManagerSchema = z.object({
+  manager: z.string().min(1, "Manager is required"),
+});
