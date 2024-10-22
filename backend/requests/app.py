@@ -542,10 +542,7 @@ def resolve_own_schedule(month, year, staff_id):
 
 def resolve_team_schedule(month, year,day, staff_id):
     # Get all approved requests for the team members in the given month and year
-
     user = User.query.filter(User.staff_id == staff_id).first()
-    print(staff_id)
-    print(user.staff_id)
     if user.role == 3 or user.position == "Director" or user.position == "MD":
         print("staff id: " + str(user.staff_id))
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
