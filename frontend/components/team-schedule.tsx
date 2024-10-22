@@ -45,7 +45,6 @@ const mockSchedule2 = [
 interface TeamScheduleProps {
   user: User;
   _managerList: User[];
-  _teamSchedule: any[];
 }
 
 export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
@@ -58,6 +57,8 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
   const [selectedManager, setSelectedManager] = useState<number>(0); // Added to store the selected manager's ID
   // const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar (redundant)
   
+  
+  console.log(managerList);
   
   useEffect(() => {
     const fetchSchedule = async () => {

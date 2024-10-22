@@ -2,7 +2,6 @@ import * as motion from "framer-motion/client";
 import ApplicationForm from "@/components/application-form";
 import { getCurrentUser } from "@/lib/session";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useEffect } from "react";
 import { getOwnRequest } from "@/service/request";
 
 export default async function ApplyWFHPage() {

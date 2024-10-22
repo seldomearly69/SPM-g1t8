@@ -113,10 +113,11 @@ export default function ManageEmployeeArrangements({
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Manager</DialogTitle>
+                <DialogDescription>
+                  Assign a manager to the employee
+                </DialogDescription>
               </DialogHeader>
-              <DialogDescription>
-                <AssignManagerForm />
-              </DialogDescription>
+              <AssignManagerForm />
             </DialogContent>
           </Dialog>
         
