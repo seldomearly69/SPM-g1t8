@@ -10,6 +10,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -58,8 +59,6 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
   // const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar (redundant)
   
   
-  console.log(managerList);
-  
   useEffect(() => {
     const fetchSchedule = async () => {
       let managerId: number;
@@ -88,7 +87,7 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
 
           console.log(data)
           setSelectedManager(parseInt(user.reportingManager, 10));
-          setTeamSchedule(data.data.teamSchedule.teamSchedule);
+          setTeamSchedule(data.data.teamSchedule);
          
       }
       
@@ -101,7 +100,7 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
         managerId
       );
       console.log(team_schedule_data)
-      setTeamSchedule(team_schedule_data.data.teamSchedule.teamSchedule)
+      setTeamSchedule(team_schedule_data.data.teamSchedule)
     };
     fetchSchedule();
   }, [selectedDate, selectedManager]);
@@ -128,7 +127,7 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
               selectedDialogDate?.getDate(),
               selectedDialogDate?.getMonth() + 1,
               selectedDialogDate?.getFullYear(),
-              user.staffId
+              selectedManager
             );
           }
          
@@ -201,7 +200,7 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
                 <MonthlyNav />
 
               </div>
-              <MonthlyBody events={teamSchedule}>
+              <MonthlyBody events={teamSchedule.teamSchedule}>
                 <Dialog onOpenChange={handleDialogOpen}>
                   <DialogTrigger>
                     <MonthlyDay<EventType>
@@ -211,7 +210,7 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
                           {data.map((item) => (
                             <TeamMonthlyEventItem
                               key={`${item.date}-${item.type}`}
-                              availability={item.availableCount?.office || 0}
+                              availability={`${item.availableCount?.office || 0} / ${teamSchedule.teamCount || 0}`}
                               type={item.type}
                             />
                           ))}
@@ -223,8 +222,11 @@ export default function TeamSchedule({ user, _managerList}: TeamScheduleProps) {
                   <DialogContent className="w-full max-w-[95vw] h-[90vh] p-0 sm:p-6">
                     <DialogHeader className="p-4 sm:p-0">
                       <DialogTitle>
-                        {dialogData ? <></> : <p>Loading...</p>}
+                        {dialogData ? <>Staff Availability for {selectedDialogDate?.toLocaleDateString()}</> : <p>Loading...</p>}
                       </DialogTitle>
+                      <DialogDescription>
+                        Pending requests are included in the availability
+                      </DialogDescription>
                     </DialogHeader>
                    
                       <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0 ">

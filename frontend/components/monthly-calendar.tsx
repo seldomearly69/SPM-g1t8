@@ -115,7 +115,7 @@ export const handleOmittedDays = ({
   let headings = daysInWeek({ locale });
   let daysToRender = days.map(day => {
     
-    if (day < new Date()) {
+    if (day <= new Date()) {
       return {
         day,
         is_past: true
@@ -178,7 +178,8 @@ export function MonthlyBody<DayData>({
     const headingClassName =
       'border-b-2 p-2 border-r-2 xl:flex justify-center items-center hidden';
 
-      
+   
+
     return (
       <div className={cn("bg-white border-l-2 border-t-2", className)}>
         <div
@@ -230,7 +231,7 @@ export function MonthlyBody<DayData>({
     return (
       <div
         key={day.toISOString()}
-        title={`Events for day ${dayNumber}`}
+        title={`Number of staff in office on day ${dayNumber}`}
         className={cn("h-48 p-2 border-b-2 border-r-2", className?.({date: day}))}
         onClick={() => onDateClick(day)}
         >
@@ -255,7 +256,7 @@ export function CustomMonthlyDay<DayData>({ renderDay, onDateClick, className}: 
       is_past ?  
         <button
           key={day.toISOString()}
-          title={`Events for day ${dayNumber}`}
+          // title={`Events for day ${dayNumber}`}
           disabled={is_past}
           className={cn(
             "disabled:font-light flex flex-col p-1 h-20 border-none m-0.5 rounded-md flex items-center justify-evenly",
