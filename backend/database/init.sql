@@ -76,8 +76,14 @@ INSERT INTO requests (Requesting_staff, Year, Month, Day, Type, Status, Approvin
 (140002, 2024, 11, 24, 'PM', 'pending', 140894, 'Personal time needed', ''),
 (140003, 2024, 11, 24, 'AM', 'approved', 140894, 'Personal time needed', 'Approved'),
 (140004, 2024, 11, 24, 'AM', 'approved', 140894, 'Personal time needed', 'Approved'),
-(140015, 2024, 11, 24, 'AM', 'approved', 140894, 'Personal time needed', 'Approved'),
-(140025, 2024, 11, 24, 'FULL', 'rejected', 140894, 'Personal time needed', 'Approved');
+(140015, 2024, 11, 24, 'PM', 'approved', 140894, 'Personal time needed', 'Approved'),
+(140025, 2024, 11, 24, 'FULL', 'rejected', 140894, 'Personal time needed', 'Approved'),
+(140036, 2024, 11, 24, 'AM', 'pending', 140894, 'Personal time needed', ''),
+(140078, 2024, 11, 24, 'PM', 'pending', 140894, 'Personal time needed', ''),
+(140102, 2024, 11, 24, 'FULL', 'pending', 140894, 'Personal time needed', ''),
+(140108, 2024, 11, 24, 'AM', 'pending', 140894, 'Personal time needed', ''),
+(140115, 2024, 11, 24, 'PM', 'pending', 140894, 'Personal time needed', ''),
+(140736, 2024, 11, 24, 'AM', 'pending', 140894, 'Personal time needed', '');
 
 
 -- CREATE TABLE departments (
