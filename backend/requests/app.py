@@ -377,6 +377,9 @@ class WithdrawPendingRequest(graphene.Mutation):
         if not r:
             return WithdrawPendingRequest(success = False, message="Request not found")
         
+        if r.status == "approved" or r.status == "rejected":
+            return WithdrawApprovedRequest(success = False, message="Request is already approved")
+
         r.status = "withdrawn"
         try:
             db.session.commit()
@@ -384,11 +387,37 @@ class WithdrawPendingRequest(graphene.Mutation):
         except Exception as e:
             db.session.rollback()  # Rollback in case of error
             return WithdrawPendingRequest(success = False, message=e)
+
+class WithdrawApprovedRequest(graphene.Mutation):
+    class Arguments:
+        request_id = graphene.Int(required=True)
+        new_reason = graphene.String(required=True)
+    
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, request_id, new_reason):
+        r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
+        if not r:
+            return WithdrawApprovedRequest(success = False, message="Request not found")
+        
+        if r.status == "pending":
+            return WithdrawApprovedRequest(success = False, message="Request is still pending")
+        
+        r.status = "pending_withdrawal"
+        r.reason = new_reason
+        try:
+            db.session.commit()
+            return WithdrawApprovedRequest(success = True, message="Request withdrawn successfully")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return WithdrawApprovedRequest(success = False, message=e)
         
 class Mutation1(graphene.ObjectType):
     create_request = CreateRequest.Field()
     accept_reject_request = AcceptRejectRequest.Field()
     withdraw_pending_request = WithdrawPendingRequest.Field()
+    withdraw_approved_request = WithdrawApprovedRequest.Field()
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
