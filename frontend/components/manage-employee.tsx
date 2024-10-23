@@ -24,6 +24,7 @@ export default function ManageEmployeeArrangements({
   user,
 }: ManageEmployeeArrangementsProps) {
   const [employeeRequests, setEmployeeRequests] = useState<any[]>([]); // Updated to handle real data
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function ManageEmployeeArrangements({
     fetchPendingRequests();
   }, [user.staffId]);
 
+  // Todo: Why not pass in requestId instead
   const handleRowClick = (row: {
     requestId: number;
     requestingStaffName: string;
@@ -101,15 +103,15 @@ export default function ManageEmployeeArrangements({
               Rejected
             </TabsTrigger>
           </TabsList>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button 
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Button 
               className="flex items-center absolute right-1"
+              onClick={() => setIsDialogOpen(true)}
               >
               <PlusIcon className="w-4 h-4 mr-2" />
                Assign Manager
-              </Button>
-            </DialogTrigger>
+            </Button>
+           
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Manager</DialogTitle>
@@ -117,7 +119,10 @@ export default function ManageEmployeeArrangements({
                   Assign a manager to the employee
                 </DialogDescription>
               </DialogHeader>
-              <AssignManagerForm />
+              <AssignManagerForm 
+                user={user} 
+                setIsDialogOpen={setIsDialogOpen} 
+                employeeRequests={employeeRequests}/>
             </DialogContent>
           </Dialog>
         
