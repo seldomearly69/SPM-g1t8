@@ -5,11 +5,11 @@ from flask_graphql import GraphQLView
 from sqlalchemy import or_
 import graphene, boto3
 from graphene_sqlalchemy import SQLAlchemyObjectType
-import os, json, ast, datetime, sys
+import os, json, ast, base64, datetime
 from flask_cors import CORS
 from graphene_file_upload.scalars import Upload
 from graphene_file_upload.flask import FileUploadGraphQLView
-from amqp_connection import *
+
 
 
 days_in_month = {
@@ -48,13 +48,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{POSTGRES_USER}:{POSTGRES
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
-connection = create_connection()
-channel = connection.channel()
-#if the exchange is not yet created, exit the program
-if not check_exchange(channel, exchangename, exchangetype):
-    print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
-    sys.exit(0)  # Exit with a success status
 
 from models import *
 # Custom Scalar for JSON
@@ -117,18 +110,6 @@ class ManagerList(graphene.ObjectType):
     director_name = graphene.String()
     manager_list = graphene.List(Manager)
 
-class OverallSchedule(graphene.ObjectType):
-    overall_schedule = graphene.List(DaySchedule)
-
-class OverallAvailability(graphene.ObjectType):
-    overall_availability = graphene.List(JSON)
-
-class Leave(graphene.ObjectType):
-    date = graphene.String()
-    availability = graphene.String()
-    type = graphene.String()
-    is_pending = graphene.Boolean()
-
 class Query1(graphene.ObjectType):
 
     own_schedule = graphene.Field(
@@ -148,7 +129,7 @@ class Query1(graphene.ObjectType):
 
     manager_list = graphene.Field(
         ManagerList,
-        staff_id = graphene.Int(),
+        director_id = graphene.Int(),
     )
 
     department_schedule = graphene.Field(
@@ -158,26 +139,7 @@ class Query1(graphene.ObjectType):
         staff_id=graphene.Int(),
         team_managers = graphene.List(graphene.Int)
     ) # Add department schedule query (Shawn)
-    
-    overall_schedule = graphene.Field(
-        OverallSchedule,
-        month=graphene.Int(), 
-        year=graphene.Int(),
-        day = graphene.Int()
-    )
 
-    overall_availability = graphene.Field(
-        OverallAvailability,
-        month = graphene.Int(),
-        year = graphene.Int()
-    )
-
-    own_leaves = graphene.Field(
-        graphene.List(Leave),
-        staff_id = graphene.Int(),
-        month = graphene.Int(),
-        year = graphene.Int()
-    )
 
     # Add resolver for department schedule (Shawn)
     def resolve_department_schedule(self, info, month, year, staff_id, team_managers=None):
@@ -191,17 +153,8 @@ class Query1(graphene.ObjectType):
     def resolve_team_schedule(self, info, month, year, day, staff_id):
         return resolve_team_schedule(month, year, day, staff_id)
     
-    def resolve_manager_list(self,info,staff_id):
-        return resolve_manager_list(staff_id)
-
-    def resolve_overall_schedule(self,info,month,year,day):
-        return resolve_overall_schedule(month,year,day)
-    
-    def resolve_overall_availability(self,info,month,year):
-        return resolve_overall_availability(month,year)
-    
-    def resolve_own_leaves(self,info,staff_id,month,year):
-        return resolve_own_leaves(staff_id,month,year)
+    def resolve_manager_list(self,info,director_id):
+        return resolve_manager_list(director_id)
     
 schedule_schema = graphene.Schema(query=Query1)
 
@@ -255,8 +208,6 @@ class Query2(graphene.ObjectType):
         file_key = graphene.String()
     )
 
-
-
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
     
@@ -269,8 +220,7 @@ class Query2(graphene.ObjectType):
     def resolve_file_link(self,info,file_key):
         return resolve_file_link(file_key)
 
- 
-# Define Mutations 
+# Define Mutations
 class CreateRequest(graphene.Mutation):
     class Arguments:
         staff_id = graphene.Int(required=True)
@@ -284,16 +234,13 @@ class CreateRequest(graphene.Mutation):
 
     def mutate(self, info, staff_id, date_type ,files = None, reason=None, remarks=None):
 
-        requesting_staff = User.query.filter(User.staff_id == staff_id).first()
-        manager = requesting_staff.reporting_manager
-        
+        manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
         f_keys = []
         if files:
             
             for f in files:
-                filekey = f.filename.split(".")
-                filekey.insert(1, str(datetime.datetime.now()))
-                filekey = filekey[0] + filekey[1] + "." + filekey[2]
+                filekey = f.filename + str(datetime.datetime.now())
+
                 # Upload the file to S3
                 s3_client.upload_fileobj(
                     f,
@@ -336,8 +283,7 @@ class CreateRequest(graphene.Mutation):
 
         # except Exception as e:
         #     return CreateRequest(success = False, message = str(e))
-        notification = requesting_staff.staff_fname + " " + requesting_staff.staff_lname + " has submitted a wfh request at " + str(datetime.datetime.now())
-        publish_to_broker(notification, "New WFH request", User.query.filter(User.staff_id == manager).first().email , channel)
+        
 
         return CreateRequest(success=True, message="Request created successfully")
 
@@ -365,59 +311,9 @@ class AcceptRejectRequest(graphene.Mutation):
             db.session.rollback()  # Rollback in case of error
             return AcceptRejectRequest(success = False, message=e)
 
-class WithdrawPendingRequest(graphene.Mutation):
-    class Arguments:
-        request_id = graphene.Int(required=True)
-
-    success = graphene.Boolean()
-    message = graphene.String()
-
-    def mutate(self, info, request_id):
-        r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
-        if not r:
-            return WithdrawPendingRequest(success = False, message="Request not found")
-        
-        if r.status == "approved" or r.status == "rejected":
-            return WithdrawApprovedRequest(success = False, message="Request is already approved")
-
-        r.status = "withdrawn"
-        try:
-            db.session.commit()
-            return WithdrawPendingRequest(success = True, message="Request withdrawn successfully")
-        except Exception as e:
-            db.session.rollback()  # Rollback in case of error
-            return WithdrawPendingRequest(success = False, message=e)
-
-class WithdrawApprovedRequest(graphene.Mutation):
-    class Arguments:
-        request_id = graphene.Int(required=True)
-        new_reason = graphene.String(required=True)
-    
-    success = graphene.Boolean()
-    message = graphene.String()
-
-    def mutate(self, info, request_id, new_reason):
-        r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
-        if not r:
-            return WithdrawApprovedRequest(success = False, message="Request not found")
-        
-        if r.status == "pending":
-            return WithdrawApprovedRequest(success = False, message="Request is still pending")
-        
-        r.status = "pending_withdrawal"
-        r.reason = new_reason
-        try:
-            db.session.commit()
-            return WithdrawApprovedRequest(success = True, message="Request withdrawn successfully")
-        except Exception as e:
-            db.session.rollback()  # Rollback in case of error
-            return WithdrawApprovedRequest(success = False, message=e)
-        
 class Mutation1(graphene.ObjectType):
     create_request = CreateRequest.Field()
     accept_reject_request = AcceptRejectRequest.Field()
-    withdraw_pending_request = WithdrawPendingRequest.Field()
-    withdraw_approved_request = WithdrawApprovedRequest.Field()
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
@@ -427,96 +323,14 @@ app.add_url_rule('/schedule', view_func=GraphQLView.as_view('graphql1', schema=s
 
 app.add_url_rule('/requests', view_func=FileUploadGraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
 
-def resolve_manager_list(staff_id):
-    user = User.query.filter(User.staff_id == staff_id).first()
+def resolve_manager_list(director_id):
+    user = User.query.filter(User.staff_id == director_id).first()
     if user.position != "Director":
-        return resolve_manager_list(user.reporting_manager)
-    m_list = User.query.filter(User.reporting_manager == staff_id, User.role == 3).all()
+        raise Exception("User is not a director. This endpoint is for directors only")
+    m_list = User.query.filter(User.reporting_manager == director_id, User.role == 3).all()
     return {
         "director_name": user.staff_fname + " " + user.staff_lname,
         "manager_list": [{"staff_id":m.staff_id, "position": m.position, "name": m.staff_fname + " " + m.staff_lname} for m in m_list]
-    }
-
-def resolve_overall_availability(month,year):
-    total = User.query.count()
-    overall_availability = []
-    for i in range(1,days_in_month[month]+1):
-        for type in ["AM","PM"]:
-            overall_availability.append({
-                "date": f'{year}-{i}-{month}',
-                "availability":total - RequestModel.query.filter(
-                    RequestModel.month == month,
-                    RequestModel.year == year,
-                    RequestModel.day == i,
-                    RequestModel.type == type,
-                    RequestModel.status.in_(['approved', 'pending'])
-                ).count(),
-                "type":type
-            })
-
-
-    return {"overall_availability": overall_availability}
-
-def resolve_overall_schedule(month,year,day):
-    filters = [
-        RequestModel.month == month,
-        RequestModel.year == year,
-        RequestModel.day == day,
-        RequestModel.status.in_(['approved', 'pending'])
-    ]
-    
-    employees = User.query.all()
-    # Query the database using the filters
-    requests = RequestModel.query.filter(*filters).all()
-    print("Reqeusts: " + str(requests))
-    # Create a mapping of requests by staff member and day
-    schedules_by_staff = {u.staff_id : {"AM": None, "PM": None} for u in employees}
-    for request in requests:
-        if request.type == "AM" or request.type == "PM":
-            schedules_by_staff[request.requesting_staff][request.type] = request
-        elif request.type == "FULL":
-            schedules_by_staff[request.requesting_staff]["AM"] = request
-            schedules_by_staff[request.requesting_staff]["PM"] = request
-    print(schedules_by_staff)
-
-    overall_schedule = []
-    print(schedules_by_staff)
-    for d in range(day,day+1):
-        for period in ["AM","PM"]:
-
-            overall_availability = []
-            count = len(employees)
-            
-            for member in employees:
-                request = schedules_by_staff[member.staff_id][period]
-                if request:
-                    count -= 1
-                    availability = "wfh"
-                    if request.status == "pending":
-                        is_pending = True
-                    else:
-                        
-                        is_pending = False
-                else:
-                    availability = "office"
-                    is_pending = False
-                    
-                overall_availability.append({
-                    "name": member.staff_fname + " " + member.staff_lname,
-                    "type": period,
-                    "department": member.dept,
-                    "availability": availability,
-                    "is_pending": is_pending
-                })
-
-            overall_schedule.append({
-                "date": f"{year:04d}-{month:02d}-{d:02d}",
-                "type": period,
-                "available_count": {"office": count, "wfh": len(employees)-count},
-                "availability": overall_availability
-            })
-    return {
-        "overall_schedule": overall_schedule
     }
 
 def resolve_own_schedule(month, year, staff_id):
@@ -590,7 +404,12 @@ def resolve_own_schedule(month, year, staff_id):
 
 def resolve_team_schedule(month, year,day, staff_id):
     # Get all approved requests for the team members in the given month and year
+
     user = User.query.filter(User.staff_id == staff_id).first()
+    return retrieve_team_schedule(user,month,year,day)
+   
+
+def retrieve_team_schedule(user,month,year,day):
     if user.role == 3 or user.position == "Director" or user.position == "MD":
         print("staff id: " + str(user.staff_id))
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
@@ -685,7 +504,6 @@ def resolve_team_schedule(month, year,day, staff_id):
         "team_schedule": team_schedule
     }
 
-    
 def resolve_department_schedule(month, year, staff_id, team_managers=None):
     user = User.query.filter(User.staff_id == staff_id).first()
     if user.position != "Director":
@@ -700,7 +518,7 @@ def resolve_department_schedule(month, year, staff_id, team_managers=None):
 
     return {
         "department_name": user.dept,
-        "dept_schedule": [resolve_team_schedule(month,year,0,m.staff_id) for m in team_managers]
+        "dept_schedule": [retrieve_team_schedule(m,month,year) for m in team_managers]
     }
 
 
@@ -743,7 +561,6 @@ def resolve_request(request_id):
             "request_id": r.request_id,
             "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
             "type": r.type,
-            "created_at" : r.created_at,
             "status": r.status,
             "reason": r.reason,
             "remarks": r.remarks,
@@ -781,13 +598,6 @@ def resolve_file_link(file_key):
                 Params={'Bucket': BUCKET_NAME, 'Key': file_key},
                 ExpiresIn=3600
             )}
-
-def resolve_own_leaves(staff_id,month,year):
-    print(type(Leave))
-    leaves = LeaveModel.query.filter(LeaveModel.requesting_staff==staff_id,LeaveModel.month==month,LeaveModel.year==year).all()
-    leaves = [{"date": f"{l.year}-{l.month}-{l.day}", "availability": "Leave", "type": l.type, "is_pending": l.status == "pending"} for l in leaves]
-
-    return leaves
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

@@ -55,7 +55,7 @@ export default function ManageEmployeeArrangements({
   // Todo: Why not pass in requestId instead
   const handleRowClick = (row: {
     requestId: number;
-    requestingStaffName: string;
+    name: string;
     department: string;
     date: string;
     type: string;
@@ -67,7 +67,7 @@ export default function ManageEmployeeArrangements({
   }) => {
     let queryParams = new URLSearchParams({
       requestId: row.requestId.toString(),
-      employeeName: row.requestingStaffName,
+      name: row.name,
       department: row.department,
       date: row.date,
       type: row.type,
@@ -109,12 +109,12 @@ export default function ManageEmployeeArrangements({
             </TabsTrigger>
           </TabsList>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <Button 
+            <Button
               className="flex items-center absolute right-1"
               onClick={() => setIsDialogOpen(true)}
-              >
+            >
               <PlusIcon className="w-4 h-4 mr-2" />
-               Assign Manager
+              Assign Manager
             </Button>
             <DialogContent>
               <DialogHeader>
@@ -123,10 +123,11 @@ export default function ManageEmployeeArrangements({
                   Assign a manager to the employee
                 </DialogDescription>
               </DialogHeader>
-              <AssignManagerForm 
-                user={user} 
-                setIsDialogOpen={setIsDialogOpen} 
-                employeeRequests={employeeRequests}/>
+              <AssignManagerForm
+                user={user}
+                setIsDialogOpen={setIsDialogOpen}
+                employeeRequests={employeeRequests}
+              />
             </DialogContent>
           </Dialog>
         </div>
