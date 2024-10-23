@@ -62,7 +62,10 @@ export default function ManageArrangementsPage({
         <TabsContent value="pending">
           <DataTable
             columns={individual_request_columns}
-            data={arrangements.filter((arr) => arr.status == "pending")}
+            data={arrangements.filter(
+              (arr) =>
+                arr.status == "pending" || arr.status == "pending_withdrawal"
+            )}
             onRowClick={handleRowClick}
           />
         </TabsContent>

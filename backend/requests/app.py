@@ -743,6 +743,7 @@ def resolve_request(request_id):
             "request_id": r.request_id,
             "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
             "type": r.type,
+            "created_at" : r.created_at,
             "status": r.status,
             "reason": r.reason,
             "remarks": r.remarks,
