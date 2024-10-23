@@ -18,6 +18,7 @@ CREATE TABLE users (
     Country Varchar(50) NOT NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
     Reporting_Manager INT REFERENCES users(Staff_ID),
+    Away_Manager INT REFERENCES users(Staff_ID),
     Role INT REFERENCES roles(role_id),
     Password VARCHAR(255) NOT NULL DEFAULT encode(digest('password123', 'sha256'), 'hex')
 );
@@ -56,6 +57,15 @@ CREATE TABLE leaves (
     Type VARCHAR(4) NOT NULL,
     Status VARCHAR(20) NOT NULL DEFAULT 'pending'
 );
+
+CREATE TABLE transfer_requests (
+    Request_id SERIAL PRIMARY KEY,
+    Requesting_manager INT REFERENCES users(Staff_ID),
+    Target_manager INT REFERENCES users(Staff_ID),
+    Status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    Reason VARCHAR(300)
+);
+
 INSERT INTO roles VALUES 
     (1, 'HR'),
     (2, 'Staff'),

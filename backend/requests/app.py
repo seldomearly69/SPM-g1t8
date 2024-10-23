@@ -148,7 +148,7 @@ class Query1(graphene.ObjectType):
 
     manager_list = graphene.Field(
         ManagerList,
-        staff_id = graphene.Int(),
+        staff_id = graphene.Int(required=True)
     )
 
     department_schedule = graphene.Field(
@@ -191,7 +191,7 @@ class Query1(graphene.ObjectType):
     def resolve_team_schedule(self, info, month, year, day, staff_id):
         return resolve_team_schedule(month, year, day, staff_id)
     
-    def resolve_manager_list(self,info,staff_id):
+    def resolve_manager_list(self,info,staff_id,):
         return resolve_manager_list(staff_id)
 
     def resolve_overall_schedule(self,info,month,year,day):
@@ -230,6 +230,13 @@ class OwnRequests(graphene.ObjectType):
     approving_manager = graphene.String()
     requests = graphene.List(Request)
 
+class TransferRequestGraphene(graphene.ObjectType):
+    request_id = graphene.Int()
+    requesting_manager = graphene.Int()
+    target_manager = graphene.Int()
+    status = graphene.String()
+    reason = graphene.String()
+
 class DateTypeInput(graphene.InputObjectType):
     date = graphene.String(required=True)
     type = graphene.String(required=True)
@@ -255,7 +262,15 @@ class Query2(graphene.ObjectType):
         file_key = graphene.String()
     )
 
+    transfer_options = graphene.Field(
+        graphene.List(Manager),
+        staff_id=graphene.Int(required=True)
+    )
 
+    transfer_requests = graphene.Field(
+        graphene.List(TransferRequestGraphene),
+        staff_id = graphene.Int(required=True)
+    )
 
     def resolve_own_requests(self, info, staff_id):
         return resolve_own_requests(staff_id)
@@ -268,6 +283,12 @@ class Query2(graphene.ObjectType):
 
     def resolve_file_link(self,info,file_key):
         return resolve_file_link(file_key)
+    
+    def resolve_transfer_options(self,info,staff_id):
+        return resolve_transfer_options(staff_id)
+    
+    def resolve_transfer_requests(self,info,staff_id):
+        return resolve_transfer_requests(staff_id)
 
  
 # Define Mutations 
@@ -354,12 +375,25 @@ class AcceptRejectRequest(graphene.Mutation):
         r = RequestModel.query.filter(RequestModel.request_id == request_id).first()
         if not r:
             return AcceptRejectRequest(success = False, message="Request not found")
-        
-        r.status = new_status
+
+        type = "WFH request"
+        if r.status == "pending_withdrawal":
+            type += " withdrawal"
+
+        if r.status == "pending":
+            r.status = new_status
+        elif r.status == "pending_withdrawal":
+            if new_status == "approved":
+                r.status = "withdrawn"
+
         if remarks:
             r.remarks = remarks
         try:
             db.session.commit()
+            
+            notification = f"Your {type} for {r.year}/{r.month}/{r.day} {r.type} has been {new_status}"
+            publish_to_broker(notification, f"{type} {new_status}", User.query.filter(User.staff_id == r.requesting_staff).first().email , channel)
+
             return AcceptRejectRequest(success = True, message="Request updated successfully")
         except Exception as e:
             db.session.rollback()  # Rollback in case of error
@@ -378,7 +412,7 @@ class WithdrawPendingRequest(graphene.Mutation):
             return WithdrawPendingRequest(success = False, message="Request not found")
         
         if r.status == "approved" or r.status == "rejected":
-            return WithdrawApprovedRequest(success = False, message="Request is already approved")
+            return WithdrawApprovedRequest(success = False, message=f"Request is already {r.status}")
 
         r.status = "withdrawn"
         try:
@@ -408,16 +442,131 @@ class WithdrawApprovedRequest(graphene.Mutation):
         r.reason = new_reason
         try:
             db.session.commit()
+            requesting_staff = User.query.filter(User.staff_id==r.requesting_staff).first()
+            notification = requesting_staff.staff_fname + " " + requesting_staff.staff_lname + " has submitted a wfh request withdrawal at " + str(datetime.datetime.now())
+            publish_to_broker(notification, "New WFH request withdrawal", User.query.filter(User.staff_id == r.approving_manager).first().email , channel)
             return WithdrawApprovedRequest(success = True, message="Request withdrawn successfully")
         except Exception as e:
             db.session.rollback()  # Rollback in case of error
             return WithdrawApprovedRequest(success = False, message=e)
         
+class RequestForTransfer(graphene.Mutation):
+    class Arguments:
+        requesting_manager = graphene.Int(required=True)
+        target_manager = graphene.Int(required=True)
+        reason = graphene.String(required=True)
+    
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, requesting_manager, target_manager, reason):
+        check = User.query.filter(User.reporting_manager==target_manager,User.away_manager!=None).first()
+        requests = RequestModel.query.filter(RequestModel.approving_manager==requesting_manager,RequestModel.status).first()
+        if check:
+            return RequestForTransfer(success = False, message="Target manager already has extra responsiblity")
+        check = User.query.filter(User.staff_id==requesting_manager).first().away_manager
+
+        if check:
+            return RequestForTransfer(success = False, message="Requesting manager already has extra responsiblity")
+
+        r = TransferRequest(requesting_manager=requesting_manager,target_manager=target_manager,status="pending",reason=reason)
+
+        try:
+            db.session.add(r)
+            db.session.commit()
+            m = User.query.filter(User.staff_id==requesting_manager).first()
+            notification = m.staff_fname + " " + m.staff_lname + " has requested to transfer responsibility to you at " + str(datetime.datetime.now())
+            publish_to_broker(notification, "Responsibility transfer request", User.query.filter(User.staff_id == target_manager).first().email , channel)
+            return RequestForTransfer(success = True, message="Transfer request submitted successfully")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return RequestForTransfer(success = False, message=e)
+        
+class AcceptRejectTransferRequest(graphene.Mutation):
+    class Arguments:
+        request_id = graphene.Int(required=True)
+        new_status = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, request_id, new_status):
+        r = TransferRequest.query.filter(TransferRequest.request_id == request_id).first()
+
+        if not r:
+            return AcceptRejectTransferRequest(success = False, message="Request not found")
+
+        if new_status == "accepted":
+
+            subordinates = User.query.filter(User.reporting_manager==r.requesting_manager).all()
+            for s in subordinates:
+                s.away_manager = s.reporting_manager
+                s.reporting_manager = r.target_manager
+                db.session.add(s)
+            
+        r.status = new_status
+        db.session.add(r)
+        try:
+            db.session.commit()
+            
+            notification = f"Your transfer request has been {new_status}"
+            publish_to_broker(notification, f"Transfer request {new_status}", User.query.filter(User.staff_id == r.requesting_manager).first().email , channel)
+
+            return AcceptRejectTransferRequest(success = True, message="Transfer Request updated successfully")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return AcceptRejectTransferRequest(success = False, message=e)
+
+class RevertTransfer(graphene.Mutation):
+    class Arguments:
+        request_id = graphene.Int(required=True)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, request_id):
+        r = TransferRequest.query.filter(TransferRequest.request_id == request_id).first()
+        if not r:
+            return RevertTransfer(success = False, message="Request not found")
+
+        if r.status == "accepted":
+
+            subordinates = User.query.filter(User.away_manager==r.requesting_manager).all()
+            for s in subordinates:
+                
+                s.reporting_manager = s.away_manager
+                s.away_manager = None
+                db.session.add(s)
+            
+            r.status = "reverted"
+            db.session.add(r)
+        
+        else:
+            return RevertTransfer(success = False, message="Request pending or rejected")
+
+        try:
+            db.session.commit()
+            requesting_manager = User.query.filter(User.staff_id == r.requesting_manager).first()
+            target_manager = User.query.filter(User.staff_id == r.target_manager).first()
+
+            notification = f"Your transfer request has been reverted. Your subordinates' requests are now going to {target_manager.staff_fname} {target_manager.staff_lname}."
+            publish_to_broker(notification, f"Transfer request reverted", requesting_manager.first().email , channel)
+            notification = f"Transfer request reverted. You are no longer taking requests from {requesting_manager.staff_fname} {requesting_manager.staff_lname}'s subordinates."
+            publish_to_broker(notification, f"Transfer request reverted", target_manager.email , channel)
+
+            return RevertTransfer(success = True, message="Transfer reverted successfully")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            return RevertTransfer(success = False, message=e)
+
 class Mutation1(graphene.ObjectType):
     create_request = CreateRequest.Field()
     accept_reject_request = AcceptRejectRequest.Field()
     withdraw_pending_request = WithdrawPendingRequest.Field()
     withdraw_approved_request = WithdrawApprovedRequest.Field()
+    request_for_transfer = RequestForTransfer.Field()
+    accept_reject_transfer_request = AcceptRejectTransferRequest.Field()
+    revert_transfer = RevertTransfer.Field() 
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
@@ -436,6 +585,15 @@ def resolve_manager_list(staff_id):
         "director_name": user.staff_fname + " " + user.staff_lname,
         "manager_list": [{"staff_id":m.staff_id, "position": m.position, "name": m.staff_fname + " " + m.staff_lname} for m in m_list]
     }
+
+def resolve_transfer_options(staff_id):
+    user = User.query.filter(User.staff_id == staff_id).first()
+    if user.position == "Director":
+        options = User.query.filter(User.position == "Director",User.staff_id!=user.staff_id).all()
+    else:
+        options = User.query.filter(User.role == 3, User.dept==user.dept, User.staff_id!=user.staff_id)
+
+    return [{"staff_id":o.staff_id, "position": o.position, "name": o.staff_fname + " " + o.staff_lname} for o in options]
 
 def resolve_overall_availability(month,year):
     total = User.query.count()
@@ -787,6 +945,13 @@ def resolve_own_leaves(staff_id,month,year):
     leaves = [{"date": f"{l.year}-{l.month}-{l.day}", "availability": "Leave", "type": l.type, "is_pending": l.status == "pending"} for l in leaves]
 
     return leaves
+
+def resolve_transfer_requests(staff_id):
+    r_list = []
+    r_list += [{"request_id":r.request_id,"requesting_manager":r.requesting_manager,"target_manager":r.target_manager,"status":r.status,"reason":r.reason} for r in TransferRequest.query.filter(TransferRequest.requesting_manager == staff_id).all()]
+    r_list += [{"request_id":r.request_id,"requesting_manager":r.requesting_manager,"target_manager":r.target_manager,"status":r.status,"reason":r.reason} for r in TransferRequest.query.filter(TransferRequest.target_manager == staff_id).all()]
+
+    return r_list
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

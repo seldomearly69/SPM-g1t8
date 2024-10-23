@@ -15,7 +15,8 @@ class User(db.Model):
     position = db.Column(db.String(50), nullable=False)
     country = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
-    reporting_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
+    reporting_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'),nullable=False)
+    away_manager = db.Column(db.Integer, db.ForeignKey('users.staff_id'))
     role = db.Column(db.Integer, db.ForeignKey('roles.role_id'))
     password = db.Column(db.String(255), nullable=False)
 
@@ -55,3 +56,11 @@ class LeaveModel(db.Model):
     day = db.Column(db.Integer, nullable=False)
     type = db.Column(db.String(4), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='pending')
+
+class TransferRequest(db.Model):
+    __tablename__ = 'transfer_requests'
+    request_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    requesting_manager = db.Column(db.Integer, nullable=False)
+    target_manager = db.Column(db.Integer, nullable=False)
+    status = status = db.Column(db.String(20), nullable=False, default='pending')
+    reason = db.Column(db.String(300),nullable=True)
