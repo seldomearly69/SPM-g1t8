@@ -28,7 +28,7 @@ export default function ManageEmployeeArrangementsItem() {
   // Get search parameters (query string)
   const searchParams = useSearchParams();
   const requestId = searchParams?.get("requestId") ?? "";
-  const employeeName = searchParams?.get("employeeName") ?? "";
+  const employeeName = searchParams?.get("name") ?? "";
   const department = searchParams?.get("department") ?? "";
   const date = searchParams?.get("date") ?? "";
   const type = searchParams?.get("type") ?? "";

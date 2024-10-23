@@ -55,7 +55,7 @@ export default function ManageEmployeeArrangements({
   // Todo: Why not pass in requestId instead
   const handleRowClick = (row: {
     requestId: number;
-    name: string;
+    requestingStaffName: string;
     department: string;
     date: string;
     type: string;
@@ -67,7 +67,7 @@ export default function ManageEmployeeArrangements({
   }) => {
     let queryParams = new URLSearchParams({
       requestId: row.requestId.toString(),
-      name: row.name,
+      name: row.requestingStaffName,
       department: row.department,
       date: row.date,
       type: row.type,

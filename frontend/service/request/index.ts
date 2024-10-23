@@ -179,8 +179,12 @@ export async function withdrawApprovedRequest(
   newReason: string
 ) {
   const gqlString = gql`
-    mutation withdrawApprovedRequest($requestId: Int!, $newReason: String!) {
-      withdrawApprovedRequest(requestId: $requestId, newReason: $newReason) {
+    mutation AcceptRejectRequest($requestId: Int!, $remarks: String!) {
+      acceptRejectRequest(
+        newStatus: "pending_withdrawal"
+        requestId: $requestId
+        remarks: $remarks
+      ) {
         success
         message
       }
@@ -194,17 +198,23 @@ export async function withdrawApprovedRequest(
     },
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
-      variables: { requestId: requestId, newReason: newReason },
+      variables: { requestId, remarks: newReason }, // Correct the variable name here
     }),
   });
   const data = await res.json();
   return data;
 }
 
+/*     mutation withdrawPendingRequest($requestId: Int!) {
+  withdrawPendingRequest(requestId: $requestId) {
+    success
+    message
+  }
+} */
 export async function withdrawPendingRequest(requestId: number) {
   const gqlString = gql`
-    mutation withdrawPendingRequest($requestId: Int!) {
-      withdrawPendingRequest(requestId: $requestId) {
+    mutation AcceptRejectRequest($requestId: Int!) {
+      acceptRejectRequest(newStatus: "withdrawn", requestId: $requestId) {
         success
         message
       }
@@ -217,10 +227,11 @@ export async function withdrawPendingRequest(requestId: number) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { requestId: requestId },
+      query: gqlString?.loc?.source.body, // Correct usage
+      variables: { requestId }, // Ensure you pass requestId as a variable here
     }),
   });
+
   const data = await res.json();
   return data;
 }

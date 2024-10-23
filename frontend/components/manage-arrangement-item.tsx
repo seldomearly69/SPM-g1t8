@@ -46,24 +46,23 @@ export default function ManageIndividualRequest({
     if (!request?.requestId) return; // Ensure requestId is not undefined
 
     let data;
+    console.log(status);
+
     if (status === "approved") {
       if (!reason) return; // Ensure reason is provided for approved requests
-      console.log("Its here");
       data = await withdrawApprovedRequest(request.requestId, reason); // Call with reason
     } else if (status === "pending") {
-      console.log("fk");
       data = await withdrawPendingRequest(request.requestId); // Call without reason
     }
 
-    console.log(data);
-    if (
-      data.data.withdrawPendingRequest?.success ||
-      data.data.withdrawApprovedRequest?.success
-    ) {
-      setSuccessMessage(
-        `Request #${params.request_id} has been successfully withdrawn.`
-      );
+    if (data.data.acceptRejectRequest?.success) {
+      var messageToSet =
+        status === "approved"
+          ? `Withdraw Request for #${params.request_id} has been submitted to your immediate superior.`
+          : `Request #${params.request_id} has been successfully withdrawn.`;
+      setSuccessMessage(messageToSet);
       setSuccessDialog(true); // Open the success dialog
+      setIsPopoverOpen(false); // Close the popover only after success
     }
   };
 
@@ -123,7 +122,7 @@ export default function ManageIndividualRequest({
         </div>
         <div>
           <Label htmlFor="requested-on">Requested on</Label>
-          <Input id="requested-on" value={request?.createdAt} readOnly />
+          <Input id="requested-on" value={request?.createdAt || ""} readOnly />
         </div>
         <div>
           <Label htmlFor="request-type">Request Type</Label>
@@ -155,7 +154,12 @@ export default function ManageIndividualRequest({
               </Button>
             </PopoverTrigger>
           ) : status === "pending" ? (
-            <Button variant="outline" onClick={() => setIsPopoverOpen(true)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                handleWithdraw();
+              }}
+            >
               Withdraw
             </Button>
           ) : null}

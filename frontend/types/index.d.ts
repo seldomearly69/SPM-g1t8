@@ -35,7 +35,7 @@ export type User = {
   email: string;
   role: string;
   position: string;
-    reportingManager: string;
+  reportingManager: string;
 };
 
 export type DaysInWeekProps = {
@@ -57,7 +57,7 @@ export type OmittedDaysProps = {
 export type MonthlyDayProps<DayData> = {
   renderDay?: (events: DayData[]) => ReactNode;
   onDateClick: (handler: (prev?: any[]) => any[]) => void;
-  className?: ({date: Date}) => string;
+  className?: ({ date: Date }) => string;
 };
 
 export type MonthlyBodyProps<DayData> = {
@@ -114,8 +114,10 @@ export type Availability = {
 
 export type IndividualRequest = {
   requestId: number;
+  createdAt: string;
   date: string;
   type: string;
   status: string;
   remarks: string;
+  reason: string;
 };
