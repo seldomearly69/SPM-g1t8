@@ -6,7 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { IndividualRequest } from "@/types";
-import { getIndividualRequest, withdrawRequest } from "@/service/request";
+import {
+  getIndividualRequest,
+  withdrawPendingRequest,
+  withdrawApprovedRequest,
+} from "@/service/request";
 import { User } from "@/types";
 import { Popover } from "@radix-ui/react-popover";
 import { PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -19,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 interface ManageIndividualRequestProps {
   user: User;
   params: { request_id: string };
@@ -30,20 +35,34 @@ export default function ManageIndividualRequest({
 }: ManageIndividualRequestProps) {
   const [request, setRequest] = useState<IndividualRequest>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [status, setStatus] = useState<"pending" | "approved" | "rejected">(
-    "pending"
-  );
+  const [reason, setReason] = useState("");
+  const [status, setStatus] = useState<"pending" | "approved" | "rejected">();
   const [successDialog, setSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
+  // Update handleWithdraw to use the entered reason from the popover
   const handleWithdraw = async () => {
-    const data = await withdrawRequest(request.requestId);
-    if (data.data.withdrawPendingRequest.success) {
-      setSuccessMessage(
-        `Request #${params.request_id} has been successfully withdrawn.`
-      );
+    if (!request?.requestId) return; // Ensure requestId is not undefined
+
+    let data;
+    console.log(status);
+
+    if (status === "approved") {
+      if (!reason) return; // Ensure reason is provided for approved requests
+      data = await withdrawApprovedRequest(request.requestId, reason); // Call with reason
+    } else if (status === "pending") {
+      data = await withdrawPendingRequest(request.requestId); // Call without reason
+    }
+
+    if (data.data.acceptRejectRequest?.success) {
+      var messageToSet =
+        status === "approved"
+          ? `Withdraw Request for #${params.request_id} has been submitted to your immediate superior.`
+          : `Request #${params.request_id} has been successfully withdrawn.`;
+      setSuccessMessage(messageToSet);
       setSuccessDialog(true); // Open the success dialog
+      setIsPopoverOpen(false); // Close the popover only after success
     }
   };
 
@@ -51,6 +70,8 @@ export default function ManageIndividualRequest({
     const fetchData = async () => {
       const data = await getIndividualRequest(parseInt(params.request_id));
       setRequest(data.data.request);
+      setStatus(data.data.request.status); // Set the status based on the fetched request data
+      console.log(data.data.request);
     };
     fetchData();
   }, [params.request_id]);
@@ -101,7 +122,7 @@ export default function ManageIndividualRequest({
         </div>
         <div>
           <Label htmlFor="requested-on">Requested on</Label>
-          <Input id="requested-on" value={request.requested_on} readOnly />
+          <Input id="requested-on" value={request?.createdAt || ""} readOnly />
         </div>
         <div>
           <Label htmlFor="request-type">Request Type</Label>
@@ -112,7 +133,11 @@ export default function ManageIndividualRequest({
           <Input id="status" value={request?.status} readOnly />
         </div>
         <div className="col-span-2">
-          <Label className="block mb-2">Remarks</Label>
+          <Label className="block mb-2">Reason</Label>
+          <Textarea value={request?.reason} rows={4} readOnly />
+        </div>
+        <div className="col-span-2">
+          <Label className="block mb-2">Remarks from Supervisor</Label>
           <Textarea value={request?.remarks} rows={4} readOnly />
         </div>
       </div>
@@ -122,14 +147,19 @@ export default function ManageIndividualRequest({
           <Button variant="outline" onClick={() => router.back()}>
             Back
           </Button>
-          {request?.status == "approved" ? (
+          {status === "approved" ? (
             <PopoverTrigger asChild>
               <Button size="sm" className="hover:text-red-500">
-                Cancel
+                Cancel Request
               </Button>
             </PopoverTrigger>
-          ) : request?.status == "pending" ? (
-            <Button variant="outline" onClick={handleWithdraw}>
+          ) : status === "pending" ? (
+            <Button
+              variant="outline"
+              onClick={() => {
+                handleWithdraw();
+              }}
+            >
               Withdraw
             </Button>
           ) : null}
@@ -146,6 +176,7 @@ export default function ManageIndividualRequest({
               <div className="grid grid-cols-3 items-center gap-4">
                 <Textarea
                   onChange={(e) => setReason(e.target.value)}
+                  value={reason}
                   className="col-span-3 h-8"
                 />
               </div>

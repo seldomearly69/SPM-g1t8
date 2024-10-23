@@ -61,11 +61,10 @@ export default function ApplicationForm({
   const [date, setDate] = useState<{ date: string; type: "AM" | "PM" }[]>([]);
   const [statusCode, setStatusCode] = useState();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
-  const { toast } = useToast()
+  const { toast } = useToast();
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
-   
 
     // Convert FileList to array or handle it being empty
     const files: File[] = data.file ? Array.from(data.file) : [];
@@ -109,19 +108,26 @@ export default function ApplicationForm({
     });
   };
 
+  const refreshPageAfterSuccess = () => {
+    setShowSuccessPopup(false);
+    window.location.reload();
+  };
+
   useEffect(() => {
     setValue("date_type", date as [{ date: string; type: "AM" | "PM" }]);
 
-    const combinedDates = date.concat(requests.map((r: any) => ({date: r.date, type: r.type})));
+    const combinedDates = date.concat(
+      requests.map((r: any) => ({ date: r.date, type: r.type }))
+    );
     if (combinedDates.length > 0 && hasMoreThanTwoDays(combinedDates)) {
-        toast({
-            title: "Notice",
-            description: "You exceeded the maximum number of days allowed for this month",
-            variant: "warning",
-        })
+      toast({
+        title: "Notice",
+        description:
+          "You exceeded the maximum number of days allowed for this month",
+        variant: "warning",
+      });
     }
   }, [date]);
-
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)}>
@@ -174,42 +180,38 @@ export default function ApplicationForm({
                 </Label>
               </motion.div>
             )}
-            </div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-            >
-              <Button
-                type="submit"
-                className="w-full"
-              >
-                Submit Application
-              </Button>
-            </motion.div>
           </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            <Button type="submit" className="w-full">
+              Submit Application
+            </Button>
+          </motion.div>
+        </div>
         <div className="order-1">
           <MonthlyCalendar
             currentMonth={selectedDate || new Date()}
             onCurrentMonthChange={setSelectedDate}
           >
             <MonthlyNav />
-            <MonthlyBody 
-              events={date || []} 
-              requests={requests} 
-              className="border-none">
+            <MonthlyBody
+              events={date || []}
+              requests={requests}
+              className="border-none"
+            >
               <CustomMonthlyDay<EventType>
                 className={({ date: dayDate }) =>
                   cn({
-                      "bg-primary text-primary-foreground": date?.some((d) =>
-                        isSameDay(d.date, dayDate)
-                      ),
-                    }
-                  )
+                    "bg-primary text-primary-foreground": date?.some((d) =>
+                      isSameDay(d.date, dayDate)
+                    ),
+                  })
                 }
                 onDateClick={setDate}
                 renderDay={(data) => {
-                  
                   return (
                     <ul className="flex gap-1 justify-evenly w-full overflow-hidden max-h-36 overflow-y-auto empty:hidden">
                       {data.map((item, index) => (
@@ -222,9 +224,8 @@ export default function ApplicationForm({
                         />
                       ))}
                     </ul>
-                  )
-                }
-              }
+                  );
+                }}
               />
             </MonthlyBody>
           </MonthlyCalendar>
@@ -247,7 +248,7 @@ export default function ApplicationForm({
             </DialogHeader>
             <DialogFooter>
               <Button
-                onClick={() => setShowSuccessPopup(false)}
+                onClick={() => refreshPageAfterSuccess()}
                 className="text-md"
               >
                 Ok

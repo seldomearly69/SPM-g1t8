@@ -9,6 +9,7 @@ export async function getOwnRequest(staffId: number) {
           requestId
           date
           type
+          createdAt
           status
           reason
           remarks
@@ -150,8 +151,10 @@ export async function getIndividualRequest(requestId: number) {
         requestId
         date
         type
+        createdAt
         status
         remarks
+        reason
       }
     }
   `;
@@ -171,10 +174,17 @@ export async function getIndividualRequest(requestId: number) {
   return data;
 }
 
-export async function withdrawRequest(requestId: number) {
+export async function withdrawApprovedRequest(
+  requestId: number,
+  newReason: string
+) {
   const gqlString = gql`
-    mutation withdrawPendingRequest($requestId: Int!) {
-      withdrawPendingRequest(requestId: $requestId) {
+    mutation AcceptRejectRequest($requestId: Int!, $remarks: String!) {
+      acceptRejectRequest(
+        newStatus: "pending_withdrawal"
+        requestId: $requestId
+        remarks: $remarks
+      ) {
         success
         message
       }
@@ -188,9 +198,40 @@ export async function withdrawRequest(requestId: number) {
     },
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
-      variables: { requestId: requestId },
+      variables: { requestId, remarks: newReason }, // Correct the variable name here
     }),
   });
+  const data = await res.json();
+  return data;
+}
+
+/*     mutation withdrawPendingRequest($requestId: Int!) {
+  withdrawPendingRequest(requestId: $requestId) {
+    success
+    message
+  }
+} */
+export async function withdrawPendingRequest(requestId: number) {
+  const gqlString = gql`
+    mutation AcceptRejectRequest($requestId: Int!) {
+      acceptRejectRequest(newStatus: "withdrawn", requestId: $requestId) {
+        success
+        message
+      }
+    }
+  `;
+
+  const res = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString?.loc?.source.body, // Correct usage
+      variables: { requestId }, // Ensure you pass requestId as a variable here
+    }),
+  });
+
   const data = await res.json();
   return data;
 }

@@ -11,39 +11,17 @@ import { assignManagerSchema } from "@/lib/validations/application";
 import { useEffect, useState } from "react";
 import { getManagerList } from "@/service/schedule";
 import { User } from "@/types";
+import { toast } from "@/hooks/use-toast";
 
-const mockManagerList = [
-  {
-    staffId: 140894,
-    name: "Rahim Khalid",
-    position: "Sales Manager"
-  },
-  {
-    staffId: 140008,
-    name: "Jacklyn Lee",
-    position: "Sales Manager"
-  },
-  {
-    staffId: 140103,
-    name: "Sophia Toh",
-    position: "Sales Manager"
-  },
-  {
-    staffId: 140879,
-    name: "Siti Abdullah",
-    position: "Sales Manager"
-  },
-  {
-    staffId: 140944,
-    name: "Yee Lim",
-    position: "Sales Manager"
-  }
-]
 
 type FormData = z.infer<typeof assignManagerSchema>;
 
-export default function AssignManagerForm() {
-  const [managerList, setManagerList] = useState<any[]>(mockManagerList);
+export default function AssignManagerForm({
+  user, 
+  employeeRequests,
+  setIsDialogOpen
+}: {user: User, employeeRequests: any[], setIsDialogOpen: (open: boolean) => void}) {
+  const [managerList, setManagerList] = useState<any[]>([]);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const {
     control,
@@ -57,12 +35,33 @@ export default function AssignManagerForm() {
   });
 
   const onSubmit = (data: any) => {
-    console.log(data);
-    setShowSuccessPopup(true)
+    console.log(employeeRequests);
+    if (employeeRequests.some((request) => request.status === "pending")) {
+    
+      toast({
+        title: "Error",
+        description: "Please settle any outstanding leaves before requesting a manager change.", // Display the error message for each field
+        variant: "destructive",
+      });
+    } else {
+      setIsDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Manager assigned successfully.",
+        variant: "success",
+      })
+    }
   };
 
+  useEffect(() => {
+    getManagerList(user.staffId).then((data) => {
+      console.log(data);
+      
+      setManagerList(data.data.managerList.managerList)
+    })
+  }, [])
 
-
+  
   return (
     <>
       {showSuccessPopup 
@@ -91,7 +90,6 @@ export default function AssignManagerForm() {
                           </SelectItem>
                         ))}
                           </SelectGroup>
-                        
                       </SelectContent>
                     </Select>
                   )}

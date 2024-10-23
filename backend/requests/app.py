@@ -5,11 +5,11 @@ from flask_graphql import GraphQLView
 from sqlalchemy import or_
 import graphene, boto3
 from graphene_sqlalchemy import SQLAlchemyObjectType
-import os, json, ast, datetime, sys
+import os, json, ast, base64, datetime
 from flask_cors import CORS
 from graphene_file_upload.scalars import Upload
 from graphene_file_upload.flask import FileUploadGraphQLView
-from amqp_connection import *
+
 
 
 days_in_month = {
@@ -48,13 +48,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{POSTGRES_USER}:{POSTGRES
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
-connection = create_connection()
-channel = connection.channel()
-#if the exchange is not yet created, exit the program
-if not check_exchange(channel, exchangename, exchangetype):
-    print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
-    sys.exit(0)  # Exit with a success status
 
 from models import *
 # Custom Scalar for JSON
@@ -117,18 +110,6 @@ class ManagerList(graphene.ObjectType):
     director_name = graphene.String()
     manager_list = graphene.List(Manager)
 
-class OverallSchedule(graphene.ObjectType):
-    overall_schedule = graphene.List(DaySchedule)
-
-class OverallAvailability(graphene.ObjectType):
-    overall_availability = graphene.List(JSON)
-
-class Leave(graphene.ObjectType):
-    date = graphene.String()
-    availability = graphene.String()
-    type = graphene.String()
-    is_pending = graphene.Boolean()
-
 class Query1(graphene.ObjectType):
 
     own_schedule = graphene.Field(
@@ -158,26 +139,7 @@ class Query1(graphene.ObjectType):
         staff_id=graphene.Int(),
         team_managers = graphene.List(graphene.Int)
     ) # Add department schedule query (Shawn)
-    
-    overall_schedule = graphene.Field(
-        OverallSchedule,
-        month=graphene.Int(), 
-        year=graphene.Int(),
-        day = graphene.Int()
-    )
 
-    overall_availability = graphene.Field(
-        OverallAvailability,
-        month = graphene.Int(),
-        year = graphene.Int()
-    )
-
-    own_leaves = graphene.Field(
-        graphene.List(Leave),
-        staff_id = graphene.Int(),
-        month = graphene.Int(),
-        year = graphene.Int()
-    )
 
     # Add resolver for department schedule (Shawn)
     def resolve_department_schedule(self, info, month, year, staff_id, team_managers=None):
@@ -202,6 +164,7 @@ class Query1(graphene.ObjectType):
     
     def resolve_own_leaves(self,info,staff_id,month,year):
         return resolve_own_leaves(staff_id,month,year)
+
     
 schedule_schema = graphene.Schema(query=Query1)
 
@@ -290,8 +253,7 @@ class Query2(graphene.ObjectType):
     def resolve_transfer_requests(self,info,staff_id):
         return resolve_transfer_requests(staff_id)
 
- 
-# Define Mutations 
+# Define Mutations
 class CreateRequest(graphene.Mutation):
     class Arguments:
         staff_id = graphene.Int(required=True)
@@ -305,16 +267,13 @@ class CreateRequest(graphene.Mutation):
 
     def mutate(self, info, staff_id, date_type ,files = None, reason=None, remarks=None):
 
-        requesting_staff = User.query.filter(User.staff_id == staff_id).first()
-        manager = requesting_staff.reporting_manager
-        
+        manager = User.query.filter(User.staff_id == staff_id).first().reporting_manager
         f_keys = []
         if files:
             
             for f in files:
-                filekey = f.filename.split(".")
-                filekey.insert(1, str(datetime.datetime.now()))
-                filekey = filekey[0] + filekey[1] + "." + filekey[2]
+                filekey = f.filename + str(datetime.datetime.now())
+
                 # Upload the file to S3
                 s3_client.upload_fileobj(
                     f,
@@ -357,8 +316,7 @@ class CreateRequest(graphene.Mutation):
 
         # except Exception as e:
         #     return CreateRequest(success = False, message = str(e))
-        notification = requesting_staff.staff_fname + " " + requesting_staff.staff_lname + " has submitted a wfh request at " + str(datetime.datetime.now())
-        publish_to_broker(notification, "New WFH request", User.query.filter(User.staff_id == manager).first().email , channel)
+        
 
         return CreateRequest(success=True, message="Request created successfully")
 
@@ -398,6 +356,7 @@ class AcceptRejectRequest(graphene.Mutation):
         except Exception as e:
             db.session.rollback()  # Rollback in case of error
             return AcceptRejectRequest(success = False, message=e)
+
 
 class WithdrawPendingRequest(graphene.Mutation):
     class Arguments:
@@ -566,7 +525,7 @@ class Mutation1(graphene.ObjectType):
     withdraw_approved_request = WithdrawApprovedRequest.Field()
     request_for_transfer = RequestForTransfer.Field()
     accept_reject_transfer_request = AcceptRejectTransferRequest.Field()
-    revert_transfer = RevertTransfer.Field() 
+    revert_transfer = RevertTransfer.Field()
 
 # Schema for the second endpoint
 requests_schema = graphene.Schema(query=Query2,mutation=Mutation1)
@@ -576,15 +535,16 @@ app.add_url_rule('/schedule', view_func=GraphQLView.as_view('graphql1', schema=s
 
 app.add_url_rule('/requests', view_func=FileUploadGraphQLView.as_view('graphql2', schema=requests_schema, graphiql=True))
 
-def resolve_manager_list(staff_id):
-    user = User.query.filter(User.staff_id == staff_id).first()
+def resolve_manager_list(director_id):
+    user = User.query.filter(User.staff_id == director_id).first()
     if user.position != "Director":
-        return resolve_manager_list(user.reporting_manager)
-    m_list = User.query.filter(User.reporting_manager == staff_id, User.role == 3).all()
+        raise Exception("User is not a director. This endpoint is for directors only")
+    m_list = User.query.filter(User.reporting_manager == director_id, User.role == 3).all()
     return {
         "director_name": user.staff_fname + " " + user.staff_lname,
         "manager_list": [{"staff_id":m.staff_id, "position": m.position, "name": m.staff_fname + " " + m.staff_lname} for m in m_list]
     }
+
 
 def resolve_transfer_options(staff_id):
     user = User.query.filter(User.staff_id == staff_id).first()
@@ -748,7 +708,12 @@ def resolve_own_schedule(month, year, staff_id):
 
 def resolve_team_schedule(month, year,day, staff_id):
     # Get all approved requests for the team members in the given month and year
+
     user = User.query.filter(User.staff_id == staff_id).first()
+    return retrieve_team_schedule(user,month,year,day)
+   
+
+def retrieve_team_schedule(user,month,year,day):
     if user.role == 3 or user.position == "Director" or user.position == "MD":
         print("staff id: " + str(user.staff_id))
         team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
@@ -843,7 +808,6 @@ def resolve_team_schedule(month, year,day, staff_id):
         "team_schedule": team_schedule
     }
 
-    
 def resolve_department_schedule(month, year, staff_id, team_managers=None):
     user = User.query.filter(User.staff_id == staff_id).first()
     if user.position != "Director":
@@ -858,7 +822,7 @@ def resolve_department_schedule(month, year, staff_id, team_managers=None):
 
     return {
         "department_name": user.dept,
-        "dept_schedule": [resolve_team_schedule(month,year,0,m.staff_id) for m in team_managers]
+        "dept_schedule": [retrieve_team_schedule(m,month,year) for m in team_managers]
     }
 
 
@@ -900,6 +864,7 @@ def resolve_request(request_id):
         return {
             "request_id": r.request_id,
             "date": f"{r.year:04d}-{r.month:02d}-{r.day:02d}",
+            "created_at": r.created_at,
             "type": r.type,
             "status": r.status,
             "reason": r.reason,

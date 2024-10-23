@@ -22,15 +22,24 @@ export default function ManageArrangementsPage({
   useEffect(() => {
     const fetchData = async () => {
       const data = await getOwnRequest(user.staffId);
-      console.log(data);
-      setArrangements(data.data.ownRequests.requests);
+      if (data?.data?.ownRequests?.requests) {
+        setArrangements(data.data.ownRequests.requests);
+      }
     };
     fetchData();
-  }, []);
+  }, [user.staffId]);
 
   const handleRowClick = (row: any) => {
-    router.push(`/dashboard/manage/${row.requestId}`);
+    if (row?.requestId) {
+      router.push(`/dashboard/manage/${row.requestId}`);
+    } else {
+      console.error("requestId not found in row", row);
+    }
   };
+
+  if (!arrangements.length) {
+    return <div>Loading or no requests available</div>;
+  }
 
   return (
     <motion.div
@@ -62,7 +71,10 @@ export default function ManageArrangementsPage({
         <TabsContent value="pending">
           <DataTable
             columns={individual_request_columns}
-            data={arrangements.filter((arr) => arr.status == "pending")}
+            data={arrangements.filter(
+              (arr) =>
+                arr.status == "pending" || arr.status == "pending_withdrawal"
+            )}
             onRowClick={handleRowClick}
           />
         </TabsContent>

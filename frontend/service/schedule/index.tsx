@@ -35,8 +35,8 @@ export async function getTeamList(
   staffId: number
 ) {
   const GET_MANAGER_LIST = gql`
-    query GetManagerList($directorId: Int!) {
-      managerList(directorId: $directorId) {
+    query GetManagerList($staffId: Int!) {
+      managerList(staffId: $staffId) {
         director_name
         manager_list
       }
@@ -44,10 +44,10 @@ export async function getTeamList(
   `;
 }
 
-export async function getManagerList(directorId: number) {
+export async function getManagerList(staffId: number) {
   const gqlString = `
-    query getManagerList($directorId: Int!) {
-      managerList(directorId: $directorId) {
+    query getManagerList($staffId: Int!) {
+      managerList(staffId: $staffId) {
         directorName
         managerList {
           staffId
@@ -65,7 +65,7 @@ export async function getManagerList(directorId: number) {
     },
     body: JSON.stringify({
       query: gqlString,
-      variables: { directorId },
+      variables: { staffId },
     }),
   });
 
@@ -125,7 +125,7 @@ export async function getTeamSchedule(
   staffId: number
 ) {
   console.log(day, month, year, staffId);
-  
+
   const gqlString = gql`
     query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
       teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {
@@ -185,11 +185,7 @@ export async function getDepartmentSchedule(
   return data;
 }
 
-
-export async function getOverallSchedule(
-  month: number,
-  year: number,
-) {
+export async function getOverallSchedule(month: number, year: number) {
   const gqlString = gql`
     query overallAvailability($month: Int!, $year: Int!) {
       overallAvailability(month: $month, year: $year) {
@@ -204,13 +200,12 @@ export async function getOverallSchedule(
     },
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
-      variables: { month: month, year: year},
+      variables: { month: month, year: year },
     }),
   });
   const data = await res.json();
   return data;
 }
-
 
 export async function getLeaves(month: number, year: number, staffId: number) {
   const gqlString = gql`

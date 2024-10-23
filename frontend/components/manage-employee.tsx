@@ -13,7 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { PlusIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import AssignManagerForm from "./assign-manager-form";
 
 interface ManageEmployeeArrangementsProps {
@@ -24,6 +31,7 @@ export default function ManageEmployeeArrangements({
   user,
 }: ManageEmployeeArrangementsProps) {
   const [employeeRequests, setEmployeeRequests] = useState<any[]>([]); // Updated to handle real data
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -44,6 +52,7 @@ export default function ManageEmployeeArrangements({
     fetchPendingRequests();
   }, [user.staffId]);
 
+  // Todo: Why not pass in requestId instead
   const handleRowClick = (row: {
     requestId: number;
     requestingStaffName: string;
@@ -58,7 +67,7 @@ export default function ManageEmployeeArrangements({
   }) => {
     let queryParams = new URLSearchParams({
       requestId: row.requestId.toString(),
-      employeeName: row.requestingStaffName,
+      name: row.requestingStaffName,
       department: row.department,
       date: row.date,
       type: row.type,
@@ -76,9 +85,7 @@ export default function ManageEmployeeArrangements({
     router.push(`/dashboard/manage-employees/${row.requestId}?${queryParams}`);
   };
 
-  const handleAssignManager = () => {
-
-  };
+  const handleAssignManager = () => {};
 
   return (
     <motion.div
@@ -101,15 +108,14 @@ export default function ManageEmployeeArrangements({
               Rejected
             </TabsTrigger>
           </TabsList>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button 
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Button
               className="flex items-center absolute right-1"
-              >
+              onClick={() => setIsDialogOpen(true)}
+            >
               <PlusIcon className="w-4 h-4 mr-2" />
-               Assign Manager
-              </Button>
-            </DialogTrigger>
+              Assign Manager
+            </Button>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Manager</DialogTitle>
@@ -117,17 +123,22 @@ export default function ManageEmployeeArrangements({
                   Assign a manager to the employee
                 </DialogDescription>
               </DialogHeader>
-              <AssignManagerForm />
+              <AssignManagerForm
+                user={user}
+                setIsDialogOpen={setIsDialogOpen}
+                employeeRequests={employeeRequests}
+              />
             </DialogContent>
           </Dialog>
-        
         </div>
 
         <TabsContent value="pending">
           <DataTable
             columns={request_columns}
             data={employeeRequests.filter(
-              (request) => request.status === "pending"
+              (request) =>
+                request.status === "pending" ||
+                request.status === "pending_withdrawal"
             )}
             onRowClick={handleRowClick}
           />

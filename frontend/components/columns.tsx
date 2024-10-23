@@ -47,6 +47,10 @@ export const request_columns: ColumnDef<Request>[] = [
               ? "bg-yellow-500"
               : row.original.status == "approved"
               ? "bg-emerald-500"
+              : row.original.status == "pending_withdrawal"
+              ? "w-34 bg-blue-500"
+              : row.original.status == "withdrawn"
+              ? "bg-purple-500"
               : "bg-red-500"
           )}
         >
@@ -189,6 +193,10 @@ export const individual_request_columns: ColumnDef<IndividualRequest>[] = [
               ? "bg-yellow-500"
               : row.original.status == "approved"
               ? "bg-emerald-500"
+              : row.original.status == "pending_withdrawal"
+              ? "w-34 bg-blue-500"
+              : row.original.status == "withdrawn"
+              ? "bg-purple-500"
               : "bg-red-500"
           )}
         >

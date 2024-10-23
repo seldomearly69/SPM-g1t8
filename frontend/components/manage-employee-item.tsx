@@ -28,7 +28,7 @@ export default function ManageEmployeeArrangementsItem() {
   // Get search parameters (query string)
   const searchParams = useSearchParams();
   const requestId = searchParams?.get("requestId") ?? "";
-  const employeeName = searchParams?.get("employeeName") ?? "";
+  const employeeName = searchParams?.get("name") ?? "";
   const department = searchParams?.get("department") ?? "";
   const date = searchParams?.get("date") ?? "";
   const type = searchParams?.get("type") ?? "";
@@ -168,7 +168,7 @@ export default function ManageEmployeeArrangementsItem() {
 
       {/* Action buttons */}
       <div className="mt-4 flex justify-end space-x-4">
-        {status === "pending" && (
+        {(status === "pending" || status == "pending_withdrawal") && (
           <>
             <Button onClick={handleApprove}>Approve</Button>
             <Button onClick={handleReject} variant="outline">
