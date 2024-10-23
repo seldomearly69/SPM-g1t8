@@ -13,7 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { PlusIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import AssignManagerForm from "./assign-manager-form";
 
 interface ManageEmployeeArrangementsProps {
@@ -78,9 +85,7 @@ export default function ManageEmployeeArrangements({
     router.push(`/dashboard/manage-employees/${row.requestId}?${queryParams}`);
   };
 
-  const handleAssignManager = () => {
-
-  };
+  const handleAssignManager = () => {};
 
   return (
     <motion.div
@@ -111,7 +116,6 @@ export default function ManageEmployeeArrangements({
               <PlusIcon className="w-4 h-4 mr-2" />
                Assign Manager
             </Button>
-           
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Manager</DialogTitle>
@@ -125,14 +129,15 @@ export default function ManageEmployeeArrangements({
                 employeeRequests={employeeRequests}/>
             </DialogContent>
           </Dialog>
-        
         </div>
 
         <TabsContent value="pending">
           <DataTable
             columns={request_columns}
             data={employeeRequests.filter(
-              (request) => request.status === "pending"
+              (request) =>
+                request.status === "pending" ||
+                request.status === "pending_withdrawal"
             )}
             onRowClick={handleRowClick}
           />

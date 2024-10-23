@@ -9,6 +9,7 @@ export async function getOwnRequest(staffId: number) {
           requestId
           date
           type
+          createdAt
           status
           reason
           remarks
@@ -150,8 +151,10 @@ export async function getIndividualRequest(requestId: number) {
         requestId
         date
         type
+        createdAt
         status
         remarks
+        reason
       }
     }
   `;
@@ -171,7 +174,34 @@ export async function getIndividualRequest(requestId: number) {
   return data;
 }
 
-export async function withdrawRequest(requestId: number) {
+export async function withdrawApprovedRequest(
+  requestId: number,
+  newReason: string
+) {
+  const gqlString = gql`
+    mutation withdrawApprovedRequest($requestId: Int!, $newReason: String!) {
+      withdrawApprovedRequest(requestId: $requestId, newReason: $newReason) {
+        success
+        message
+      }
+    }
+  `;
+
+  const res = await fetch("http://localhost:5002/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString?.loc?.source?.body,
+      variables: { requestId: requestId, newReason: newReason },
+    }),
+  });
+  const data = await res.json();
+  return data;
+}
+
+export async function withdrawPendingRequest(requestId: number) {
   const gqlString = gql`
     mutation withdrawPendingRequest($requestId: Int!) {
       withdrawPendingRequest(requestId: $requestId) {
