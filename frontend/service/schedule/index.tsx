@@ -44,10 +44,10 @@ export async function getTeamList(
   `;
 }
 
-export async function getManagerList(directorId: number) {
+export async function getManagerList(staffId: number) {
   const gqlString = `
-    query getManagerList($directorId: Int!) {
-      managerList(directorId: $directorId) {
+    query getManagerList($staffId: Int!) {
+      managerList(staffId: $staffId) {
         directorName
         managerList {
           staffId
@@ -65,7 +65,7 @@ export async function getManagerList(directorId: number) {
     },
     body: JSON.stringify({
       query: gqlString,
-      variables: { directorId },
+      variables: { staffId },
     }),
   });
 
