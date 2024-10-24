@@ -603,7 +603,7 @@ def resolve_overall_availability(month,year):
     for i in range(1,days_in_month[month]+1):
         for type in ["AM","PM"]:
             overall_availability.append({
-                "date": f'{year}-{i}-{month}',
+                "date": f"{year:04d}-{month:02d}-{i:02d}",
                 "availability":total - RequestModel.query.filter(
                     RequestModel.month == month,
                     RequestModel.year == year,
