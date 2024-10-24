@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import * as React from "react";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useSelectedLayoutSegment } from "next/navigation";
 
 interface MainNavProps {

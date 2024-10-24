@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { usePathname } from "next/navigation"
 
 export default function BreadcrumbLayout() {

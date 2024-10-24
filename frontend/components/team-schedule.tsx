@@ -20,7 +20,6 @@ import { DataTable } from "@/components/data-table";
 import { availability_columns } from "@/components/columns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
-  getManagerList,
   getTeamDetails,
   getTeamSchedule,
 } from "@/service/schedule";

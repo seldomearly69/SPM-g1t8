@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { assignManagerSchema } from "@/lib/validations/application";
 import { useEffect, useState } from "react";

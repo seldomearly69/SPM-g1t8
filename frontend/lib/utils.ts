@@ -2,7 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { DaysInWeekProps } from "@/types";
 import { enUS } from "date-fns/locale";
 import { ClassValue, clsx } from "clsx";
-import { getMonth, getWeek, getYear } from "date-fns";
+import { getMonth, getYear } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
