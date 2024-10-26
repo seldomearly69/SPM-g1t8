@@ -462,7 +462,7 @@ class RequestForTransfer(graphene.Mutation):
 
     def mutate(self, info, requesting_manager, target_manager, reason):
         check = User.query.filter(User.reporting_manager==target_manager,User.away_manager!=None).first()
-        requests = RequestModel.query.filter(RequestModel.approving_manager==requesting_manager,RequestModel.status).first()
+
         if check:
             return RequestForTransfer(success = False, message="Target manager already has extra responsiblity")
         check = User.query.filter(User.staff_id==requesting_manager).first().away_manager
