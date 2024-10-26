@@ -185,7 +185,7 @@ export async function getDepartmentSchedule(
   return data;
 }
 
-export async function getOverallSchedule(month: number, year: number) {
+export async function getOverallAvailability(month: number, year: number) {
   const gqlString = gql`
     query overallAvailability($month: Int!, $year: Int!) {
       overallAvailability(month: $month, year: $year) {
@@ -201,6 +201,44 @@ export async function getOverallSchedule(month: number, year: number) {
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
       variables: { month: month, year: year },
+    }),
+  });
+  const data = await res.json();
+  return data;
+}
+
+export async function getOverallSchedule(
+  month: number,
+  year: number,
+  day: number
+) {
+  const gqlString = gql`
+    query overallSchedule($month: Int!, $year: Int!, $day: Int!) {
+      overallSchedule(month: $month, year: $year, day: $day) {
+        overallSchedule {
+          date
+          type
+          availableCount
+          availability {
+            name
+            type
+            department
+            availability
+            isPending
+          }
+        }
+      }
+    }
+  `;
+
+  const res = await fetch("http://localhost:5002/schedule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: gqlString?.loc?.source?.body,
+      variables: { month: month, year: year, day: day },
     }),
   });
   const data = await res.json();

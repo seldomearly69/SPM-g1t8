@@ -205,7 +205,7 @@ export default function TeamSchedule({
             )}
             <MonthlyNav />
           </div>
-          <MonthlyBody events={teamSchedule.teamSchedule}>
+          <MonthlyBody events={teamSchedule.teamSchedule} requests={[]}>
             <Dialog onOpenChange={handleDialogOpen}>
               <DialogTrigger>
                 <MonthlyDay<EventType>

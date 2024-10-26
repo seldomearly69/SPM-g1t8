@@ -227,6 +227,7 @@ export function MonthlyBody<DayData>({
     const { locale } = useMonthlyCalendar();
     const { day, events } = useMonthlyBody<DayData>()
     const dayNumber = format(day, 'd', { locale });
+    console.log(events);
     
     return (
       <div
@@ -361,7 +362,6 @@ export const DefaultMonthlyEventItem = ({
   };
 
 export const ApplyMonthlyEventItem = ({
-    availability,
     type,
 
   }: DefaultEventItemProps) => {

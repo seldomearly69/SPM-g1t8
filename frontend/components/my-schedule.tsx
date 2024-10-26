@@ -106,7 +106,7 @@ export default function MySchedule({ user }: MyScheduleProps) {
           onCurrentMonthChange={setCurrentMonth}
         >
           <MonthlyNav />
-          <MonthlyBody events={schedule}>
+          <MonthlyBody events={schedule} requests={[]}>
             <MonthlyDay<EventType>
               onDateClick={() => {}}
               renderDay={(data) => (

@@ -3,15 +3,16 @@ import ApplicationForm from "@/components/application-form";
 import { getCurrentUser } from "@/lib/session";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getOwnRequest } from "@/service/request";
+import { useEffect } from "react";
 
 export default async function ApplyWFHPage() {
-    const user = await getCurrentUser();
-    const data = await getOwnRequest(user?.staffId);
-    const requests = data.data.ownRequests.requests.map((request: any) => ({
-      date: request.date,
-      type: request.type,
-      status: request.status,
-    }));
+  const user = await getCurrentUser();
+  const data = await getOwnRequest(user?.staffId);
+  const requests = data.data.ownRequests.requests.map((request: any) => ({
+    date: request.date,
+    type: request.type,
+    status: request.status,
+  }));
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -28,11 +29,11 @@ export default async function ApplyWFHPage() {
         Apply for Work From Home
       </motion.h2>
       <Card>
-          <CardHeader></CardHeader>
-          <CardContent>
-            <ApplicationForm user={user} requests={requests} />
-          </CardContent>
-        </Card>
+        <CardHeader></CardHeader>
+        <CardContent>
+          <ApplicationForm user={user} requests={requests} />
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }
