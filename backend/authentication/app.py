@@ -56,7 +56,7 @@ def authenticate():
             "name": result[1] + " " + result[2],
             "email": result[6],
             "reporting_manager": result[7],
-            "role": result[8]
+            "role": result[9]
         }), 200
     elif result:
         return jsonify({"Error": "Wrong password"}), 403
