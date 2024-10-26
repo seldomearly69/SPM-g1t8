@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { IndividualRequest } from "@/types";
 import {
   getIndividualRequest,
-  withdrawPendingRequest,
   withdrawApprovedRequest,
+  withdrawPendingRequest,
 } from "@/service/request";
 import { User } from "@/types";
 import { Popover } from "@radix-ui/react-popover";
@@ -56,7 +56,7 @@ export default function ManageIndividualRequest({
     }
 
     if (data.data.acceptRejectRequest?.success) {
-      var messageToSet =
+      const messageToSet =
         status === "approved"
           ? `Withdraw Request for #${params.request_id} has been submitted to your immediate superior.`
           : `Request #${params.request_id} has been successfully withdrawn.`;

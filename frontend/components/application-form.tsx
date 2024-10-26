@@ -13,7 +13,6 @@ import { z } from "zod";
 import {
   ApplyMonthlyEventItem,
   CustomMonthlyDay,
-  DefaultMonthlyEventItem,
   MonthlyBody,
   MonthlyCalendar,
   MonthlyNav,
@@ -27,7 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn, hasMoreThanTwoDays } from "@/lib/utils";
-import { format, isSameDay } from "date-fns";
+import { isSameDay } from "date-fns";
 import { EventType, User } from "@/types";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "@/hooks/use-toast";

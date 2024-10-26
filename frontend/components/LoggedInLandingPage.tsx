@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 
 export default function LoggedInLandingPage({ user }: { user: any }) {

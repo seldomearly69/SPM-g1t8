@@ -1,4 +1,4 @@
-import { X, MoreVertical, Loader2, Plus } from "lucide-react";
+import { Loader2, MoreVertical, Plus, X } from "lucide-react";
 
 export const Icons = {
   close: X,

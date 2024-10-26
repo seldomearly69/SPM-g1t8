@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Icons } from "@/components/icons";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface DashboardNavProps {
   sideBarNav: {
