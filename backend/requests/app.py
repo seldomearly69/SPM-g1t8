@@ -385,6 +385,10 @@ class AcceptRejectRequest(graphene.Mutation):
         elif r.status == "pending_withdrawal":
             if new_status == "approved":
                 r.status = "withdrawn"
+            elif new_status == "rejected":
+                r.status = "rejected"
+        elif r.status == "approved" and new_status == "rejected":
+            r.status = "rejected"
 
         if remarks:
             r.remarks = remarks
