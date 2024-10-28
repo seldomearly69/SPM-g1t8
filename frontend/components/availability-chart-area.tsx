@@ -11,11 +11,11 @@ export const description = "A stacked area chart"
 const chartConfig = {
   office: {
     label: "office",
-    color: "red",
+    color: "hsl(var(--accent))",
   },
   wfh: {
     label: "wfh",
-    color: "green",
+    color: "hsl(var(--tertiary))",
   },
 } satisfies ChartConfig
 

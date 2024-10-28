@@ -201,7 +201,7 @@ export default function TeamSchedule({
                 <MonthlyDay<EventType>
                   onDateClick={(date) => setSelectedDialogDate(date)}
                   renderDay={(data) => (
-                    <ul>
+                    <>
                       {data.map((item) => (
                         <TeamMonthlyEventItem
                           key={`${item.date}-${item.type}`}
@@ -211,7 +211,7 @@ export default function TeamSchedule({
                           type={item.type}
                         />
                       ))}
-                    </ul>
+                    </>
                   )}
                 />
               </DialogTrigger>

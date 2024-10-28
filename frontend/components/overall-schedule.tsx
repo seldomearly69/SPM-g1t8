@@ -43,7 +43,6 @@ export default function OverallSchedule({ user }: MyScheduleProps) {
   const handleDialogOpen = async (open: boolean) => {
     if (open && selectedDialogDate) {
       try {
-        
         const data = await getOverallSchedule(
           currentMonth.getMonth() + 1,
           currentMonth.getFullYear(),
@@ -112,7 +111,7 @@ export default function OverallSchedule({ user }: MyScheduleProps) {
                 <MonthlyDay<EventType>
                   onDateClick={(date) => setSelectedDialogDate(date)}
                   renderDay={(data) => (
-                    <ul>
+                    <>
                       {data.map((item) => (
                         <TeamMonthlyEventItem
                           key={`${item.date}-${item.type}`}
@@ -120,7 +119,7 @@ export default function OverallSchedule({ user }: MyScheduleProps) {
                           type={item.type}
                         />
                       ))}
-                    </ul>
+                    </>
                   )}
                 />
               </DialogTrigger>

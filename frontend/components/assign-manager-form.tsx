@@ -15,7 +15,6 @@ import {
 import { Button } from "./ui/button";
 import { assignManagerSchema } from "@/lib/validations/application";
 import { useEffect, useState } from "react";
-import { getManagerList } from "@/service/schedule";
 import { User } from "@/types";
 import { toast } from "@/hooks/use-toast";
 import {

@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import AssignManagerForm from "./assign-manager-form";
-import { Card, CardTitle, CardContent, CardHeader } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import { revertTransferRequest } from "@/service/transfer_manager";
 
@@ -116,12 +116,11 @@ export default function ManageEmployeeArrangements({
                 variant="secondary"
                 onClick={() =>
                   handleRevertTransferRequest(
-                    _transferRequests
-                      .filter(
-                        (request: TransferRequest) =>
-                          request.requestingManager == user.staffId &&
-                          request.status === "accepted"
-                      )[0].requestId
+                    _transferRequests.filter(
+                      (request: TransferRequest) =>
+                        request.requestingManager == user.staffId &&
+                        request.status === "accepted"
+                    )[0].requestId
                   )
                 }
               >
@@ -192,15 +191,13 @@ export default function ManageEmployeeArrangements({
             </TabsContent>
 
             <TabsContent value="rejected">
-              <ScrollArea className="h-[calc(90vh-100px)] px-4 sm:px-0 ">
-                <DataTable
-                  columns={request_columns}
-                  data={employeeRequests.filter(
-                    (request) => request.status === "rejected"
-                  )}
-                  onRowClick={handleRowClick}
-                />
-              </ScrollArea>
+              <DataTable
+                columns={request_columns}
+                data={employeeRequests.filter(
+                  (request) => request.status === "rejected"
+                )}
+                onRowClick={handleRowClick}
+              />
             </TabsContent>
           </Tabs>
         </div>

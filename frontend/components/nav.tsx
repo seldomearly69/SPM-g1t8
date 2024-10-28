@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Icons } from "@/components/icons";
 import { useEffect, useState } from "react";
-import { div } from "framer-motion/client";
 
 interface DashboardNavProps {
   sideBarNav: {
@@ -40,12 +39,12 @@ export function DashboardNav({ sideBarNav, currentUser }: DashboardNavProps) {
   }, [sideBarNav, currentUser]);
 
   return (
-    <nav className="grid items-start gap-2 md:flex md:flex-col">
+    <nav className="grid items-start gap-2 md:flex md:flex-col py-2">
       {navItems.map((item, index) => {
         const Icon = Icons[item.icon || "arrowRight"];
         return (
           item.href && (
-            <div className="w-full">
+            <div className="w-full px-2" key={index}>
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
@@ -56,7 +55,7 @@ export function DashboardNav({ sideBarNav, currentUser }: DashboardNavProps) {
                   <span
                     className={cn(
                       "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                      path === item.href ? "bg-accent" : "transparent",
+                      path === item.href ? "bg-accent text-accent-foreground" : "transparent",
                       item.disabled && "cursor-not-allowed opacity-80",
                       "w-full"
                     )}

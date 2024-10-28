@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Card, CardContent } from "./ui/card";
 
 export default function ManageEmployeeArrangementsItem() {
   // State variables
@@ -123,83 +124,87 @@ export default function ManageEmployeeArrangementsItem() {
   // Example usage:
   // retrieveFileUrls(); // This line was causing the downloadFile to run on load. It's now commented out to prevent this.
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">WFH Request Details</h1>
+    <Card>
+      <CardContent>
+        <div className="max-w-3xl mx-auto p-6">
+          <h1 className="text-2xl font-bold mb-6">WFH Request Details</h1>
 
-      {/* Request Details */}
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <Label htmlFor="employee-name">Employee Name</Label>
-          <Input id="employee-name" value={employeeName} readOnly />
-        </div>
-        <div>
-          <Label htmlFor="department">Department</Label>
-          <Input id="department" value={department} readOnly />
-        </div>
-        <div>
-          <Label htmlFor="request-type">Request Type</Label>
-          <Input id="request-type" value={type} readOnly />
-        </div>
-        <div>
-          <Label htmlFor="requested-on">Requested On</Label>
-          <Input id="requested-on" value={createdAt} readOnly />
-        </div>
-        <div className="col-span-2">
-          <Label className="block mb-2">WFH Date</Label>
-          <Input id="wfh-date" value={date} readOnly />
-        </div>
-        <div className="col-span-2">
-          <Label className="block mb-2">Reason</Label>
-          <Textarea value={reason} rows={4} readOnly />
-        </div>
-        {remarks && (
-          <div className="col-span-2">
-            <Label className="block mb-2">Remarks</Label>
-            <Textarea value={remarks} rows={4} readOnly />
+          {/* Request Details */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="employee-name">Employee Name</Label>
+              <Input id="employee-name" value={employeeName} readOnly />
+            </div>
+            <div>
+              <Label htmlFor="department">Department</Label>
+              <Input id="department" value={department} readOnly />
+            </div>
+            <div>
+              <Label htmlFor="request-type">Request Type</Label>
+              <Input id="request-type" value={type} readOnly />
+            </div>
+            <div>
+              <Label htmlFor="requested-on">Requested On</Label>
+              <Input id="requested-on" value={createdAt} readOnly />
+            </div>
+            <div className="col-span-2">
+              <Label className="block mb-2">WFH Date</Label>
+              <Input id="wfh-date" value={date} readOnly />
+            </div>
+            <div className="col-span-2">
+              <Label className="block mb-2">Reason</Label>
+              <Textarea value={reason} rows={4} readOnly />
+            </div>
+            {remarks && (
+              <div className="col-span-2">
+                <Label className="block mb-2">Remarks</Label>
+                <Textarea value={remarks} rows={4} readOnly />
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {files && (
-        <div className="mt-6 flex justify-start space-x-4">
-          <Button onClick={retrieveFileUrls}>Download File</Button>
+          {files && (
+            <div className="mt-6 flex justify-start space-x-4">
+              <Button onClick={retrieveFileUrls}>Download File</Button>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="mt-4 flex justify-end space-x-4">
+            {(status === "pending" || status == "pending_withdrawal") && (
+              <>
+                <Button onClick={handleApprove}>Approve</Button>
+                <Button onClick={handleReject} variant="outline">
+                  Reject
+                </Button>
+              </>
+            )}
+            {status === "approved" && (
+              <Button onClick={handleReject} variant="outline">
+                Reject
+              </Button>
+            )}
+          </div>
+
+          {/* Dialogs */}
+          <SuccessDialog
+            isOpen={successDialog}
+            onClose={setSuccessDialog}
+            employeeName={employeeName}
+            successMessage={successMessage}
+            redirectBack={redirectBack}
+          />
+
+          <RejectDialog
+            isOpen={rejectDialog}
+            onClose={setRejectDialog}
+            rejectionReason={rejectionReason}
+            setRejectionReason={setRejectionReason}
+            rejectArrangement={rejectArrangement}
+          />
         </div>
-      )}
-
-      {/* Action buttons */}
-      <div className="mt-4 flex justify-end space-x-4">
-        {(status === "pending" || status == "pending_withdrawal") && (
-          <>
-            <Button onClick={handleApprove}>Approve</Button>
-            <Button onClick={handleReject} variant="outline">
-              Reject
-            </Button>
-          </>
-        )}
-        {status === "approved" && (
-          <Button onClick={handleReject} variant="outline">
-            Reject
-          </Button>
-        )}
-      </div>
-
-      {/* Dialogs */}
-      <SuccessDialog
-        isOpen={successDialog}
-        onClose={setSuccessDialog}
-        employeeName={employeeName}
-        successMessage={successMessage}
-        redirectBack={redirectBack}
-      />
-
-      <RejectDialog
-        isOpen={rejectDialog}
-        onClose={setRejectDialog}
-        rejectionReason={rejectionReason}
-        setRejectionReason={setRejectionReason}
-        rejectArrangement={rejectArrangement}
-      />
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -228,7 +233,7 @@ function SuccessDialog({
         </DialogHeader>
         <DialogFooter>
           <Button onClick={redirectBack} className="text-md">
-            Ok
+            Okay
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -272,7 +277,7 @@ function RejectDialog({
         </div>
         <DialogFooter>
           <Button onClick={rejectArrangement} className="text-md">
-            Ok
+            Okay
           </Button>
         </DialogFooter>
       </DialogContent>

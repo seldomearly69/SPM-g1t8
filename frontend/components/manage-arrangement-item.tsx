@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Card, CardContent } from "./ui/card";
 
 interface ManageIndividualRequestProps {
   user: User;
@@ -102,7 +103,7 @@ export default function ManageIndividualRequest({
           </DialogHeader>
           <DialogFooter>
             <Button onClick={redirectBack} className="text-md">
-              Ok
+              Okay
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -111,98 +112,106 @@ export default function ManageIndividualRequest({
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">
-        WFH Request #{params.request_id}
-      </h1>
+    <Card>
+      <CardContent>
+        <div className="max-w-3xl mx-auto p-6">
+          <h1 className="text-2xl font-bold mb-6">
+            WFH Request #{params.request_id}
+          </h1>
 
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <Label htmlFor="date">Date</Label>
-          <Input id="date" value={request?.date} readOnly />
-        </div>
-        <div>
-          <Label htmlFor="requested-on">Requested on</Label>
-          <Input id="requested-on" value={request?.createdAt || ""} readOnly />
-        </div>
-        <div>
-          <Label htmlFor="request-type">Request Type</Label>
-          <Input id="request-type" value={request?.type} readOnly />
-        </div>
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Input id="status" value={request?.status} readOnly />
-        </div>
-        <div className="col-span-2">
-          <Label className="block mb-2">Reason</Label>
-          <Textarea value={request?.reason} rows={4} readOnly />
-        </div>
-        <div className="col-span-2">
-          <Label className="block mb-2">Remarks from Supervisor</Label>
-          <Textarea value={request?.remarks} rows={4} readOnly />
-        </div>
-      </div>
-
-      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <div className="mt-6 flex justify-between space-x-4">
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
-          </Button>
-          {status === "approved" ? (
-            <PopoverTrigger asChild>
-              <Button size="sm" className="hover:text-red-500">
-                Cancel Request
-              </Button>
-            </PopoverTrigger>
-          ) : status === "pending" ? (
-            <Button
-              variant="outline"
-              onClick={() => {
-                handleWithdraw();
-              }}
-            >
-              Withdraw
-            </Button>
-          ) : null}
-        </div>
-        <PopoverContent className="w-80">
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <h4 className="font-medium leading-none">Reason</h4>
-              <p className="text-sm text-muted-foreground">
-                Enter the reason for the withdrawal
-              </p>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="date">Date</Label>
+              <Input id="date" value={request?.date} readOnly />
             </div>
-            <div className="grid gap-2">
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Textarea
-                  onChange={(e) => setReason(e.target.value)}
-                  value={reason}
-                  className="col-span-3 h-8"
-                />
-              </div>
+            <div>
+              <Label htmlFor="requested-on">Requested on</Label>
+              <Input
+                id="requested-on"
+                value={request?.createdAt || ""}
+                readOnly
+              />
             </div>
-            <div className="grid gap-2">
-              <Button
-                onClick={() => {
-                  handleWithdraw();
-                  setIsPopoverOpen(false);
-                }}
-                variant="outline"
-              >
-                Submit
-              </Button>
+            <div>
+              <Label htmlFor="request-type">Request Type</Label>
+              <Input id="request-type" value={request?.type} readOnly />
+            </div>
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Input id="status" value={request?.status} readOnly />
+            </div>
+            <div className="col-span-2">
+              <Label className="block mb-2">Reason</Label>
+              <Textarea value={request?.reason} rows={4} readOnly />
+            </div>
+            <div className="col-span-2">
+              <Label className="block mb-2">Remarks from Supervisor</Label>
+              <Textarea value={request?.remarks} rows={4} readOnly />
             </div>
           </div>
-        </PopoverContent>
-      </Popover>
-      {/* Success Dialog */}
-      <SuccessDialog
-        isOpen={successDialog}
-        onClose={setSuccessDialog}
-        successMessage={successMessage}
-        redirectBack={() => window.location.reload()}
-      />
-    </div>
+
+          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+            <div className="mt-6 flex justify-between space-x-4">
+              <Button variant="outline" onClick={() => router.back()}>
+                Back
+              </Button>
+              {status === "approved" ? (
+                <PopoverTrigger asChild>
+                  <Button size="sm" className="hover:text-red-500">
+                    Cancel Request
+                  </Button>
+                </PopoverTrigger>
+              ) : status === "pending" ? (
+                <Button
+                  className="hover:text-red-500"
+                  onClick={() => {
+                    handleWithdraw();
+                  }}
+                >
+                  Withdraw
+                </Button>
+              ) : null}
+            </div>
+            <PopoverContent className="w-80">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Reason</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Enter the reason for the cancellation
+                  </p>
+                </div>
+                <div className="grid gap-2">
+                  <div className="grid grid-cols-3 items-center gap-4">
+                    <Textarea
+                      onChange={(e) => setReason(e.target.value)}
+                      value={reason}
+                      className="col-span-3 h-8"
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Button
+                    onClick={() => {
+                      handleWithdraw();
+                      setIsPopoverOpen(false);
+                    }}
+                    variant="outline"
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          {/* Success Dialog */}
+          <SuccessDialog
+            isOpen={successDialog}
+            onClose={setSuccessDialog}
+            successMessage={successMessage}
+            redirectBack={() => window.location.reload()}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
