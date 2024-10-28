@@ -53,6 +53,7 @@ export default function ManageIndividualRequest({
       data = await withdrawApprovedRequest(request.requestId, reason); // Call with reason
     } else if (status === "pending") {
       data = await withdrawPendingRequest(request.requestId); // Call without reason
+      console.log(data);
     }
 
     if (data.data.acceptRejectRequest?.success) {
