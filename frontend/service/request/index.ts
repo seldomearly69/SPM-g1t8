@@ -140,7 +140,7 @@ export async function approveRequest(
     }),
   });
   const data = await res.json();
-
+  console.log(data);
   return data;
 }
 
@@ -178,13 +178,9 @@ export async function withdrawApprovedRequest(
   requestId: number,
   newReason: string
 ) {
-  const gqlString = gql`
-    mutation AcceptRejectRequest($requestId: Int!, $remarks: String!) {
-      acceptRejectRequest(
-        newStatus: "pending_withdrawal"
-        requestId: $requestId
-        remarks: $remarks
-      ) {
+  const gqlString = `
+    mutation WithdrawApprovedRequest($requestId: Int!, $newReason: String!) {
+      withdrawApprovedRequest(requestId: $requestId, newReason: $newReason) {
         success
         message
       }
@@ -197,11 +193,13 @@ export async function withdrawApprovedRequest(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { requestId, remarks: newReason }, // Correct the variable name here
+      query: gqlString,
+      variables: { requestId, newReason },
     }),
   });
+
   const data = await res.json();
+  console.log(data);
   return data;
 }
 

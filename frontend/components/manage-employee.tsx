@@ -29,6 +29,7 @@ export default function ManageEmployeeArrangements({
   const [employeeRequests, setEmployeeRequests] = useState<any[]>([]); // Updated to handle real data
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     // Fetch actual employee requests data from API
@@ -91,75 +92,77 @@ export default function ManageEmployeeArrangements({
       className="max-w-full mx-auto pr-4"
     >
       <h2 className="text-2xl font-bold mb-6">Manage Employee WFH Requests</h2>
-      <Tabs defaultValue="pending" className="h-full space-y-6">
-        <div className="space-between flex items-center justify-center relative">
-          <TabsList>
-            <TabsTrigger value="pending" className="relative">
-              Pending
-            </TabsTrigger>
-            <TabsTrigger value="approved" className="relative">
-              Approved
-            </TabsTrigger>
-            <TabsTrigger value="rejected" className="relative">
-              Rejected
-            </TabsTrigger>
-          </TabsList>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <Button
-              className="flex items-center absolute right-1"
-              onClick={() => setIsDialogOpen(true)}
-            >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Assign Manager
-            </Button>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Assign Manager</DialogTitle>
-                <DialogDescription>
-                  Assign a manager to the employee
-                </DialogDescription>
-              </DialogHeader>
-              <AssignManagerForm
-                user={user}
-                setIsDialogOpen={setIsDialogOpen}
-                employeeRequests={employeeRequests}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
+      <div className="flex flex-col md:flex-row md:justify-between">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Button
+            className="flex items-center mb-4 md:absolute md:right-1"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            <PlusIcon className="w-4 h-4 mr-2" />
+            Assign Manager
+          </Button>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Assign Manager</DialogTitle>
+              <DialogDescription>
+                Assign a manager to the employee
+              </DialogDescription>
+            </DialogHeader>
+            <AssignManagerForm
+              user={user}
+              setIsDialogOpen={setIsDialogOpen}
+              employeeRequests={employeeRequests}
+            />
+          </DialogContent>
+        </Dialog>
+        <Tabs defaultValue="pending" className="h-full space-y-6">
+          <div className="space-between flex items-center justify-center relative">
+            <TabsList>
+              <TabsTrigger value="pending" className="relative">
+                Pending
+              </TabsTrigger>
+              <TabsTrigger value="approved" className="relative">
+                Approved
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="relative">
+                Rejected
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <TabsContent value="pending">
-          <DataTable
-            columns={request_columns}
-            data={employeeRequests.filter(
-              (request) =>
-                request.status === "pending" ||
-                request.status === "pending_withdrawal"
-            )}
-            onRowClick={handleRowClick}
-          />
-        </TabsContent>
+          <TabsContent value="pending">
+            <DataTable
+              columns={request_columns}
+              data={employeeRequests.filter(
+                (request) =>
+                  request.status === "pending" ||
+                  request.status === "pending_withdrawal"
+              )}
+              onRowClick={handleRowClick}
+            />
+          </TabsContent>
 
-        <TabsContent value="approved">
-          <DataTable
-            columns={request_columns}
-            data={employeeRequests.filter(
-              (request) => request.status === "approved"
-            )}
-            onRowClick={handleRowClick}
-          />
-        </TabsContent>
+          <TabsContent value="approved">
+            <DataTable
+              columns={request_columns}
+              data={employeeRequests.filter(
+                (request) => request.status === "approved"
+              )}
+              onRowClick={handleRowClick}
+            />
+          </TabsContent>
 
-        <TabsContent value="rejected">
-          <DataTable
-            columns={request_columns}
-            data={employeeRequests.filter(
-              (request) => request.status === "rejected"
-            )}
-            onRowClick={handleRowClick}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="rejected">
+            <DataTable
+              columns={request_columns}
+              data={employeeRequests.filter(
+                (request) => request.status === "rejected"
+              )}
+              onRowClick={handleRowClick}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
     </motion.div>
   );
 }

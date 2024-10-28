@@ -1,105 +1,138 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { MainNavItem } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelectedLayoutSegment } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SidebarNavItem } from "@/types";
+import { cn } from "@/lib/utils";
+import { Icons } from "@/components/icons";
 
 interface MainNavProps {
-  items?: MainNavItem[];
-  children?: React.ReactNode;
+  mainNav: {
+    common: SidebarNavItem[];
+    roleSpecific: {
+      [key: number]: SidebarNavItem[];
+    };
+  };
+  currentUser: {
+    role?: number;
+  } | null;
 }
 
-export function MainNav({ items }: MainNavProps) {
+export function MainNav({ mainNav, currentUser }: MainNavProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const segment = useSelectedLayoutSegment();
+  const [navItems, setNavItems] = useState<SidebarNavItem[]>([]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    const items = [...mainNav.common];
+    const role = currentUser?.role;
+
+    if (role !== undefined && mainNav.roleSpecific[role]) {
+      items.push(...mainNav.roleSpecific[role]);
+    }
+
+    setNavItems(items);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, [mainNav, currentUser]);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="flex gap-6 md:gap-10" 
-    >
-      <Link href="/" className="flex items-center">
-        <Image
-          src="/assets/images/logo.png"
-          alt="FlexiWork Logo"
-          width={80}
-          height={80}
-          className="mr-2 pl-4 pr-2"
-        />
-        <span className="font-bold text-xl">FlexiWork</span>
-      </Link>
-      {items?.length ? (
-        <nav className="hidden md:flex gap-6 items-center">
-          {items?.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Link
-                key={index}
-                href={item.disabled ? "#" : item.href}
-                className={cn(
-                  "flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm",
-                  item.href.startsWith(`/${segment}`)
-                    ? "text-foreground"
-                    : "text-foreground/60",
-                  item.disabled && "cursor-not-allowed opacity-80"
-                )}
-              >
-                {item.title}
-              </Link>
-            </motion.div>
-          ))}
-        </nav>
-      ) : null}
-      <div className="md:hidden">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="p-2 rounded-md bg-secondary text-secondary-foreground text-base shadow-sm"
+    <div className="flex justify-between items-center">
+      {isMobile && (
+        <button
           onClick={() => setShowMobileMenu(!showMobileMenu)}
+          className="p-2 rounded-md bg-secondary text-secondary-foreground"
         >
-          {showMobileMenu ? "Close" : "Menu"}
-        </motion.button>
-      </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="lucide lucide-square-menu"
+          >
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M7 8h10" />
+            <path d="M7 12h10" />
+            <path d="M7 16h10" />
+          </svg>
+        </button>
+      )}
+      <nav className="hidden md:flex gap-6 items-center">
+        {navItems.map((item, index) => {
+          const Icon = Icons[item.icon || "arrowRight"];
+          return (
+            <DropdownMenu key={index}>
+              <DropdownMenuTrigger asChild>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <Link
+                      href={item.disabled ? "#" : item.href}
+                      className={cn(
+                        "flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm",
+                        item.href.startsWith(`/${segment}`)
+                          ? "text-foreground"
+                          : "text-foreground/60",
+                        item.disabled && "cursor-not-allowed opacity-80"
+                      )}
+                    >
+                      <Icon className="mr-2 h-4 w-4" />
+                      {item.title}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenuTrigger>
+            </DropdownMenu>
+          );
+        })}
+      </nav>
       <AnimatePresence>
-        {showMobileMenu && items && (
+        {showMobileMenu && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="absolute top-full right-0 w-full md:w-auto bg-white shadow-lg rounded-b-md"
+            className="absolute top-full right-0 w-full bg-white shadow-lg rounded-b-md md:hidden"
           >
             <nav className="flex flex-col p-4">
-              {items.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
+              {navItems.map((item, index) => {
+                const Icon = Icons[item.icon || "arrowRight"];
+                return (
                   <Link
+                    key={index}
                     href={item.href || "#"}
-                    className="py-2 text-lg font-medium hover:text-primary transition-colors"
+                    className="py-2 text-lg font-medium hover:text-primary transition-colors flex items-center"
                     onClick={() => setShowMobileMenu(false)}
                   >
+                    <Icon className="mr-2 h-4 w-4" /> {/* Icon added here */}
                     {item.title}
                   </Link>
-                </motion.div>
-              ))}
+                );
+              })}
             </nav>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

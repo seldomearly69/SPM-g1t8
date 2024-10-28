@@ -16,6 +16,7 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      PYTHONPATH: ${{ github.workspace }}
 
     services:
       rabbitmq:
@@ -23,6 +24,25 @@ jobs:
         ports:
           - 5672:5672  # RabbitMQ AMQP port
           - 15672:15672  # RabbitMQ management web UI
+        options: >-
+          --health-cmd "rabbitmqctl node_health_check"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       # Checkout the repository
@@ -48,11 +68,46 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      # Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      # Install dependencies (removed coverage-related packages)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest  # Removed pytest-cov and coverage
+
       # Build the Docker image using the path to docker-compose.yml
       - name: Build Docker image
-        run: docker-compose -f backend/docker-compose.yml build
+        run: |
+          docker-compose -f backend/docker-compose.yml build
+          docker-compose -f backend/docker-compose.yml pull
 
-      # Run the tests within the Docker container using the path to docker-compose.yml
+      # Run the tests within the Docker container (removed coverage options)
       - name: Run unit tests
         run: |
-          docker-compose -f backend/docker-compose.yml run --rm requests pytest unit_tests.py --maxfail=1 --disable-warnings -q
+          docker-compose -f backend/docker-compose.yml run --rm \
+            -e PYTHONPATH=/app \
+            requests pytest --maxfail=1 --disable-warnings -v unit_tests.py
+
+      # Store test results
+      - name: Store test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            ./backend/requests/coverage.xml
+            ./backend/requests/.coverage
+          retention-days: 30
+
+      # Cleanup
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose -f backend/docker-compose.yml down -v
+          docker system prune -f
