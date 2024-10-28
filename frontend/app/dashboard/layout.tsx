@@ -59,8 +59,8 @@ export default async function DashboardLayout({
           </div>
         </motion.div>
       </header>
-      <div className="flex flex-1 gap-12 md:grid-cols-[300px_1fr]">
-        <aside className="hidden w-[200px] flex-col md:block flex-shrink-0">
+      <div className="flex flex-1 gap-12 lg:grid-cols-[300px_1fr] justify-center">
+        <aside className="hidden w-[200px] flex-col lg:block flex-shrink-0">
           <div className="fixed top-[5rem] h-[calc(100vh-5rem)] overflow-y-auto">
             <DashboardNav
               sideBarNav={dashboardConfig.sidebarNav}

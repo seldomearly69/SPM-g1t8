@@ -21,8 +21,9 @@ export default async function ManageEmployeeRequestPage({
   const user = await getCurrentUser();
 
   return (
-    <ManageEmployeeArrangementsItem
-      params={{ request_id: params.request_id, user: user }}
-    />
+    
+      <ManageEmployeeArrangementsItem
+        params={{ request_id: params.request_id, user: user }}
+      />
   );
 }

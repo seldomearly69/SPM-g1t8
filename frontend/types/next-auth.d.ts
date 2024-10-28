@@ -11,6 +11,7 @@ declare module "next-auth/jwt" {
     role: string
     position: string
     reportingManager: string
+    awayManager: string
   }
 }
 
@@ -23,6 +24,7 @@ declare module "next-auth" {
       role: string
       position: string
       reportingManager: string
+      awayManager: string
     }
   }
 
@@ -33,5 +35,6 @@ declare module "next-auth" {
     role: string
     position: string
     reporting_manager: string
+    away_manager: string
   }
 }
