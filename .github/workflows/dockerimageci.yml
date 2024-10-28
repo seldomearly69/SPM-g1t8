@@ -17,7 +17,6 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       PYTHONPATH: ${{ github.workspace }}
-      COVERAGE_FILE: coverage.xml
 
     services:
       rabbitmq:
@@ -69,18 +68,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # Setup Python for coverage reporting
+      # Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           cache: 'pip'
 
-      # Install coverage dependencies
-      - name: Install coverage dependencies
+      # Install dependencies (removed coverage-related packages)
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov coverage
+          pip install pytest  # Removed pytest-cov and coverage
 
       # Build the Docker image using the path to docker-compose.yml
       - name: Build Docker image
@@ -88,23 +87,12 @@ jobs:
           docker-compose -f backend/docker-compose.yml build
           docker-compose -f backend/docker-compose.yml pull
 
-      # Run the tests within the Docker container
+      # Run the tests within the Docker container (removed coverage options)
       - name: Run unit tests
         run: |
           docker-compose -f backend/docker-compose.yml run --rm \
             -e PYTHONPATH=/app \
-            -e COVERAGE_FILE=/app/coverage.xml \
-            requests pytest --maxfail=1 --disable-warnings -v \
-            --cov=. --cov-report=xml unit_tests.py
-
-      # Upload coverage report
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./backend/requests/coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
+            requests pytest --maxfail=1 --disable-warnings -v unit_tests.py
 
       # Store test results
       - name: Store test results
