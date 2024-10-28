@@ -56,22 +56,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200 px-4 md:px-0">
       <div className="flex-grow flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-full max-w-[600px] space-y-8"
+          className="w-full max-w-[340px] sm:max-w-[500px] md:max-w-[600px] space-y-6 sm:space-y-8"
         >
-          <div className="flex flex-col space-y-6 text-center">
+          <div className="flex flex-col space-y-4 sm:space-y-6 text-center">
             <Link href="/" className="mx-auto">
               <motion.img
                 whileHover={{ scale: 1.03 }}
                 src="/assets/images/logo.png"
                 alt="FlexiWork Logo"
-                width={180}
-                height={180}
+                width={140}
+                height={140}
                 className="cursor-pointer p-0 m-0"
               />
             </Link>
@@ -79,7 +79,7 @@ export default function LoginPage() {
               variants={container}
               initial="hidden"
               animate="visible"
-              className="text-5xl font-semibold tracking-light"
+              className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-light"
             >
               {Array.from("Welcome back").map((letter, index) => (
                 <motion.span key={index} variants={child}>
@@ -91,7 +91,7 @@ export default function LoginPage() {
               variants={container}
               initial="hidden"
               animate="visible"
-              className="text-xl text-muted-foreground"
+              className="text-md sm:text-lg md:text-xl text-muted-foreground"
             >
               {Array.from("Enter your email to sign in to your account").map(
                 (letter, index) => (
@@ -106,7 +106,7 @@ export default function LoginPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="scale-105"
+            className="scale-100 sm:scale-105"
           >
             <UserAuthForm />
           </motion.div>
