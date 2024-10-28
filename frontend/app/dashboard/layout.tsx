@@ -1,6 +1,8 @@
 import { MainNav } from "@/components/main-nav";
 import { DashboardNav } from "@/components/nav";
 import { dashboardConfig } from "@/config/dashboard";
+import Link from "next/link";
+import Image from "next/image";
 import Footer from "@/components/Footer";
 import { UserAccountNav } from "@/components/user-account-nav";
 import { getCurrentUser } from "@/lib/session";
@@ -31,15 +33,30 @@ export default async function DashboardLayout({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full flex h-16 justify-between items-center pr-6 py-4"
+          className="w-full flex h-16 justify-between items-center px-6"
         >
-          <MainNav items={dashboardConfig.loggedInNav} />
-          <UserAccountNav
-            user={{
-              name: user.name,
-              email: user.email,
-            }}
-          />
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/assets/images/logo.png"
+              alt="FlexiWork Logo"
+              width={80}
+              height={80}
+              className="mr-2 pl-4 pr-2"
+            />
+            <span className="font-bold text-xl">FlexiWork</span>
+          </Link>
+          <div className="flex justify-end space-x-4">
+            {/* Display MainNav only on mobile view */}
+            <div className="md:hidden mt-1">
+              <MainNav mainNav={dashboardConfig.mainNav} currentUser={user} />
+            </div>
+            <UserAccountNav
+              user={{
+                name: user.name,
+                email: user.email,
+              }}
+            />
+          </div>
         </motion.div>
       </header>
       <div className="flex flex-1 gap-12 md:grid-cols-[300px_1fr]">
@@ -51,7 +68,7 @@ export default async function DashboardLayout({
             />
           </div>
         </aside>
-        <main className="container space-y-6">
+        <main className="container space-y-6 pl-3">
           <BreadcrumbLayout />
           {children}
         </main>

@@ -1,16 +1,19 @@
-export type DashboardConfig = {
-  mainNav: MainNavItem[];
-  loggedOutNav: NavbarItem[];
-  loggedInNav: NavbarItem[];
-  sidebarNav: {
-    common: SidebarNavItem[];
-    roleSpecific: {
-      [key: number]: SidebarNavItem[];
-    };
-  };
+export const dashboardConfig: NavStructure = {
+  common: [...mainNav.common, ...sidebarNav.common],
+  roleSpecific: {
+    ...mainNav.roleSpecific,
+    ...sidebarNav.roleSpecific,
+  },
+  // Add other shared properties here
 };
 
-export type MainNavItem = NavItem;
+export type MainNavItem = {
+  title: string;
+  href: string;
+  disabled?: boolean;
+  external?: boolean;
+  icon?: keyof typeof Icons;
+};
 
 export type SidebarNavItem = {
   title: string;
@@ -62,10 +65,6 @@ export type MonthlyDayProps<DayData> = {
 
 export type MonthlyBodyProps<DayData> = {
   className?: string;
-  /*
-    skip days, an array of days, starts at sunday (0), saturday is 6
-    ex: [0,6] would remove sunday and saturday from rendering
-  */
   omitDays?: number[];
   events: (DayData & { date: string | Date })[];
   requests: { date: string; type: string }[];

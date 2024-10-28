@@ -18,7 +18,6 @@ interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function UserAccountNav({ user }: UserAccountNavProps) {
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
