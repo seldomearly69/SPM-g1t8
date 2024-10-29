@@ -52,13 +52,7 @@ export const dashboardConfig: DashboardConfig = {
       ],
     },
   },
-  loggedOutNav: [
-    {
-      title: "Home",
-      href: "/",
-    },
-  ],
-  loggedInNav: [],
+
   sidebarNav: {
     common: [
       {

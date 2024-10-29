@@ -1,13 +1,7 @@
 "use client";
-import { ColumnDef, Row } from "@tanstack/react-table";
-import { Button } from "./ui/button";
+import { ColumnDef } from "@tanstack/react-table";
 import { Availability, IndividualRequest, Request } from "@/types";
-import { Check, X } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Textarea } from "./ui/textarea";
-import { useState } from "react";
 import { Badge } from "./ui/badge";
-import { cn } from "@/lib/utils";
 
 export const request_columns: ColumnDef<Request>[] = [
   {

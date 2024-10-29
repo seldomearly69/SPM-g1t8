@@ -63,8 +63,10 @@ export default async function DashboardLayout({
             />
           </div>
         </aside>
-        <main className="w-full space-y-6 px-12 pt-3 bg-secondary">
-          <BreadcrumbLayout />
+        <main className="w-full space-y-6 md:px-12 pt-3 bg-secondary">
+          <div className="px-2 md:px-0">
+            <BreadcrumbLayout />
+          </div>
           {children}
         </main>
       </div>

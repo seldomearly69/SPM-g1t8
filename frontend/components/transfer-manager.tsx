@@ -10,11 +10,11 @@ import { useState } from "react";
 import { Badge } from "./ui/badge";
 import {
   Table,
-  TableCell,
-  TableRow,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
+  TableRow,
 } from "./ui/table";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -72,7 +72,7 @@ export default function TransferManager({
             </TableHeader>
             <TableBody>
               {transferRequests.map((request: any) => (
-                <TableRow>
+                <TableRow key={request.requestId}>
                   <TableCell>
                     <div className="flex items-center">
                       <Avatar className="h-9 w-9">

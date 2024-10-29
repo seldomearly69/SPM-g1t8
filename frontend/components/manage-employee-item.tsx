@@ -111,7 +111,7 @@ export default function ManageEmployeeArrangementsItem() {
       if (downloadUrl) {
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.download = fileLink.split("/").pop(); // Extract the file name from the URL
+        link.download = fileLink.split("/").pop() || ""; // Extract the file name from the URL
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -218,7 +218,6 @@ export default function ManageEmployeeArrangementsItem() {
 function SuccessDialog({
   isOpen,
   onClose,
-  employeeName,
   successMessage,
   redirectBack,
 }: {

@@ -21,10 +21,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <UserAvatar
-          user={{ name: user.name || null, image: user.image || null }}
-          className="h-12 w-12"
-        />
+        <UserAvatar user={{ name: user.name || null }} className="h-12 w-12" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <div className="flex items-center justify-start gap-2 p-2">

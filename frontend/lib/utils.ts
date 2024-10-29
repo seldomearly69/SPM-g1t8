@@ -1,5 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import { DaysInWeekProps, User } from "@/types";
+import { DaysInWeekProps } from "@/types";
 import { enUS } from "date-fns/locale";
 import { ClassValue, clsx } from "clsx";
 import { getMonth, getYear } from "date-fns";

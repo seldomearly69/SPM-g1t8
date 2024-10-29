@@ -19,11 +19,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/data-table";
 import { availability_columns } from "@/components/columns";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  getTeamDetails,
-  getTeamSchedule,
-} from "@/service/schedule";
-import { Availability, EventType, User } from "@/types";
+import { getTeamDetails, getTeamSchedule } from "@/service/schedule";
+import { DaySchedule, type TeamSchedule, User } from "@/types";
 import { useEffect, useState } from "react";
 import {
   Select,
@@ -35,7 +32,6 @@ import {
 } from "./ui/select";
 import { AvailabilityChartArea } from "./availability-chart-area";
 
-
 interface TeamScheduleProps {
   user: User;
   _managerList: User[];
@@ -45,19 +41,22 @@ export default function TeamSchedule({
   user,
   _managerList,
 }: TeamScheduleProps) {
-  const [teamSchedule, setTeamSchedule] = useState<any[]>([]);
+  const [teamSchedule, setTeamSchedule] = useState<TeamSchedule>({
+    reportingManagerId: 0,
+    teamCount: 0,
+    teamSchedule: [],
+  });
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedDialogDate, setSelectedDialogDate] = useState<Date | null>(
     null
   );
   const [chartData, setChartData] = useState<any[]>([]);
-  const [dialogData, setDialogData] = useState<Availability[]>([]);
-  const [managerList, setManagerList] = useState<User[]>(_managerList);
-  const [selectedManager, setSelectedManager] = useState<number>(0); // Added to store the selected manager's ID
-  // const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar (redundant)
+  const [dialogData, setDialogData] = useState<DaySchedule[]>([]);
+  const [managerList] = useState<User[]>(_managerList);
+  const [selectedManager, setSelectedManager] = useState<number>(0);
 
   console.log(managerList);
-  
+
   useEffect(() => {
     const fetchSchedule = async () => {
       let managerId: number;
@@ -66,20 +65,19 @@ export default function TeamSchedule({
         if (Array.isArray(managerList) && managerList.length > 0) {
           // On initial load, set to the first manager
           if (!selectedManager) {
-            managerId = parseInt(managerList[0]?.staffId, 10);
+            managerId = managerList[0]?.staffId;
             setSelectedManager(managerId);
             // On subsequent loads, set managerId to the existing selected manager
           } else {
             managerId = selectedManager;
           }
-        } else console.error("Manager list is not an array");
+        } else {
+          managerId = user.staffId;
+        }
       } else {
         // For managers and staff
         managerId = user.staffId;
-       
       }
-
-      console.log(managerId);
 
       const team_schedule_data = await getTeamSchedule(
         0,
@@ -189,7 +187,7 @@ export default function TeamSchedule({
           <MonthlyBody events={teamSchedule.teamSchedule} requests={[]}>
             <Dialog onOpenChange={handleDialogOpen}>
               <DialogTrigger>
-                <MonthlyDay<EventType>
+                <MonthlyDay<DaySchedule>
                   onDateClick={(date) => setSelectedDialogDate(date)}
                   renderDay={(data) => (
                     <>

@@ -31,7 +31,6 @@ interface ManageIndividualRequestProps {
 }
 
 export default function ManageIndividualRequest({
-  user,
   params,
 }: ManageIndividualRequestProps) {
   const [request, setRequest] = useState<IndividualRequest>();

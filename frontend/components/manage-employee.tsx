@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { request_columns } from "@/components/columns";
 import { useRouter } from "next/navigation";
-import { TransferRequest, User } from "@/types";
+import { SubordinatesRequest, TransferRequest, User } from "@/types";
 import { getSubordinatesRequest } from "@/service/request";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -72,10 +72,11 @@ export default function ManageEmployeeArrangements({
     // Fetch actual employee requests data from API
     const fetchPendingRequests = async () => {
       try {
-        const data = await getSubordinatesRequest(user.staffId);
-        console.log(data);
-        if (data && data.subordinatesRequest) {
-          setEmployeeRequests(data.subordinatesRequest);
+        const subordinateRequests: SubordinatesRequest[] = await getSubordinatesRequest(
+          user.staffId
+        ).then((res) => res.subordinatesRequest);
+        if (subordinateRequests) {
+          setEmployeeRequests(subordinateRequests);
         } else {
           setEmployeeRequests([]);
         }

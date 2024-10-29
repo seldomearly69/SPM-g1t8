@@ -1,7 +1,7 @@
 "use client";
 
 import { TransferRequest } from "@/types";
-import { Table, TableHead, TableRow, TableHeader, TableBody, TableCell } from "./ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 export default function ViewTransfer({
   transferRequests,

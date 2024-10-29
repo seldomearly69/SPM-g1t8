@@ -39,15 +39,7 @@ export default function AssignManagerForm({
   transferRequests: TransferRequest[];
 }) {
   const [managerList, setManagerList] = useState<any[]>([]);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const {
-    control,
-    register,
-    handleSubmit,
-    setValue,
-    setError,
-    formState: { errors },
-  } = useForm<FormData>({
+  const { control, register, handleSubmit } = useForm<FormData>({
     resolver: zodResolver(assignManagerSchema),
   });
 
@@ -69,7 +61,7 @@ export default function AssignManagerForm({
 
       console.log(res);
       if (res.data.requestForTransfer.success) {
-        if (transferRequests.length > 0) {  
+        if (transferRequests.length > 0) {
           const updatedRequests = [...transferRequests];
           updatedRequests[updatedRequests.length - 1].status = "pending";
           setTransferRequests(updatedRequests);
@@ -111,59 +103,55 @@ export default function AssignManagerForm({
 
   return (
     <>
-      {showSuccessPopup ? (
-        <div>Request Sent!</div>
-      ) : (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col justify-between order-2">
-            <div className="space-y-6">
-              <div>
-                <Label
-                  htmlFor="manager"
-                  className="block mb-2 text-sm font-medium text-gray-700"
-                >
-                  Manager
-                </Label>
-                <Controller
-                  control={control}
-                  name="manager"
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a manager" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {managerList.map((manager) => (
-                            <SelectItem
-                              key={manager.staffId}
-                              value={manager.staffId.toString()}
-                            >
-                              {`${manager.position} - ${manager.name} - ${manager.staffId}`}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              <div>
-                <Label
-                  htmlFor="reason"
-                  className="block mb-2 text-sm font-medium text-gray-700"
-                >
-                  Reason
-                </Label>
-                <Textarea id="reason" {...register("reason")} />
-              </div>
-              <div>
-                <Button type="submit">Send Assignment Request</Button>
-              </div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="flex flex-col justify-between order-2">
+          <div className="space-y-6">
+            <div>
+              <Label
+                htmlFor="manager"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
+                Manager
+              </Label>
+              <Controller
+                control={control}
+                name="manager"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a manager" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {managerList.map((manager) => (
+                          <SelectItem
+                            key={manager.staffId}
+                            value={manager.staffId.toString()}
+                          >
+                            {`${manager.position} - ${manager.name} - ${manager.staffId}`}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div>
+              <Label
+                htmlFor="reason"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
+                Reason
+              </Label>
+              <Textarea id="reason" {...register("reason")} />
+            </div>
+            <div>
+              <Button type="submit">Send Assignment Request</Button>
             </div>
           </div>
-        </form>
-      )}
+        </div>
+      </form>
     </>
   );
 }

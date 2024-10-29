@@ -9,7 +9,7 @@ import {
   TeamMonthlyEventItem,
 } from "./monthly-calendar";
 import { Card, CardContent, CardHeader } from "./ui/card";
-import { Availability, EventType, User } from "@/types";
+import { DaySchedule, EventType } from "@/types";
 import { startOfMonth } from "date-fns";
 import { getOverallAvailability, getOverallSchedule } from "@/service/schedule";
 import {
@@ -25,16 +25,12 @@ import { DataTable } from "./data-table";
 import { availability_columns } from "./columns";
 import { AvailabilityChartArea } from "./availability-chart-area";
 
-interface MyScheduleProps {
-  user: User;
-}
-
-export default function OverallSchedule({ user }: MyScheduleProps) {
+export default function OverallSchedule() {
   const [schedule, setSchedule] = useState([]);
   const [selectedDialogDate, setSelectedDialogDate] = useState<Date | null>(
     null
   );
-  const [dialogData, setDialogData] = useState<Availability[]>([]);
+  const [dialogData, setDialogData] = useState<DaySchedule[]>([]);
   const [currentMonth, setCurrentMonth] = useState<Date>(
     startOfMonth(new Date())
   );

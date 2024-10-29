@@ -1,10 +1,9 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Request } from "@/types";
-import { Icon } from "@radix-ui/react-select";
 import { Button } from "./ui/button";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function DashboardStat({ stats }: { stats: Request[] }) {
   console.log(stats);

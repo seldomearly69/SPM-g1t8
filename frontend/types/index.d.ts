@@ -7,6 +7,16 @@ export const dashboardConfig: NavStructure = {
   // Add other shared properties here
 };
 
+export type DashboardConfig = {
+  mainNav: {
+    common: MainNavItem[];
+    roleSpecific: { [key: number]: MainNavItem[] };
+  };
+  sidebarNav: {
+    common: SidebarNavItem[];
+    roleSpecific: { [key: number]: SidebarNavItem[] };
+  };
+};
 export type MainNavItem = {
   title: string;
   href: string;
@@ -50,6 +60,7 @@ export type BodyState<DayData> = {
   day: Date;
   is_past: boolean;
   events: DayData[];
+  requests: any;
 };
 
 export type OmittedDaysProps = {
@@ -60,7 +71,7 @@ export type OmittedDaysProps = {
 
 export type MonthlyDayProps<DayData> = {
   renderDay?: (events: DayData[]) => ReactNode;
-  onDateClick: (handler: (prev?: any[]) => any[]) => void;
+  onDateClick: (any) => void;
   className?: ({ date: Date }) => string;
 };
 
@@ -104,12 +115,41 @@ export type Request = {
   remarks: string;
 };
 
+export type DaySchedule = {
+  date: string;
+  type: string;
+  availableCount: {
+    office: number;
+    wfh: number;
+  };
+  availability: Availability[];
+};
+
+export type TeamSchedule = {
+  reportingManagerId: number;
+  teamCount: number;
+  teamSchedule: DaySchedule[];
+};
+
 export type Availability = {
   employeeName: string;
   department: string;
   availability: string;
   type: "AM" | "PM" | "full";
   isPending: string;
+};
+
+export type SubordinatesRequest = {
+  requestId: number;
+  requestingStaffName: string;
+  department: string;
+  date: string;
+  type: string;
+  status: string;
+  reason: string;
+  remarks: string;
+  createdAt: string;
+  files: string[];
 };
 
 export type IndividualRequest = {
