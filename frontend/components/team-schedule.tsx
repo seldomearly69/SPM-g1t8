@@ -75,17 +75,8 @@ export default function TeamSchedule({
         } else console.error("Manager list is not an array");
       } else {
         // For managers and staff
-        managerId = parseInt(user.reportingManager, 10);
-        const data = await getTeamSchedule(
-          0,
-          selectedDate?.getMonth() + 1,
-          selectedDate?.getFullYear(),
-          user.staffId
-        );
-
-        console.log(data);
-        setSelectedManager(parseInt(user.reportingManager, 10));
-        setTeamSchedule(data.data.teamSchedule);
+        managerId = user.staffId;
+       
       }
 
       console.log(managerId);
