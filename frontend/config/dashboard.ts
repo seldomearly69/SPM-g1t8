@@ -99,6 +99,11 @@ export const dashboardConfig: DashboardConfig = {
           href: "/dashboard/manage-employees",
           icon: "users",
         },
+        {
+          title: "View Transfer Requests",
+          href: "/dashboard/view-transfer",
+          icon: "eye",
+        },
       ],
       2: [],
       3: [
@@ -106,6 +111,11 @@ export const dashboardConfig: DashboardConfig = {
           title: "Manage Employees",
           href: "/dashboard/manage-employees",
           icon: "users",
+        },
+        {
+          title: "View Transfer Requests",
+          href: "/dashboard/view-transfer",
+          icon: "eye",
         },
       ],
     },

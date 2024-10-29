@@ -170,20 +170,26 @@ export default function ManageEmployeeArrangementsItem() {
           )}
 
           {/* Action buttons */}
-          <div className="mt-4 flex justify-end space-x-4">
-            {(status === "pending" || status == "pending_withdrawal") && (
-              <>
-                <Button onClick={handleApprove}>Approve</Button>
+          <div className="mt-6 flex justify-between space-x-4">
+            <Button variant="outline" onClick={redirectBack}>
+              Back
+            </Button>
+            <div className="flex space-x-4">
+           
+              {(status === "pending" || status == "pending_withdrawal") && (
+                <>
+                  <Button onClick={handleApprove}>Approve</Button>
+                  <Button onClick={handleReject} variant="outline">
+                    Reject
+                  </Button>
+                </>
+              )}
+              {status === "approved" && (
                 <Button onClick={handleReject} variant="outline">
                   Reject
                 </Button>
-              </>
-            )}
-            {status === "approved" && (
-              <Button onClick={handleReject} variant="outline">
-                Reject
-              </Button>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Dialogs */}

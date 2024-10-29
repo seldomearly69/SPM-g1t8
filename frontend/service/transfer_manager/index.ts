@@ -40,13 +40,15 @@ export async function requestForTransfer(
   return data;
 }
 
-export async function getTransferRequests(staffId: number) {
+export async function getTransferRequests(staffId: number, status?: string) {
   const gqlString = gql`
-    query TransferRequests($staffId: Int!) {
-      transferRequests(staffId: $staffId) {
+    query TransferRequests($staffId: Int!, $status: String) {
+      transferRequests(staffId: $staffId, status: $status) {
         requestId
-        requestingManager
-        targetManager
+        requestingManagerId
+        requestingManagerName
+        targetManagerId
+        targetManagerName
         status
         reason
       }
@@ -59,7 +61,7 @@ export async function getTransferRequests(staffId: number) {
     },
     body: JSON.stringify({
       query: gqlString?.loc?.source?.body,
-      variables: { staffId: staffId },
+      variables: { staffId: staffId, status: status },
     }),
   });
 

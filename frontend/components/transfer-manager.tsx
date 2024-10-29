@@ -8,6 +8,15 @@ import { acceptRejectTransferRequest } from "@/service/transfer_manager";
 import { TransferRequest, User } from "@/types";
 import { useState } from "react";
 import { Badge } from "./ui/badge";
+import {
+  Table,
+  TableCell,
+  TableRow,
+  TableBody,
+  TableHead,
+  TableHeader,
+} from "./ui/table";
+import { usePathname, useRouter } from "next/navigation";
 
 interface TransferManagerProps {
   _transferRequests: TransferRequest[];
@@ -20,6 +29,9 @@ export default function TransferManager({
 }: TransferManagerProps) {
   const [transferRequests, setTransferRequests] =
     useState<TransferRequest[]>(_transferRequests);
+
+  const router = useRouter();
+  const pathname = usePathname();
 
   const handleAcceptReject = async (requestId: number, response: any) => {
     const res = await acceptRejectTransferRequest(response, requestId);
@@ -35,145 +47,100 @@ export default function TransferManager({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Transfer Requests</CardTitle>
+        <CardTitle>
+          <div className="flex justify-between items-center space-x-2">
+            <span>Transfer Requests</span>
+            <Button
+              variant="outline"
+              onClick={() => router.push(pathname + "/view-transfer")}
+            >
+              View All
+            </Button>
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {transferRequests.length === 0 && <p>You have no transfer requests.</p>}
-        {transferRequests.length > 0 &&
-          transferRequests.filter(
-            (request: TransferRequest) => request.status === "pending"
-          ).length > 0 && (
-            <>
-              <div className="space-y-8">
-                {transferRequests
-                  .filter((request: any) => request.status === "pending")
-                  .map((request: any) => (
-                    <div className="flex items-center" key={request.requestId}>
+        {transferRequests.length > 0 && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-left">Name</TableHead>
+                <TableHead className="text-left">Reason</TableHead>
+                <TableHead className="text-left">Status / Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transferRequests.map((request: any) => (
+                <TableRow>
+                  <TableCell>
+                    <div className="flex items-center">
                       <Avatar className="h-9 w-9">
                         <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                        <AvatarFallback>OM</AvatarFallback>
+                        <AvatarFallback>
+                          {request.requestingManagerId == user.staffId
+                            ? request.targetManagerName
+                                .slice(0, 2)
+                                .toUpperCase()
+                            : request.requestingManagerName
+                                .slice(0, 2)
+                                .toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="ml-4 space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          {request.requestingManager}
+                          {request.requestingManagerId == user.staffId
+                            ? request.targetManagerName
+                            : request.requestingManagerName}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           olivia.martin@email.com
                         </p>
                       </div>
-                      <Button
-                        variant="outline"
-                        className="ml-auto"
-                        onClick={() =>
-                          handleAcceptReject(request.requestId, "accepted")
-                        }
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        className="ml-2"
-                        onClick={() =>
-                          handleAcceptReject(request.requestId, "rejected")
-                        }
-                      >
-                        Reject
-                      </Button>
                     </div>
-                  ))}
-              </div>
-
-              {transferRequests.filter(
-                (request: TransferRequest) =>
-                  request.requestingManager == user.staffId
-              ).length > 0 && (
-                <>
-                  {transferRequests
-                    .filter(
-                      (request: TransferRequest) =>
-                        request.requestingManager == user.staffId
-                    )
-                    .map((request: TransferRequest) => (
-                      <div
-                        className="flex justify-between"
-                        key={request.requestId}
+                  </TableCell>
+                  <TableCell className="text-sm truncate text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px]">
+                    {request.reason}
+                  </TableCell>
+                  <TableCell>
+                    {request.requestingManagerId == user.staffId ? (
+                      <Badge
+                        variant={
+                          request.status === "accepted"
+                            ? "success"
+                            : request.status === "rejected"
+                            ? "destructive"
+                            : "warning"
+                        }
                       >
-                        <div className="flex items-center">
-                          <Avatar className="h-9 w-9">
-                            <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                            <AvatarFallback>OM</AvatarFallback>
-                          </Avatar>
-                          <div className="ml-4 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                              {request.requestingManager}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              olivia.martin@email.com
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center">
-                          <p>{request.reason}</p>
-                        </div>
-                        <Badge
-                          variant={
-                            request.status === "accepted"
-                              ? "success"
-                              : request.status === "rejected"
-                              ? "destructive"
-                              : "warning"
+                        {request.status}
+                      </Badge>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="ml-auto"
+                          onClick={() =>
+                            handleAcceptReject(request.requestId, "accepted")
                           }
                         >
-                          {request.status}
-                        </Badge>
-                      </div>
-                    ))}
-                </>
-              )}
-            </>
-          )}
-
-        {transferRequests.filter(
-          (request: TransferRequest) => request.status !== "pending"
-        ).length > 0 && (
-          <>
-            {transferRequests.map((request: TransferRequest) => (
-              <div
-                className="flex justify-between my-3"
-                key={request.requestId}
-              >
-                <div className="flex items-center">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                    <AvatarFallback>OM</AvatarFallback>
-                  </Avatar>
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {request.requestingManager}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      olivia.martin@email.com
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <p>{request.reason}</p>
-                </div>
-                <Badge
-                  variant={
-                    request.status === "accepted"
-                      ? "success"
-                      : request.status === "rejected"
-                      ? "destructive"
-                      : "warning"
-                  }
-                >
-                  {request.status}
-                </Badge>
-              </div>
-            ))}
-          </>
+                          Accept
+                        </Button>
+                        <Button
+                          className="ml-2"
+                          onClick={() =>
+                            handleAcceptReject(request.requestId, "rejected")
+                          }
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>

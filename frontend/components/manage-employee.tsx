@@ -8,7 +8,7 @@ import { TransferRequest, User } from "@/types";
 import { getSubordinatesRequest } from "@/service/request";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusIcon } from "lucide-react";
+import { CheckIcon, Clock, PlusIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +18,8 @@ import {
 } from "./ui/dialog";
 import AssignManagerForm from "./assign-manager-form";
 import { Card, CardContent } from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
 import { revertTransferRequest } from "@/service/transfer_manager";
+import { toast } from "@/hooks/use-toast";
 
 interface ManageEmployeeArrangementsProps {
   user: User;
@@ -30,11 +30,43 @@ export default function ManageEmployeeArrangements({
   user,
   _transferRequests,
 }: ManageEmployeeArrangementsProps) {
-  const [employeeRequests, setEmployeeRequests] = useState<any[]>([]); // Updated to handle real data
+  const [transferRequests, setTransferRequests] = useState<TransferRequest[]>(
+    _transferRequests.sort((a, b) => a.requestId - b.requestId)
+  );
+  const [employeeRequests, setEmployeeRequests] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
-  console.log(user);
+  console.log(transferRequests);
+
+  const has_transferred_request = (transferRequests: TransferRequest[]) => {
+    return (
+      transferRequests.length > 0 &&
+      transferRequests[transferRequests.length - 1].status === "accepted" &&
+      transferRequests[transferRequests.length - 1].requestingManagerId ==
+        user.staffId
+    );
+  };
+
+  const has_pending_transfer_request = (
+    transferRequests: TransferRequest[]
+  ) => {
+    return (
+      transferRequests.length > 0 &&
+      transferRequests[transferRequests.length - 1].status === "pending" &&
+      transferRequests[transferRequests.length - 1].requestingManagerId ==
+        user.staffId
+    );
+  };
+
+  const has_accepted_transfer_request = (
+    transferRequests: TransferRequest[]
+  ) => {
+    return (
+      transferRequests.length > 0 &&
+      transferRequests[transferRequests.length - 1].status === "accepted"
+    );
+  };
 
   useEffect(() => {
     // Fetch actual employee requests data from API
@@ -88,39 +120,39 @@ export default function ManageEmployeeArrangements({
   };
 
   const handleRevertTransferRequest = async (requestId: number) => {
+    setTransferRequests(
+      transferRequests.map((request) =>
+        request.requestId === requestId
+          ? { ...request, status: "reverted" }
+          : request
+      )
+    );
     const res = await revertTransferRequest(requestId);
     console.log(res);
+    toast({
+      title: "Success",
+      description: "Request reverted successfully",
+    });
   };
 
   return (
     <Card>
       <CardContent className="pt-8 relative">
-        {_transferRequests.filter(
-          (request: TransferRequest) =>
-            request.requestingManager == user.staffId &&
-            request.status === "accepted"
-        ).length > 0 && (
+        {has_transferred_request(transferRequests) && (
           <div className="absolute inset-0 z-50 bg-black/80 rounded-xl">
             <div className="flex flex-col items-center justify-center h-full">
               <div className="text-white text-lg mb-4">
                 Currently passing my job to manager{" "}
-                {_transferRequests
-                  .filter(
-                    (request: TransferRequest) =>
-                      request.requestingManager == user.staffId &&
-                      request.status === "accepted"
-                  )
-                  .map((request: TransferRequest) => request.targetManager)}
+                {
+                  transferRequests[transferRequests.length - 1]
+                    .targetManagerName
+                }
               </div>
               <Button
                 variant="secondary"
                 onClick={() =>
                   handleRevertTransferRequest(
-                    _transferRequests.filter(
-                      (request: TransferRequest) =>
-                        request.requestingManager == user.staffId &&
-                        request.status === "accepted"
-                    )[0].requestId
+                    transferRequests[transferRequests.length - 1].requestId
                   )
                 }
               >
@@ -136,11 +168,42 @@ export default function ManageEmployeeArrangements({
                 <Button
                   className="flex items-center md:absolute md:right-1"
                   onClick={() => setIsDialogOpen(true)}
-                  disabled={user.awayManager !== null}
+                  variant={
+                    has_pending_transfer_request(transferRequests)
+                      ? "secondary"
+                      : has_transferred_request(transferRequests)
+                      ? "ghost"
+                      : "primary"
+                  }
+                  disabled={
+                    has_pending_transfer_request(transferRequests) ||
+                    has_accepted_transfer_request(transferRequests)
+                  }
                 >
-                  <PlusIcon className="w-4 h-4 mr-2" />
-                  Assign Manager
+                  {has_pending_transfer_request(transferRequests) ? (
+                    <>
+                      <Clock className="w-4 h-4 mr-2" />
+                      Awaiting approval
+                    </>
+                  ) : has_accepted_transfer_request(transferRequests) &&
+                    transferRequests[transferRequests.length - 1]
+                      .targetManagerId == user.staffId ? (
+                    <>
+                      <CheckIcon className="w-4 h-4 mr-2" />
+                      Currently taking over{" "}
+                      {
+                        transferRequests[transferRequests.length - 1]
+                          .requestingManagerName
+                      }
+                    </>
+                  ) : (
+                    <>
+                      <PlusIcon className="w-4 h-4 mr-2" />
+                      Assign Manager
+                    </>
+                  )}
                 </Button>
+
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Assign Manager</DialogTitle>
@@ -152,6 +215,8 @@ export default function ManageEmployeeArrangements({
                     user={user}
                     setIsDialogOpen={setIsDialogOpen}
                     employeeRequests={employeeRequests}
+                    setTransferRequests={setTransferRequests}
+                    transferRequests={transferRequests}
                   />
                 </DialogContent>
               </Dialog>

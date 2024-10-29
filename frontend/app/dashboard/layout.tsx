@@ -54,7 +54,7 @@ export default async function DashboardLayout({
           </div>
         </motion.div>
       </header>
-      <div className="flex lg:grid-cols-[300px_1fr] ">
+      <div className="flex lg:grid-cols-[300px_1fr] flex-1">
         <aside className="hidden w-[200px] flex-col lg:block flex-shrink-0">
           <div className="fixed h-[calc(100vh-5rem)] overflow-y-auto bg-primary text-primary-foreground">
             <DashboardNav
@@ -63,7 +63,7 @@ export default async function DashboardLayout({
             />
           </div>
         </aside>
-        <main className="w-full space-y-6 px-12 pt-3 bg-secondary ">
+        <main className="w-full space-y-6 px-12 pt-3 bg-secondary">
           <BreadcrumbLayout />
           {children}
         </main>

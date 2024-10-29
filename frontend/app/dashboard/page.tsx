@@ -1,13 +1,23 @@
+import DashboardStat from "@/components/dashboard-stat";
 import TransferManager from "@/components/transfer-manager";
 
 import { getCurrentUser } from "@/lib/session";
+import { getOwnRequest } from "@/service/request";
 import { getTransferRequests } from "@/service/transfer_manager";
 import * as motion from "framer-motion/client";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 
-  const transferRequests = await getTransferRequests(user.staffId).then((res) => res.data.transferRequests);
+  const transferRequests = await getTransferRequests(
+    user.staffId,
+    "pending"
+  ).then((res) => res.data.transferRequests);
+  console.log(transferRequests);
+
+  const stats = await getOwnRequest(user.staffId).then(
+    (res) => res.data.ownRequests.requests
+  );
 
   return (
     <motion.div
@@ -24,7 +34,12 @@ export default async function DashboardPage() {
       >
         Dashboard
       </motion.h2>
-      <TransferManager _transferRequests={transferRequests} user={user} />
+      <div className="grid grid-cols-1   gap-4">
+        {user.role !== 2 && (
+          <TransferManager _transferRequests={transferRequests} user={user} />
+        )}
+        <DashboardStat stats={stats} />
+      </div>
     </motion.div>
   );
 }

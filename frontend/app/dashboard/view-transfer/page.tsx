@@ -1,13 +1,15 @@
-import ManageEmployeeArrangements from "@/components/manage-employee";
+import * as motion from "framer-motion/client";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import ViewTransfer from "@/components/view-transfer";
 import { getCurrentUser } from "@/lib/session";
 import { getTransferRequests } from "@/service/transfer_manager";
-import * as motion from "framer-motion/client";
 
-export default async function ManageEmployeeArrangementsPage() {
+export default async function ViewTransferPage() {
   const user = await getCurrentUser();
-  const transferRequests = await getTransferRequests(user.staffId).then((res) => res.data.transferRequests);
-  console.log(transferRequests);
-  
+  const transferRequests = await getTransferRequests(user?.staffId).then(
+    (res) => res.data.transferRequests
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -21,9 +23,14 @@ export default async function ManageEmployeeArrangementsPage() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="text-2xl font-bold mb-6"
       >
-        Manage Employee Arrangement
+        View Transfer Requests
       </motion.h2>
-      <ManageEmployeeArrangements user={user} _transferRequests={transferRequests} />
+      <Card>
+        <CardHeader></CardHeader>
+        <CardContent>
+          <ViewTransfer transferRequests={transferRequests} />
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }

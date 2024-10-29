@@ -15,7 +15,7 @@ import {
 import { Button } from "./ui/button";
 import { assignManagerSchema } from "@/lib/validations/application";
 import { useEffect, useState } from "react";
-import { User } from "@/types";
+import { TransferRequest, User } from "@/types";
 import { toast } from "@/hooks/use-toast";
 import {
   getTransferOptions,
@@ -29,10 +29,14 @@ export default function AssignManagerForm({
   user,
   employeeRequests,
   setIsDialogOpen,
+  setTransferRequests,
+  transferRequests,
 }: {
   user: User;
   employeeRequests: any[];
   setIsDialogOpen: (open: boolean) => void;
+  setTransferRequests: (requests: TransferRequest[]) => void;
+  transferRequests: TransferRequest[];
 }) {
   const [managerList, setManagerList] = useState<any[]>([]);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -53,23 +57,39 @@ export default function AssignManagerForm({
       toast({
         title: "Error",
         description:
-          "Please settle any outstanding leaves before requesting a manager change.", // Display the error message for each field
+          "Please settle any outstanding pending requests before assigning someone else.",
         variant: "destructive",
       });
     } else {
       const res = await requestForTransfer(
-        "need a breakkkkkk",
+        data.reason,
         user.staffId,
         data.manager
       );
 
       console.log(res);
       if (res.data.requestForTransfer.success) {
+        if (transferRequests.length > 0) {  
+          const updatedRequests = [...transferRequests];
+          updatedRequests[updatedRequests.length - 1].status = "pending";
+          setTransferRequests(updatedRequests);
+        } else {
+          setTransferRequests([
+            {
+              requestId: 0,
+              requestingManagerId: user.staffId,
+              requestingManagerName: user.name,
+              targetManagerId: data.manager,
+              targetManagerName: "",
+              status: "pending",
+              reason: data.reason,
+            },
+          ]);
+        }
         setIsDialogOpen(false);
         toast({
           title: "Success",
           description: res.data.requestForTransfer.message,
-          variant: "success",
         });
       } else {
         toast({
