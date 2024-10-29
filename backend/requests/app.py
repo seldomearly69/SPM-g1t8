@@ -272,7 +272,8 @@ class Query2(graphene.ObjectType):
 
     transfer_requests = graphene.Field(
         graphene.List(TransferRequestGraphene),
-        staff_id = graphene.Int(required=True)
+        staff_id = graphene.Int(required=True),
+        status = graphene.String(required=True)
     )
 
     def resolve_own_requests(self, info, staff_id):
@@ -290,8 +291,8 @@ class Query2(graphene.ObjectType):
     def resolve_transfer_options(self,info,staff_id):
         return resolve_transfer_options(staff_id)
     
-    def resolve_transfer_requests(self,info,staff_id):
-        return resolve_transfer_requests(staff_id)
+    def resolve_transfer_requests(self,info,staff_id, status):
+        return resolve_transfer_requests(staff_id,status)
 
 # Define Mutations
 class CreateRequest(graphene.Mutation):
@@ -962,11 +963,11 @@ def resolve_own_leaves(staff_id,month,year):
 
     return leaves
 
-def resolve_transfer_requests(staff_id):
+def resolve_transfer_requests(staff_id, status):
     r_list = []
     # Add transfer requests where the requesting manager is the specified staff
     names = {}
-    for r in TransferRequest.query.filter(or_(TransferRequest.requesting_manager == staff_id,TransferRequest.target_manager == staff_id)).all():
+    for r in TransferRequest.query.filter(or_(TransferRequest.requesting_manager == staff_id,TransferRequest.target_manager == staff_id), TransferRequest.status==status).all():
         if r.requesting_manager not in names:
             u = User.query.filter(User.staff_id==r.requesting_manager).first()
             names[r.requesting_manager] = u.staff_fname + " " + u.staff_lname
