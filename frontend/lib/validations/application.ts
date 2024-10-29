@@ -20,5 +20,6 @@ export const applicationSchema = z.object({
 });
 
 export const assignManagerSchema = z.object({
+  reason: z.string().min(1, "Reason is required"),
   manager: z.string().min(1, "Manager is required"),
 });

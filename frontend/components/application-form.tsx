@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn, hasMoreThanTwoDays } from "@/lib/utils";
 import { isSameDay } from "date-fns";
-import { EventType, User } from "@/types";
+import { EventType, Request, User } from "@/types";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
@@ -61,6 +61,8 @@ export default function ApplicationForm({
   const [statusCode, setStatusCode] = useState();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
   const { toast } = useToast();
+  console.log(requests);
+  
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
@@ -198,7 +200,7 @@ export default function ApplicationForm({
             <MonthlyNav />
             <MonthlyBody
               events={date || []}
-              requests={requests}
+              requests={requests.filter((r: Request) => r.status === "pending" || r.status === "approved" || r.status === "pending_withdrawal")}
               className="border-none"
             >
               <CustomMonthlyDay<EventType>
@@ -250,7 +252,7 @@ export default function ApplicationForm({
                 onClick={() => refreshPageAfterSuccess()}
                 className="text-md"
               >
-                Ok
+                Okay
               </Button>
             </DialogFooter>
           </DialogContent>

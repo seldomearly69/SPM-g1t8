@@ -35,18 +35,6 @@ import {
 } from "./ui/select";
 import { AvailabilityChartArea } from "./availability-chart-area";
 
-const mockSchedule2 = [
-  { date: new Date("2024-09-01"), availableCount: 3, type: "AM" },
-  { date: new Date("2024-09-01"), availableCount: 4, type: "PM" },
-  { date: new Date("2024-09-01"), availableCount: 5, type: "Full" },
-  { date: new Date("2024-05-04"), availableCount: "wfh", type: "AM" },
-  { date: new Date("2024-05-05"), availableCount: "office", type: "AM" },
-  { date: new Date("2024-05-06"), availableCount: "wfh", type: "AM" },
-  { date: new Date("2023-05-07"), availableCount: "office", type: "AM" },
-  { date: new Date("2023-05-08"), availableCount: "wfh", type: "AM" },
-  { date: new Date("2023-05-09"), availableCount: "office", type: "AM" },
-  { date: new Date("2023-05-10"), availableCount: "wfh", type: "AM" },
-];
 
 interface TeamScheduleProps {
   user: User;
@@ -68,6 +56,8 @@ export default function TeamSchedule({
   const [selectedManager, setSelectedManager] = useState<number>(0); // Added to store the selected manager's ID
   // const [showCalendar, setShowCalendar] = useState(false); // Added to control the display of the calendar (redundant)
 
+  console.log(managerList);
+  
   useEffect(() => {
     const fetchSchedule = async () => {
       let managerId: number;
@@ -211,7 +201,7 @@ export default function TeamSchedule({
                 <MonthlyDay<EventType>
                   onDateClick={(date) => setSelectedDialogDate(date)}
                   renderDay={(data) => (
-                    <ul>
+                    <>
                       {data.map((item) => (
                         <TeamMonthlyEventItem
                           key={`${item.date}-${item.type}`}
@@ -221,7 +211,7 @@ export default function TeamSchedule({
                           type={item.type}
                         />
                       ))}
-                    </ul>
+                    </>
                   )}
                 />
               </DialogTrigger>

@@ -42,6 +42,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.position = token.position;
         session.user.reportingManager = token.reportingManager;
+        session.user.awayManager = token.awayManager;
       }
       return session;
     },
@@ -54,7 +55,10 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.position = user.position;
         token.reportingManager = user.reporting_manager;
+        token.awayManager = user.away_manager;
       }
+      console.log(token);
+      
       return token;
     }
   },

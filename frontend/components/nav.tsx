@@ -39,31 +39,33 @@ export function DashboardNav({ sideBarNav, currentUser }: DashboardNavProps) {
   }, [sideBarNav, currentUser]);
 
   return (
-    <nav className="grid items-start gap-2 md:flex md:flex-col">
+    <nav className="grid items-start gap-2 md:flex md:flex-col py-2">
       {navItems.map((item, index) => {
         const Icon = Icons[item.icon || "arrowRight"];
         return (
           item.href && (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <Link href={item.disabled ? "#" : item.href}>
-                <span
-                  className={cn(
-                    "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                    path === item.href ? "bg-accent" : "transparent",
-                    item.disabled && "cursor-not-allowed opacity-80",
-                    "w-full"
-                  )}
-                >
-                  <Icon className="mr-2 h-4 w-4" />
-                  <span>{item.title}</span>
-                </span>
-              </Link>
-            </motion.div>
+            <div className="w-full px-2" key={index}>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Link href={item.disabled ? "#" : item.href}>
+                  <span
+                    className={cn(
+                      "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                      path === item.href ? "bg-accent text-accent-foreground" : "transparent",
+                      item.disabled && "cursor-not-allowed opacity-80",
+                      "w-full"
+                    )}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    <span>{item.title}</span>
+                  </span>
+                </Link>
+              </motion.div>
+            </div>
           )
         );
       })}

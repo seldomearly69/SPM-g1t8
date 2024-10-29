@@ -32,13 +32,14 @@ export type NavbarItem = {
   image?: string;
 };
 
-export type User = {
+export type   User = {
   staffId: number;
   name: string;
   email: string;
   role: string;
   position: string;
   reportingManager: string;
+  awayManager: string;
 };
 
 export type DaysInWeekProps = {
@@ -118,5 +119,13 @@ export type IndividualRequest = {
   type: string;
   status: string;
   remarks: string;
+  reason: string;
+};
+
+export type TransferRequest = {
+  requestId: number;
+  requestingManager: number;
+  targetManager: number;
+  status: string;
   reason: string;
 };

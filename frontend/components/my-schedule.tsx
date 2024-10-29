@@ -110,7 +110,7 @@ export default function MySchedule({ user }: MyScheduleProps) {
             <MonthlyDay<EventType>
               onDateClick={() => {}}
               renderDay={(data) => (
-                <ul>
+                <>
                   {data.map((item, index) => (
                     <DefaultMonthlyEventItem
                       key={index}
@@ -120,7 +120,7 @@ export default function MySchedule({ user }: MyScheduleProps) {
                       isPending={item.is_pending}
                     />
                   ))}
-                </ul>
+                </>
               )}
             />
           </MonthlyBody>
