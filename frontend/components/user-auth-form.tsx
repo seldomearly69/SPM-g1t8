@@ -6,10 +6,10 @@ import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button, buttonVariants } from "./ui/button";
+import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useSearchParams } from "next/navigation";
-import {  useState } from "react";
+import { useState } from "react";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -27,11 +27,10 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   } = useForm<FormData>({
     resolver: zodResolver(userAuthSchema),
   });
-  const [isGitHubLoading, setIsGitHubLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -61,7 +60,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       });
     }
   }
-
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -97,25 +95,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           </Button>
         </div>
       </form>
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2">Or continue with</span>
-        </div>
-      </div>
-      <button
-        type="button"
-        className={cn(buttonVariants({ variant: "outline" }))}
-        onClick={() => {
-          setIsGitHubLoading(true);
-          signIn("github", { callbackUrl: "/" });
-        }}
-        disabled={isLoading || isGitHubLoading}
-      >
-        Github
-      </button>
     </div>
   );
 }

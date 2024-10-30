@@ -85,7 +85,7 @@ export default function TeamSchedule({
         selectedDate?.getFullYear(),
         managerId
       );
-      console.log(team_schedule_data);
+      console.log("this is line 88 of teamschedule", team_schedule_data);
       setTeamSchedule(team_schedule_data.data.teamSchedule);
     };
     fetchSchedule();
