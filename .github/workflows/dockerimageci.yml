@@ -17,13 +17,14 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       PYTHONPATH: ${{ github.workspace }}
+      FLASK_ENV: testing
 
     services:
       rabbitmq:
         image: rabbitmq:3-management
         ports:
-          - 5672:5672  # RabbitMQ AMQP port
-          - 15672:15672  # RabbitMQ management web UI
+          - 5672:5672
+          - 15672:15672
         options: >-
           --health-cmd "rabbitmqctl node_health_check"
           --health-interval 10s
@@ -45,21 +46,17 @@ jobs:
           --health-retries 5
 
     steps:
-      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Install Docker Compose
       - name: Install Docker Compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
-      # Cache Docker layers
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
@@ -68,44 +65,53 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           cache: 'pip'
 
-      # Install dependencies (removed coverage-related packages)
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest  # Removed pytest-cov and coverage
+          pip install pytest unittest-xml-reporting
 
-      # Build the Docker image using the path to docker-compose.yml
       - name: Build Docker image
         run: |
           docker-compose -f backend/docker-compose.yml build
           docker-compose -f backend/docker-compose.yml pull
 
-      # Run the tests within the Docker container (removed coverage options)
-      - name: Run unit tests
+      # Run requests unit tests
+      - name: Run requests unit tests
         run: |
           docker-compose -f backend/docker-compose.yml run --rm \
             -e PYTHONPATH=/app \
-            requests pytest --maxfail=1 --disable-warnings -v unit_tests.py
+            requests pytest --maxfail=1 --disable-warnings -v \
+            -o junit_family=xunit1 \
+            --junitxml=test-results/requests-junit.xml \
+            unit_tests.py
 
-      # Store test results
+      # Run authentication unit tests
+      - name: Run authentication unit tests
+        run: |
+          docker-compose -f backend/docker-compose.yml run --rm \
+            -e PYTHONPATH=/app \
+            -e FLASK_ENV=testing \
+            authentication pytest --maxfail=1 --disable-warnings -v \
+            -o junit_family=xunit1 \
+            --junitxml=test-results/auth-junit.xml \
+            auth_unit_tests.py
+
       - name: Store test results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
           path: |
-            ./backend/requests/coverage.xml
-            ./backend/requests/.coverage
+            ./backend/requests/test-results/
+            ./backend/authentication/test-results/
           retention-days: 30
 
-      # Cleanup
       - name: Cleanup
         if: always()
         run: |
