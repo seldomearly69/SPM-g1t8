@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn, hasMoreThanTwoDays } from "@/lib/utils";
 import { isSameDay } from "date-fns";
-import { EventType, User } from "@/types";
+import { EventType, Request, User } from "@/types";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
@@ -39,18 +39,10 @@ interface ApplicationFormProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export default function ApplicationForm({
-  className,
   user,
   requests,
-  ...props
 }: ApplicationFormProps) {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    setError,
-    formState: { errors },
-  } = useForm<FormData>({
+  const { register, handleSubmit, setValue } = useForm<FormData>({
     resolver: zodResolver(applicationSchema),
     defaultValues: {
       remarks: "", // Ensure remarks is initialized with an empty string
@@ -58,9 +50,11 @@ export default function ApplicationForm({
   });
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [date, setDate] = useState<{ date: string; type: "AM" | "PM" }[]>([]);
-  const [statusCode, setStatusCode] = useState();
+  const [statusCode, setStatusCode] = useState<string>("");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
   const { toast } = useToast();
+  console.log(requests);
+
   // Submission Logic is here
   const onSubmit = async (data: any) => {
     // Format the date to "YYYY-MM-DDTHH:MM:SS.000Z" before sending to the backend
@@ -98,10 +92,11 @@ export default function ApplicationForm({
 
   const onError = (errors: any) => {
     console.log("Form submission errors:", errors); // Check what validation errors are thrown
+    // eslint-disable-next-line
     Object.entries(errors).forEach(([field, error]) => {
       toast({
         title: "Error",
-        description: error.message, // Display the error message for each field
+        description: (error as { message: string }).message, // Display the error message for each field
         variant: "destructive",
       });
     });
@@ -165,7 +160,7 @@ export default function ApplicationForm({
                 multiple
               />
             </motion.div>
-            {statusCode !== 200 && (
+            {statusCode !== "200" && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -198,7 +193,12 @@ export default function ApplicationForm({
             <MonthlyNav />
             <MonthlyBody
               events={date || []}
-              requests={requests}
+              requests={requests.filter(
+                (r: Request) =>
+                  r.status === "pending" ||
+                  r.status === "approved" ||
+                  r.status === "pending_withdrawal"
+              )}
               className="border-none"
             >
               <CustomMonthlyDay<EventType>
@@ -250,7 +250,7 @@ export default function ApplicationForm({
                 onClick={() => refreshPageAfterSuccess()}
                 className="text-md"
               >
-                Ok
+                Okay
               </Button>
             </DialogFooter>
           </DialogContent>

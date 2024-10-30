@@ -233,8 +233,10 @@ class OwnRequests(graphene.ObjectType):
 
 class TransferRequestGraphene(graphene.ObjectType):
     request_id = graphene.Int()
-    requesting_manager = graphene.Int()
-    target_manager = graphene.Int()
+    requesting_manager_id = graphene.Int()
+    requesting_manager_name = graphene.String()
+    target_manager_id = graphene.Int()
+    target_manager_name = graphene.String()
     status = graphene.String()
     reason = graphene.String()
 
@@ -270,7 +272,8 @@ class Query2(graphene.ObjectType):
 
     transfer_requests = graphene.Field(
         graphene.List(TransferRequestGraphene),
-        staff_id = graphene.Int(required=True)
+        staff_id = graphene.Int(required=True),
+        status = graphene.String(required=False)
     )
 
     def resolve_own_requests(self, info, staff_id):
@@ -288,8 +291,8 @@ class Query2(graphene.ObjectType):
     def resolve_transfer_options(self,info,staff_id):
         return resolve_transfer_options(staff_id)
     
-    def resolve_transfer_requests(self,info,staff_id):
-        return resolve_transfer_requests(staff_id)
+    def resolve_transfer_requests(self,info,staff_id, status=None):
+        return resolve_transfer_requests(staff_id,status)
 
 # Define Mutations
 class CreateRequest(graphene.Mutation):
@@ -555,7 +558,7 @@ class RevertTransfer(graphene.Mutation):
             target_manager = User.query.filter(User.staff_id == r.target_manager).first()
 
             notification = f"Your transfer request has been reverted. Your subordinates' requests are now going to {target_manager.staff_fname} {target_manager.staff_lname}."
-            publish_to_broker(notification, f"Transfer request reverted", requesting_manager.first().email , channel)
+            publish_to_broker(notification, f"Transfer request reverted", requesting_manager.email , channel)
             notification = f"Transfer request reverted. You are no longer taking requests from {requesting_manager.staff_fname} {requesting_manager.staff_lname}'s subordinates."
             publish_to_broker(notification, f"Transfer request reverted", target_manager.email , channel)
 
@@ -756,11 +759,18 @@ def resolve_team_schedule(month, year,day, staff_id):
     # Get all approved requests for the team members in the given month and year
 
     user = User.query.filter(User.staff_id == staff_id).first()
+    is_away = (User.query.filter(User.away_manager==staff_id)).first() != None
     if user.role == 3 or user.position == "Director" or user.position == "MD":
         print("staff id: " + str(user.staff_id))
-        team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
+        if is_away:
+            team_members = User.query.filter(or_(User.away_manager == user.staff_id, User.staff_id == user.staff_id)).all()
+        else:
+            team_members = User.query.filter(or_(User.reporting_manager == user.staff_id, User.staff_id == user.staff_id)).all()
     else:
-        team_members = User.query.filter(User.reporting_manager == user.reporting_manager).all()
+        if is_away:
+            team_members = User.query.filter(User.away_manager == user.reporting_manager).all()
+        else:
+            team_members = User.query.filter(User.reporting_manager == user.reporting_manager).all()
 
     print(team_members)
     # Conditionally add the `day` filter only if it's provided
@@ -953,10 +963,36 @@ def resolve_own_leaves(staff_id,month,year):
 
     return leaves
 
-def resolve_transfer_requests(staff_id):
+def resolve_transfer_requests(staff_id, status=None):
     r_list = []
-    r_list += [{"request_id":r.request_id,"requesting_manager":r.requesting_manager,"target_manager":r.target_manager,"status":r.status,"reason":r.reason} for r in TransferRequest.query.filter(TransferRequest.requesting_manager == staff_id).all()]
-    r_list += [{"request_id":r.request_id,"requesting_manager":r.requesting_manager,"target_manager":r.target_manager,"status":r.status,"reason":r.reason} for r in TransferRequest.query.filter(TransferRequest.target_manager == staff_id).all()]
+    # Add transfer requests where the requesting manager is the specified staff
+    names = {}
+    filters = [
+        or_(TransferRequest.requesting_manager == staff_id,TransferRequest.target_manager == staff_id)
+    ]
+    if status:
+        filters.append(TransferRequest.status==status)
+    for r in TransferRequest.query.filter(*filters).all():
+        if r.requesting_manager not in names:
+            u = User.query.filter(User.staff_id==r.requesting_manager).first()
+            names[r.requesting_manager] = u.staff_fname + " " + u.staff_lname
+        if r.target_manager not in names:
+            u = User.query.filter(User.staff_id==r.target_manager).first()
+            names[r.target_manager] = u.staff_fname + " " + u.staff_lname
+
+        r_list.append(
+            {
+                "request_id": r.request_id,
+                "requesting_manager_id": r.requesting_manager,
+                "requesting_manager_name": names[r.requesting_manager],
+                "target_manager_id": r.target_manager,
+                "target_manager_name": names[r.target_manager],
+                "status": r.status,
+                "reason": r.reason
+            }
+            
+        )
+
 
     return r_list
 

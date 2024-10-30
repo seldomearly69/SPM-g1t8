@@ -7,7 +7,7 @@ import { DataTable } from "@/components/data-table";
 import { individual_request_columns } from "@/components/columns";
 import { getOwnRequest } from "@/service/request";
 import { useRouter } from "next/navigation";
-import { User } from "@/types";
+import { type Request, User } from "@/types";
 
 interface ManageArrangementsProps {
   user: User;
@@ -16,7 +16,7 @@ interface ManageArrangementsProps {
 export default function ManageArrangementsPage({
   user,
 }: ManageArrangementsProps) {
-  const [arrangements, setArrangements] = useState([]);
+  const [arrangements, setArrangements] = useState<Request[]>([]);
   const router = useRouter();
 
   useEffect(() => {

@@ -27,7 +27,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col space-y-6">
+    <div className="flex min-h-screen flex-col ">
       <header className="sticky top-0 z-40 border-b bg-background w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -50,26 +50,23 @@ export default async function DashboardLayout({
             <div className="md:hidden mt-1">
               <MainNav mainNav={dashboardConfig.mainNav} currentUser={user} />
             </div>
-            <UserAccountNav
-              user={{
-                name: user.name,
-                email: user.email,
-              }}
-            />
+            <UserAccountNav user={user} />
           </div>
         </motion.div>
       </header>
-      <div className="flex flex-1 gap-12 md:grid-cols-[300px_1fr]">
-        <aside className="hidden w-[200px] flex-col md:block flex-shrink-0">
-          <div className="fixed top-[5rem] h-[calc(100vh-5rem)] overflow-y-auto">
+      <div className="flex lg:grid-cols-[300px_1fr] flex-1">
+        <aside className="hidden w-[200px] flex-col lg:block flex-shrink-0">
+          <div className="fixed h-[calc(100vh-5rem)] overflow-y-auto bg-primary text-primary-foreground">
             <DashboardNav
               sideBarNav={dashboardConfig.sidebarNav}
               currentUser={user}
             />
           </div>
         </aside>
-        <main className="container space-y-6 pl-3">
-          <BreadcrumbLayout />
+        <main className="w-full space-y-6 md:px-12 pt-3 bg-secondary">
+          <div className="px-2 md:px-0">
+            <BreadcrumbLayout />
+          </div>
           {children}
         </main>
       </div>

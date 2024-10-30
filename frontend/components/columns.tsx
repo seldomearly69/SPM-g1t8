@@ -1,13 +1,7 @@
 "use client";
-import { ColumnDef, Row } from "@tanstack/react-table";
-import { Button } from "./ui/button";
+import { ColumnDef } from "@tanstack/react-table";
 import { Availability, IndividualRequest, Request } from "@/types";
-import { Check, X } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Textarea } from "./ui/textarea";
-import { useState } from "react";
 import { Badge } from "./ui/badge";
-import { cn } from "@/lib/utils";
 
 export const request_columns: ColumnDef<Request>[] = [
   {
@@ -41,18 +35,17 @@ export const request_columns: ColumnDef<Request>[] = [
     cell: ({ row }) => {
       return (
         <Badge
-          className={cn(
-            "w-20 justify-center ",
+          variant={
             row.original.status == "pending"
-              ? "bg-yellow-500"
+              ? "warning"
               : row.original.status == "approved"
-              ? "bg-emerald-500"
+              ? "success"
               : row.original.status == "pending_withdrawal"
-              ? "w-34 bg-blue-500"
+              ? "secondary"
               : row.original.status == "withdrawn"
-              ? "bg-purple-500"
-              : "bg-red-500"
-          )}
+              ? "tertiary"
+              : "destructive"
+          }
         >
           {row.original.status}
         </Badge>
@@ -65,100 +58,6 @@ export const request_columns: ColumnDef<Request>[] = [
   },
 ];
 
-// export const request_columns: ColumnDef<Request>[] = [
-//   {
-//     accessorKey: "requestId",
-//     header: "ID",
-//   },
-//   {
-//     accessorKey: "employeeName",
-//     header: "Employee Name",
-//   },
-//   {
-//     accessorKey: "department",
-//     header: "Department",
-//   },
-//   {
-//     accessorKey: "date",
-//     header: "Date",
-//   },
-//   {
-//     accessorKey: "type",
-//     header: "Type",
-//   },
-//   {
-//     accessorKey: "requestedOn",
-//     header: "Requested On",
-//   },
-//   {
-//     accessorKey: "status",
-//     header: "Status",
-//   },
-//   {
-//     accessorKey: "remarks",
-//     header: "Remarks",
-//   },
-
-//   // {
-//   //     accessorKey: "actions",
-//   //     header: "Actions",
-//   //     cell: ({ row }) => {
-//   //         return <div>
-//   //             <Button>Approve</Button>
-//   //             <Button>Reject</Button>
-//   //         </div>
-//   //     }
-//   // }
-// ];
-
-const ActionCell = ({ row }: { row: Row<Request> }) => {
-  const [status, setStatus] = useState<"pending" | "approved" | "rejected">(
-    "pending"
-  );
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  console.log(row);
-  return (
-    <div>
-      <Button variant="ghost" size="sm" className="hover:text-green-500">
-        <Check className="w-4 h-4" />
-      </Button>
-      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" size="sm" className="hover:text-red-500">
-            <X className="w-4 h-4" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80">
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <h4 className="font-medium leading-none">Reason</h4>
-              <p className="text-sm text-muted-foreground">
-                Enter the reason for the rejection
-              </p>
-            </div>
-            <div className="grid gap-2">
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Textarea className="col-span-3 h-8" />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Button
-                onClick={() => {
-                  setStatus("rejected");
-                  console.log(status);
-                  setIsPopoverOpen(false);
-                }}
-                variant="outline"
-              >
-                Submit
-              </Button>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-};
 
 export const individual_request_columns: ColumnDef<IndividualRequest>[] = [
   {
@@ -187,18 +86,17 @@ export const individual_request_columns: ColumnDef<IndividualRequest>[] = [
     cell: ({ row }) => {
       return (
         <Badge
-          className={cn(
-            "w-20 justify-center ",
+          variant={
             row.original.status == "pending"
-              ? "bg-yellow-500"
+              ? "warning"
               : row.original.status == "approved"
-              ? "bg-emerald-500"
+              ? "success"
               : row.original.status == "pending_withdrawal"
-              ? "w-34 bg-blue-500"
+              ? "secondary"
               : row.original.status == "withdrawn"
-              ? "bg-purple-500"
-              : "bg-red-500"
-          )}
+              ? "tertiary"
+              : "destructive"
+          }
         >
           {row.original.status}
         </Badge>
@@ -236,11 +134,7 @@ export const availability_columns: ColumnDef<Availability>[] = [
         row.original.isPending === "true" ? "Pending" : "Confirmed";
       return (
         <Badge
-          className={
-            row.original.isPending === "true"
-              ? "bg-yellow-500"
-              : "bg-emerald-500"
-          }
+          variant={row.original.isPending === "true" ? "warning" : "success"}
         >
           {status}
         </Badge>

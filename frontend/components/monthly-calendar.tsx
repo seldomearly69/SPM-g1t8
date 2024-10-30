@@ -243,16 +243,18 @@ export function MonthlyDay<DayData>({
       key={day.toISOString()}
       title={`Number of staff in office on day ${dayNumber}`}
       className={cn(
-        "h-48 p-2 border-b-2 border-r-2",
+        "h-48 p-2 border-b-2 border-r-2 flex flex-col",
         className?.({ date: day })
       )}
       onClick={() => onDateClick(day)}
     >
-      <div className="flex justify-between">
+      <div className=" flex justify-between">
         <div className="font-bold">{dayNumber}</div>
         <div className="xl:hidden block">{format(day, "EEEE", { locale })}</div>
       </div>
-      {renderDay && renderDay(events)}
+      <div className="grow overflow-hidden flex flex-col gap-2 justify-between ">
+        {renderDay && renderDay(events)}
+      </div>
     </div>
   );
 }
@@ -295,15 +297,23 @@ export function CustomMonthlyDay<DayData>({
           title={`Events for day ${dayNumber}`}
           className={cn(
             "h-48 flex flex-col p-1 h-20 border-none m-0.5 rounded-md flex items-center justify-evenly cursor-pointer hover:bg-secondary hover:text-secondary-foreground",
-            requests.some((r: { date: string; status: string; type: string }) =>
-              isSameDay(r.date, day)
+            requests.some(
+              (r: { date: string; status: string; type: string }) => {
+                console.log(r);
+
+                return isSameDay(r.date, day);
+              }
             )
               ? requests.find(
                   (r: { date: string; status: string; type: string }) =>
                     isSameDay(r.date, day)
-                )?.status === "pending"
-                ? "bg-warning text-warning-foreground"
-                : "bg-secondary text-secondary-foreground"
+                )?.status === "pending" ||
+                requests.find(
+                  (r: { date: string; status: string; type: string }) =>
+                    isSameDay(r.date, day)
+                )?.status === "pending_withdrawal"
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-accent text-accent-foreground"
               : "",
             className?.({ date: day })
           )}
@@ -381,23 +391,23 @@ export const DefaultMonthlyEventItem = ({
   isPending,
 }: DefaultEventItemProps) => {
   return (
-    <li className="py-2">
-      <Badge
-        variant={
-          availability == "Leave"
-            ? "secondary"
-            : isPending
-            ? "warning"
-            : "success"
-        }
-        className="w-full"
-      >
-        <div className="flex text-sm flex-1 justify-between">
-          <h3 className="font-medium">{availability}</h3>
-          <p className="text-gray-500 text-xs">{type}</p>
-        </div>
-      </Badge>
-    </li>
+    <div
+      className={cn(
+        "flex text-sm flex-1 justify-between items-center bg-accent p-2 rounded-md",
+        availability == "Leave"
+          ? "bg-tertiary text-tertiary-foreground"
+          : isPending
+          ? "bg-secondary text-secondary-foreground"
+          : ""
+      )}
+    >
+      <h3 className="font-medium">
+        {availability}
+        <span className="text-xs">{isPending ? " (Pending)" : ""}</span>
+      </h3>
+
+      <p className="text-xs opacity-70">{type}</p>
+    </div>
   );
 };
 
@@ -416,11 +426,15 @@ export const TeamMonthlyEventItem = ({
   type,
 }: TeamEventItemProps) => {
   return (
-    <li className="py-2">
+    <div
+      className={cn(
+        "flex text-sm flex-1 justify-between items-center p-2 border border-accent rounded-md"
+      )}
+    >
       <div className="flex text-sm flex-1 justify-between">
         <h3 className="font-medium">{availability}</h3>
         <p className="text-gray-500">{type}</p>
       </div>
-    </li>
+    </div>
   );
 };

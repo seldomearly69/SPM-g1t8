@@ -24,20 +24,21 @@ import {
 } from "@/components/ui/table";
 import { DataTableToolbar } from "./data-table-toolbar";
 import { useState } from "react";
+import { Availability, IndividualRequest, Request } from "@/types";
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[]
-    onRowClick?: (row: TData) => void
-    hasToolbar?: boolean
-    sort?: boolean
-    filterStatus?: boolean
-    filterType?: boolean
-    filterDepartment?: boolean
-    filterAvailability?: boolean
+interface DataTableProps {
+  columns: ColumnDef<any>[];
+  data: any[];
+  onRowClick?: (row: any) => void;
+  hasToolbar?: boolean;
+  sort?: boolean;
+  filterStatus?: boolean;
+  filterType?: boolean;
+  filterDepartment?: boolean;
+  filterAvailability?: boolean;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable({
   columns,
   data,
   onRowClick,
@@ -47,16 +48,16 @@ export function DataTable<TData, TValue>({
   filterType,
   filterDepartment,
   filterAvailability,
-}: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = useState({})
+}: DataTableProps) {
+  const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>(
-    sort ? [{ id: "requestId", desc: false }] : [] 
+    sort ? [{ id: "requestId", desc: false }] : []
   );
 
   const table = useReactTable({
-    data,
+    data: data as Request[] | Availability[] | IndividualRequest[],
     columns,
     state: {
       sorting,
@@ -77,17 +78,17 @@ export function DataTable<TData, TValue>({
     enableColumnFilters: true,
   });
 
-  
   return (
     <div className="space-y-4 p-1">
-      {hasToolbar && 
-      <DataTableToolbar 
-        table={table} 
-        filterStatus={filterStatus} 
-        filterType={filterType} 
-        filterDepartment={filterDepartment} 
-        filterAvailability={filterAvailability}
-      />}
+      {hasToolbar && (
+        <DataTableToolbar
+          table={table}
+          filterStatus={filterStatus}
+          filterType={filterType}
+          filterDepartment={filterDepartment}
+          filterAvailability={filterAvailability}
+        />
+      )}
       <div className="rounded-md border max-h-[400px] overflow-y-auto no-scrollbar">
         <Table>
           <TableHeader>

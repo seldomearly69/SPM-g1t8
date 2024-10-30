@@ -42,7 +42,7 @@ export async function createRequest(
         reason: reason || null,
         remarks: remarks || "",
         dateType: date_type,
-        files: files.length > 0 ? files.map((file) => null) : null,
+        files: files && files.length > 0 ? files.map(() => null) : null,
       },
     })
   );

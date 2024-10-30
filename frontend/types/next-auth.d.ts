@@ -1,37 +1,40 @@
 import { User } from "next-auth"
 import { JWT } from "next-auth/jwt"
 
-type UserId = string
+
 
 declare module "next-auth/jwt" {
   interface JWT {
-    staffId: UserId
+    staffId: number
     name: string
     email: string
-    role: string
+    role: number
     position: string
-    reportingManager: string
+    reportingManager: number
+    awayManager: number
   }
 }
 
 declare module "next-auth" {
   interface Session {
     user: {
-      staffId: UserId
+      staffId: number
       name: string
       email: string
-      role: string
+      role: number
       position: string
-      reportingManager: string
+      reportingManager: number
+      awayManager: number
     }
   }
 
   interface User {
-    staff_id: UserId
+    staff_id: number
     name: string
     email: string
-    role: string
+    role: number
     position: string
-    reporting_manager: string
+    reporting_manager: number
+    away_manager: number
   }
 }
