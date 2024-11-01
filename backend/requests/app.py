@@ -615,7 +615,7 @@ def resolve_overall_availability(month,year):
                     RequestModel.month == month,
                     RequestModel.year == year,
                     RequestModel.day == i,
-                    RequestModel.type == type,
+                    or_(RequestModel.type == type, RequestModel.type=="FULL"),
                     RequestModel.status.in_(['approved', 'pending'])
                 ).count(),
                 "type":type
@@ -859,25 +859,6 @@ def resolve_team_schedule(month, year,day, staff_id):
         "team_count": len(team_members),
         "team_schedule": team_schedule
     }
-
-def resolve_department_schedule(month, year, staff_id, team_managers=None):
-    user = User.query.filter(User.staff_id == staff_id).first()
-    if user.position != "Director":
-        raise Exception("User is not a director. This endpoint is for directors only")
-
-    if not team_managers:
-        team_managers = User.query.filter(User.reporting_manager==staff_id).all()
-    else:
-        team_managers = User.query.filter(User.staff_id.in_(team_managers)).all()
-        print("team_managers:" +  str(team_managers))
-
-
-    return {
-        "department_name": user.dept,
-        "dept_schedule": [resolve_team_schedule(month,year,0,m.staff_id) for m in team_managers]
-    }
-
-
 
 
 def resolve_own_requests(staff_id):

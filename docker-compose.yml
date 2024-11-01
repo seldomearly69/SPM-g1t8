@@ -78,19 +78,6 @@ services:
       PYTHONUNBUFFERED: 1
     networks:
       - internal_network
-#################################
-# Frontend
-#################################
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    environment:
-      PYTHONUNBUFFERED: 1
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-    networks:
-      - internal_network
 
 
 volumes:
