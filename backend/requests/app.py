@@ -56,6 +56,15 @@ if not check_exchange(channel, exchangename, exchangetype):
     print("\nCreate the 'Exchange' before running this microservice. \nExiting the program.")
     sys.exit(0)  # Exit with a success status
 
+
+@app.before_request
+def check_amqp_connection():
+    global connection, channel
+    if connection is None or connection.is_closed:
+        connection = create_connection()
+        channel = connection.channel()
+    return
+    
 from models import *
 # Custom Scalar for JSON
 class JSON(graphene.Scalar):
