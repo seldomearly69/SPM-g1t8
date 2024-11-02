@@ -131,6 +131,12 @@ export type TeamSchedule = {
   teamSchedule: DaySchedule[];
 };
 
+type ChartData = {
+  type: string;
+  office: number;
+  wfh: number;
+}
+
 export type Availability = {
   employeeName: string;
   department: string;
@@ -170,5 +176,4 @@ export type TransferRequest = {
   targetManagerName: string;
   status: string;
   reason: string;
- 
 };

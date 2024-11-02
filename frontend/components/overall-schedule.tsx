@@ -25,6 +25,7 @@ import { DataTable } from "./data-table";
 import { availability_columns } from "./columns";
 import { AvailabilityChartArea } from "./availability-chart-area";
 import { Skeleton, SkeletonTable } from "./ui/skeleton";
+import { ChartData } from "@/types";
 
 export default function OverallSchedule() {
   const [schedule, setSchedule] = useState([]);
@@ -35,7 +36,7 @@ export default function OverallSchedule() {
   const [currentMonth, setCurrentMonth] = useState<Date>(
     startOfMonth(new Date())
   );
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDialogOpen = async (open: boolean) => {
@@ -50,7 +51,7 @@ export default function OverallSchedule() {
         setDialogData(data.data.overallSchedule.overallSchedule);
 
         const chartData = data.data.overallSchedule.overallSchedule.map(
-          (schedule: any) => {
+          (schedule: DaySchedule) => {
             return {
               type: schedule.type,
               office: schedule.availableCount.office,
@@ -90,20 +91,6 @@ export default function OverallSchedule() {
           currentMonth={currentMonth}
           onCurrentMonthChange={setCurrentMonth}
         >
-          {/* <div className="ml-auto flex w-full space-x-5 sm:justify-end">
-            {user.position === "Director" && (
-              <Select onValueChange={() => {}}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a department" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectGroup></SelectGroup>
-                </SelectContent>
-              </Select>
-            )}
-            <MonthlyNav />
-          </div> */}
           <MonthlyNav />
           <MonthlyBody events={schedule} requests={[]}>
             <Dialog onOpenChange={handleDialogOpen}>
