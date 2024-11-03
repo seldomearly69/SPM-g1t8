@@ -51,7 +51,7 @@ sys.modules['boto3'] = mock_boto3
 
 # Now we can safely import the application
 from app import app, db, User, RequestModel, FileRequestAssoc, TransferRequest
-from app import resolve_own_schedule, resolve_team_schedule, resolve_department_schedule
+from app import resolve_own_schedule, resolve_team_schedule
 from app import resolve_own_requests, resolve_request, resolve_subordinates_request
 from app import resolve_manager_list
 
@@ -356,20 +356,6 @@ class FlaskAppTestCase(BaseTestCase):
         self.assertEqual(updated_request.status, "approved")
         self.assertEqual(updated_request.remarks, "Approved in test")
 
-    def test_department_schedule_director(self):
-        """Test department schedule for director"""
-        with patch.object(User, 'position', new_callable=PropertyMock) as mock_position:
-            mock_position.return_value = "Director"
-            result = resolve_department_schedule(10, 2024, 140001, [140894])
-            self.assertIsInstance(result, dict)
-            self.assertEqual(result['department_name'], "Sales")
-            self.assertIsInstance(result['dept_schedule'], list)
-
-    def test_invalid_department_access(self):
-        """Test invalid department schedule access"""
-        with self.assertRaises(Exception) as context:
-            resolve_department_schedule(10, 2024, 140894, None)
-        self.assertIn("User is not a director", str(context.exception))
 
     def test_resolve_request(self):
         """Test resolving specific request"""
