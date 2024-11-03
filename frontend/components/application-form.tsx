@@ -31,7 +31,6 @@ import { EventType, Request, User } from "@/types";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { getOwnRequest } from "@/service/request";
 
 type FormData = z.infer<typeof applicationSchema>;
 
