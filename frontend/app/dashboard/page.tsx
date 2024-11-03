@@ -13,7 +13,6 @@ export default async function DashboardPage() {
     user.staffId,
     "pending"
   ).then((res) => res.data.transferRequests);
-  console.log(transferRequests);
 
   const stats = await getOwnRequest(user.staffId).then(
     (res) => res.data.ownRequests.requests

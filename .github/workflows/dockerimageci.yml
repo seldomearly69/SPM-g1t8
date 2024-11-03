@@ -78,13 +78,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker-compose -f backend/docker-compose.yml build
-          docker-compose -f backend/docker-compose.yml pull
+          docker-compose -f docker-compose.yml build
+          docker-compose -f docker-compose.yml pull
 
       # Run requests unit tests
       - name: Run requests unit tests
         run: |
-          docker-compose -f backend/docker-compose.yml run --rm \
+          docker-compose -f docker-compose.yml run --rm \
             -e PYTHONPATH=/app \
             requests pytest --maxfail=1 --disable-warnings -v \
             -o junit_family=xunit1 \
@@ -94,7 +94,7 @@ jobs:
       # Run authentication unit tests
       - name: Run authentication unit tests
         run: |
-          docker-compose -f backend/docker-compose.yml run --rm \
+          docker-compose -f docker-compose.yml run --rm \
             -e PYTHONPATH=/app \
             -e FLASK_ENV=testing \
             authentication pytest --maxfail=1 --disable-warnings -v \
@@ -115,5 +115,5 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          docker-compose -f backend/docker-compose.yml down -v
+          docker-compose -f docker-compose.yml down -v
           docker system prune -f

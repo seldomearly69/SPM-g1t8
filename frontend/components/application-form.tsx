@@ -30,6 +30,7 @@ import { isSameDay } from "date-fns";
 import { EventType, Request, User } from "@/types";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type FormData = z.infer<typeof applicationSchema>;
 
@@ -53,7 +54,7 @@ export default function ApplicationForm({
   const [statusCode, setStatusCode] = useState<string>("");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Added state for success popup
   const { toast } = useToast();
-  console.log(requests);
+  const router = useRouter();
 
   // Submission Logic is here
   const onSubmit = async (data: any) => {
@@ -79,8 +80,11 @@ export default function ApplicationForm({
 
       if (response.data.createRequest.success) {
         console.log("Status Code:", response.data.createRequest.success);
+
         setStatusCode(response.data.createRequest.success);
         setShowSuccessPopup(true); // Show success popup upon successful submission
+        setDate([]);
+        router.refresh();
       } else {
         console.log("No status code returned from the backend");
       }
@@ -110,16 +114,18 @@ export default function ApplicationForm({
   useEffect(() => {
     setValue("date_type", date as [{ date: string; type: "AM" | "PM" }]);
 
-    const combinedDates = date.concat(
-      requests.map((r: any) => ({ date: r.date, type: r.type }))
-    );
-    if (combinedDates.length > 0 && hasMoreThanTwoDays(combinedDates)) {
-      toast({
-        title: "Notice",
-        description:
-          "You exceeded the maximum number of days allowed for this month",
-        variant: "warning",
-      });
+    if (requests) {
+      const combinedDates = date.concat(
+        requests.map((r: any) => ({ date: r.date, type: r.type }))
+      );
+      if (combinedDates.length > 0 && hasMoreThanTwoDays(combinedDates)) {
+        toast({
+          title: "Notice",
+          description:
+            "You exceeded the maximum number of days allowed for this month",
+          variant: "info",
+        });
+      }
     }
   }, [date]);
 
@@ -191,14 +197,18 @@ export default function ApplicationForm({
             onCurrentMonthChange={setSelectedDate}
           >
             <MonthlyNav />
+
             <MonthlyBody
               events={date || []}
-              requests={requests.filter(
-                (r: Request) =>
+              requests={requests.filter((r: Request) => {
+                console.log(r);
+
+                return (
                   r.status === "pending" ||
                   r.status === "approved" ||
                   r.status === "pending_withdrawal"
-              )}
+                );
+              })}
               className="border-none"
             >
               <CustomMonthlyDay<EventType>

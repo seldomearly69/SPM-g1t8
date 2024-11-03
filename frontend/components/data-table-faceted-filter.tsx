@@ -37,6 +37,8 @@ export function DataTableFacetedFilter<TData, TValue>({
 
   const selectedValues = new Set((column?.getFilterValue() as string[]) || []);
 
+
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -97,6 +99,8 @@ export function DataTableFacetedFilter<TData, TValue>({
                         selectedValues.add(option.value);
                       }
                       const filterValues = Array.from(selectedValues);
+                      console.log("debug wfh", option.value, column?.getFilterValue());
+                      
                       column?.setFilterValue(
                         filterValues.length ? filterValues : undefined
                       );

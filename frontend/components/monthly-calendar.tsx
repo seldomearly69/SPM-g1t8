@@ -180,7 +180,8 @@ export function MonthlyBody<DayData>({
     omitDays,
     locale,
   });
-
+  console.log(requests);
+  
   const headingClassName =
     "border-b-2 p-2 border-r-2 xl:flex justify-center items-center hidden";
 
@@ -267,7 +268,8 @@ export function CustomMonthlyDay<DayData>({
   const { locale } = useMonthlyCalendar();
   const { day, events, is_past, requests } = useMonthlyBody<DayData>();
   const dayNumber = format(day, "d", { locale });
-
+  console.log(requests);
+  
   return is_past ? (
     <button
       key={day.toISOString()}
@@ -299,7 +301,6 @@ export function CustomMonthlyDay<DayData>({
             "h-48 flex flex-col p-1 h-20 border-none m-0.5 rounded-md flex items-center justify-evenly cursor-pointer hover:bg-secondary hover:text-secondary-foreground",
             requests.some(
               (r: { date: string; status: string; type: string }) => {
-                console.log(r);
 
                 return isSameDay(r.date, day);
               }

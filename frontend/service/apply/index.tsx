@@ -7,6 +7,7 @@ export async function createRequest(
   remarks?: string,
   files?: Array<File>
 ) {
+  const isServer = typeof window === "undefined";   
   // The GraphQL mutation string for file upload
   const gqlString = `
     mutation createRequest(
@@ -62,9 +63,11 @@ export async function createRequest(
   }
 
   // Send the fetch request with multipart/form-data
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    body: formData, // No need for 'Content-Type' header, FormData handles that
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      body: formData, // No need for 'Content-Type' header, FormData handles that
   });
 
   const data = await res.json();

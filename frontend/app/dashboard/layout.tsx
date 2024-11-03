@@ -56,7 +56,7 @@ export default async function DashboardLayout({
       </header>
       <div className="flex lg:grid-cols-[300px_1fr] flex-1">
         <aside className="hidden w-[200px] flex-col lg:block flex-shrink-0">
-          <div className="fixed h-[calc(100vh-5rem)] overflow-y-auto bg-primary text-primary-foreground">
+          <div className="fixed h-[calc(100vh)] overflow-y-auto bg-primary text-primary-foreground">
             <DashboardNav
               sideBarNav={dashboardConfig.sidebarNav}
               currentUser={user}
