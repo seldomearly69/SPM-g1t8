@@ -65,12 +65,7 @@ class BaseTestCase(unittest.TestCase):
         }
         app.config['TESTING'] = True
         cls.client = app.test_client()
-        try:
-            cls.client = app.test_client()
-        except AttributeError:
-            import werkzeug
-            werkzeug.__version__ = '3.0.0'  # Set a dummy version
-            cls.client = app.test_client()
+      
 
         # Patch external services
         cls.amqp_patcher = patch('amqp_connection.create_connection', return_value=mock_connection)
