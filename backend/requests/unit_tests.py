@@ -65,6 +65,7 @@ class BaseTestCase(unittest.TestCase):
         }
         app.config['TESTING'] = True
         cls.client = app.test_client()
+        cls.client.environ_base['HTTP_USER_AGENT'] = 'custom-agent/1.0'
 
         # Patch external services
         cls.amqp_patcher = patch('amqp_connection.create_connection', return_value=mock_connection)
