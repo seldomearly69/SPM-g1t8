@@ -65,7 +65,12 @@ class BaseTestCase(unittest.TestCase):
         }
         app.config['TESTING'] = True
         cls.client = app.test_client()
-        cls.client.environ_base['HTTP_USER_AGENT'] = 'custom-agent/1.0'
+        try:
+            cls.client = app.test_client()
+        except AttributeError:
+            import werkzeug
+            werkzeug.__version__ = '3.0.0'  # Set a dummy version
+            cls.client = app.test_client()
 
         # Patch external services
         cls.amqp_patcher = patch('amqp_connection.create_connection', return_value=mock_connection)
@@ -253,6 +258,7 @@ class TestAMQPConnection(BaseTestCase):
             self.assertFalse(result)
         finally:
             mock_amqp.check_exchange = original_check_exchange
+
 class FlaskAppTestCase(BaseTestCase):
     """Test cases for Flask application functionality"""
 
@@ -543,6 +549,7 @@ class TestHROfficeSchedule(BaseTestCase):
         
         self.assertEqual(initial_response.status_code, 200)
         self.assertEqual(updated_response.status_code, 200)
+    
     def test_hr_role_access(self):
         """Test that only HR staff can access overall schedule"""
         query = '''
@@ -616,7 +623,6 @@ class TestHROfficeSchedule(BaseTestCase):
         data = json.loads(response.data)
         self.assertIn('data', data)
         self.assertIn('departmentSchedule', data['data'])
-    
 
 class TestNotificationSystem(BaseTestCase):
     """Test cases for notification system"""
@@ -748,6 +754,7 @@ class TestTransferApprovingRights(BaseTestCase):
         data = json.loads(response.data)
         self.assertTrue(data['data']['revertTransfer']['success'])
         self.assertEqual(TransferRequest.query.get(2).status, "reverted")
+
 class TestWithdrawRequests(BaseTestCase):
     """Test cases for withdraw request functionalities (Staff & Director)"""
 
@@ -816,6 +823,7 @@ class TestWithdrawRequests(BaseTestCase):
         
         self.assertTrue(data['data']['acceptRejectRequest']['success'])
         self.assertEqual(RequestModel.query.get(101).status, "rejected")
+
 class TestViewPreviouslyAcceptedRequests(BaseTestCase):
     """Test cases for viewing previously accepted requests"""
 
@@ -873,4 +881,3 @@ class TestViewPreviouslyAcceptedRequests(BaseTestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
