@@ -79,6 +79,13 @@ services:
     networks:
       - internal_network
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - internal_network
+
 
 volumes:
   pgdata:
