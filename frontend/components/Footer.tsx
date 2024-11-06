@@ -34,7 +34,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href="#"
                   className="text-gray-600 hover:text-blue-600 text-lg"
                 >
                   Contact
@@ -42,7 +42,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href="#"
                   className="text-gray-600 hover:text-blue-600 text-lg"
                 >
                   Privacy Policy

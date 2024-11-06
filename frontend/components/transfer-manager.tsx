@@ -94,7 +94,9 @@ export default function TransferManager({
                             : request.requestingManagerName}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          olivia.martin@email.com
+                          {request.requestingManagerId == user.staffId
+                            ? request.targetManagerEmail
+                            : request.requestingManagerEmail}
                         </p>
                       </div>
                     </div>

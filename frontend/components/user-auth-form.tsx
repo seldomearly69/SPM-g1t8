@@ -46,7 +46,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
     if (signInResult?.ok) {
       router.push(signInResult.url || "/dashboard");
-      console.log("Sign in success:", signInResult.url);
     } else {
       // Set error for password field
       setError("password", {

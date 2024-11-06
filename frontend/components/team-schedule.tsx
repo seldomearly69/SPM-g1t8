@@ -55,7 +55,6 @@ export default function TeamSchedule({
   const [managerList] = useState<User[]>(_managerList);
   const [selectedManager, setSelectedManager] = useState<number>(0);
 
-  console.log(managerList);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -85,7 +84,6 @@ export default function TeamSchedule({
         selectedDate?.getFullYear(),
         managerId
       );
-      console.log("this is line 88 of teamschedule", team_schedule_data);
       setTeamSchedule(team_schedule_data.data.teamSchedule);
     };
     fetchSchedule();
@@ -94,7 +92,6 @@ export default function TeamSchedule({
   const handleDialogOpen = async (open: boolean) => {
     if (open && selectedDialogDate) {
       try {
-        console.log(selectedDialogDate);
 
         let data;
         if (user.position === "Director") {
@@ -127,7 +124,6 @@ export default function TeamSchedule({
             user.staffId
           );
         }
-        console.log(data);
         setDialogData(data.data.teamSchedule.teamSchedule);
 
         const chartData = data.data.teamSchedule.teamSchedule.map(
@@ -139,7 +135,6 @@ export default function TeamSchedule({
             };
           }
         );
-        console.log(chartData);
         setChartData(chartData);
         // setDialogData(data.data.teamSchedule.teamSchedule[0].availability.concat(data.data.teamSchedule.teamSchedule[1].availability));
       } catch (error) {

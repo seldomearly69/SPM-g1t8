@@ -59,7 +59,6 @@ export default function OverallSchedule() {
             };
           }
         );
-        console.log(chartData);
         setChartData(chartData);
         setIsLoading(false);
         // setDialogData(data.data.teamSchedule.teamSchedule[0].availability.concat(data.data.teamSchedule.teamSchedule[1].availability));
@@ -76,7 +75,6 @@ export default function OverallSchedule() {
         currentMonth.getMonth() + 1,
         currentMonth.getFullYear()
       );
-      console.log(data.data.overallAvailability.overallAvailability);
 
       setSchedule(data.data.overallAvailability.overallAvailability);
     };

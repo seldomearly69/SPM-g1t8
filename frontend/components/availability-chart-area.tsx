@@ -24,7 +24,6 @@ interface AvailabilityChartAreaProps {
 }
 
 export const AvailabilityChartArea = ({chartData}: AvailabilityChartAreaProps) =>  {
-  console.log(chartData)
   return (
 
     <div className="max-w-[500px] mx-auto">

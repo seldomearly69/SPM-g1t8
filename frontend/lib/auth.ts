@@ -57,9 +57,8 @@ export const authOptions: NextAuthOptions = {
         token.reportingManager = user.reporting_manager;
         token.awayManager = user.away_manager;
       }
-      console.log(token);
-      
       return token;
     }
   },
 };
+ 

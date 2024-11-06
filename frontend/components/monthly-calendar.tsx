@@ -133,7 +133,6 @@ export const handleOmittedDays = ({
     headings = daysInWeek({ locale }).filter(
       (day) => !omitDays.includes(day.day)
     );
-    console.log("days to render", daysToRender);
 
     daysToRender = daysToRender.filter(
       ({ day }) => !omitDays.includes(getDay(day))
@@ -180,7 +179,6 @@ export function MonthlyBody<DayData>({
     omitDays,
     locale,
   });
-  console.log(requests);
   
   const headingClassName =
     "border-b-2 p-2 border-r-2 xl:flex justify-center items-center hidden";
@@ -237,7 +235,6 @@ export function MonthlyDay<DayData>({
   const { locale } = useMonthlyCalendar();
   const { day, events } = useMonthlyBody<DayData>();
   const dayNumber = format(day, "d", { locale });
-  console.log(events);
 
   return (
     <div
@@ -268,7 +265,6 @@ export function CustomMonthlyDay<DayData>({
   const { locale } = useMonthlyCalendar();
   const { day, events, is_past, requests } = useMonthlyBody<DayData>();
   const dayNumber = format(day, "d", { locale });
-  console.log(requests);
   
   return is_past ? (
     <button

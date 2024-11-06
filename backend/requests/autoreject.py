@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from app import app, db, RequestModel
 
+
 log_file_path = "/var/log/cron.log"
 def log_message(message):
     with open(log_file_path, "a") as log_file:
