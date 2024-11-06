@@ -128,7 +128,8 @@ export default function ManageEmployeeArrangements({
       )
     );
     const res = await revertTransferRequest(requestId);
-    if (res.status === 200) {
+
+    if (res.data.revertTransfer.success) {
       toast({
         title: "Success",
         description: "Request reverted successfully",

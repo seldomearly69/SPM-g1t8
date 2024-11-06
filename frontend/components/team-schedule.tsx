@@ -84,7 +84,6 @@ export default function TeamSchedule({
         selectedDate?.getFullYear(),
         managerId
       );
-      console.log("this is line 88 of teamschedule", team_schedule_data);
       setTeamSchedule(team_schedule_data.data.teamSchedule);
     };
     fetchSchedule();
@@ -93,7 +92,6 @@ export default function TeamSchedule({
   const handleDialogOpen = async (open: boolean) => {
     if (open && selectedDialogDate) {
       try {
-        console.log(selectedDialogDate);
 
         let data;
         if (user.position === "Director") {

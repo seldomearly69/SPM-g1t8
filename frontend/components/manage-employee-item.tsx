@@ -92,7 +92,6 @@ export default function ManageEmployeeArrangementsItem() {
       const fileUrls = files.split(","); // Split the string into an array of URLs
 
       fileUrls.forEach(async (fileUrl) => {
-        console.log(fileUrl);
         try {
           await downloadFile(fileUrl.trim()); // Download the file directly
         } catch (error) {
@@ -106,7 +105,6 @@ export default function ManageEmployeeArrangementsItem() {
     try {
       const response = await getFileLink(fileLink);
 
-      console.log(response);
       const downloadUrl = response.fileLink;
       if (downloadUrl) {
         const link = document.createElement("a");

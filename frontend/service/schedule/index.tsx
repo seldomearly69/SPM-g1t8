@@ -37,21 +37,6 @@ export async function getOwnSchedule(
   return data;
 }
 
-export async function getTeamList(
-  month: number,
-  year: number,
-  staffId: number
-) {
-  const isServer = typeof window === "undefined";
-  const GET_MANAGER_LIST = gql`
-    query GetManagerList($staffId: Int!) {
-      managerList(staffId: $staffId) {
-        director_name
-        manager_list
-      }
-    }
-  `;
-}
 
 export async function getManagerList(staffId: number) {
   const isServer = typeof window === "undefined";
@@ -179,7 +164,6 @@ export async function getTeamSchedule(
       }),
     }
   );
-  console.log("this is line 151 of getTeamSchedule", res);
 
   const data = await res.json();
   return data;

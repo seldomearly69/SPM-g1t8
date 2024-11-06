@@ -87,7 +87,6 @@ export function DataTableFacetedFilter<TData, TValue>({
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
-                // console.log(facets?.get(option.value))
                 const isSelected = selectedValues.has(option.value);
                 return (
                   <CommandItem
@@ -99,7 +98,6 @@ export function DataTableFacetedFilter<TData, TValue>({
                         selectedValues.add(option.value);
                       }
                       const filterValues = Array.from(selectedValues);
-                      console.log("debug wfh", option.value, column?.getFilterValue());
                       
                       column?.setFilterValue(
                         filterValues.length ? filterValues : undefined

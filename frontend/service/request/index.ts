@@ -152,7 +152,6 @@ export async function approveRequest(
     }),
   });
   const data = await res.json();
-  console.log(data);
   return data;
 }
 

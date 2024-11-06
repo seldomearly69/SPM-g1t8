@@ -75,7 +75,6 @@ export default function ApplicationForm({
 
 
       if (response.data.createRequest.success) {
-        console.log("Status Code:", response.data.createRequest.success);
 
         setStatusCode(response.data.createRequest.success);
         setShowSuccessPopup(true); // Show success popup upon successful submission
@@ -197,8 +196,6 @@ export default function ApplicationForm({
             <MonthlyBody
               events={date || []}
               requests={requests.filter((r: Request) => {
-                console.log(r);
-
                 return (
                   r.status === "pending" ||
                   r.status === "approved" ||
