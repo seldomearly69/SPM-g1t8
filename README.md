@@ -32,7 +32,7 @@ npm run dev
 ```
 
 Next, set up environment variables:
-- Create a `.env` file in the `backend` directory and add the following:
+- Create a `.env` file in the root directory and add the following:
 ```bash
 POSTGRES_USER={your_username}
 POSTGRES_PASSWORD={your_password}
@@ -40,8 +40,7 @@ POSTGRES_DB={your_database_name}
 AWS_ACCESS_KEY_ID={your_access_key_id}
 AWS_SECRET_ACCESS_KEY={your_secret_access_key}
 ```
-
-
+- Get environment variables from file provided by our team
 
 
 
