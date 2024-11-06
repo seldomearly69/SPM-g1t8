@@ -8,7 +8,6 @@ export default async function TeamSchedulePage() {
 
   // fetching team schedule here so client can come preloaded with default 1st manager team schedule
   const manager_list_data = await getManagerList(user.staffId);
-  console.log(manager_list_data);
   const manager_list = manager_list_data?.data.managerList?.managerList;
 
   return (

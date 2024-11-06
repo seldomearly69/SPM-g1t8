@@ -6,7 +6,6 @@ import { Button } from "./ui/button";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function DashboardStat({ stats }: { stats: Request[] }) {
-  console.log(stats);
 
   const router = useRouter();
   const pathname = usePathname();

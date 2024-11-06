@@ -44,7 +44,6 @@ export default function AssignManagerForm({
   });
 
   const onSubmit = async (data: any) => {
-    console.log(employeeRequests);
     if (employeeRequests.some((request) => request.status === "pending")) {
       toast({
         title: "Error",
@@ -59,7 +58,6 @@ export default function AssignManagerForm({
         data.manager
       );
 
-      console.log(res);
       if (res.data.requestForTransfer.success) {
         if (transferRequests.length > 0) {
           const updatedRequests = [...transferRequests];
@@ -95,8 +93,6 @@ export default function AssignManagerForm({
 
   useEffect(() => {
     getTransferOptions(user.staffId).then((data) => {
-      console.log(data);
-
       setManagerList(data.data.transferOptions);
     });
   }, []);

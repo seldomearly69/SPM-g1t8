@@ -46,14 +46,12 @@ export default function ManageIndividualRequest({
     if (!request?.requestId) return; // Ensure requestId is not undefined
 
     let data;
-    console.log(status);
 
     if (status === "approved") {
       if (!reason) return; // Ensure reason is provided for approved requests
       data = await withdrawApprovedRequest(request.requestId, reason); // Call with reason
     } else if (status === "pending") {
       data = await withdrawPendingRequest(request.requestId); // Call without reason
-      console.log(data);
     }
 
     if (data.data.acceptRejectRequest?.success) {
@@ -72,7 +70,6 @@ export default function ManageIndividualRequest({
       const data = await getIndividualRequest(parseInt(params.request_id));
       setRequest(data.data.request);
       setStatus(data.data.request.status); // Set the status based on the fetched request data
-      console.log(data.data.request);
     };
     fetchData();
   }, [params.request_id]);

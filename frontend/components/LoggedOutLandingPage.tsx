@@ -3,13 +3,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 export default function LoggedOutLandingPage() {
-  // const { data: session } = useSession();
 
-  // useEffect(() => {
-  //   if (session?.user?.token) {
-  //     console.log("Session token:", session.user.token);
-  //   }
-  // }, [session]);
 
   return (
     <div className="bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200 min-h-screen flex items-center justify-center p-2">

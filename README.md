@@ -18,20 +18,21 @@ Tech stack:
 
 ## Getting Started
 
-First, run the development server:
+First, run the backend server:
 
 ```bash
+docker compose up --build
+```
+
+Next, run the frontend server:
+```bash
+cd frontend
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
 ```
 
 Next, set up environment variables:
-- Create a `.env` file in the `backend` directory and add the following:
+- Create a `.env` file in the root directory and add the following:
 ```bash
 POSTGRES_USER={your_username}
 POSTGRES_PASSWORD={your_password}
@@ -39,11 +40,9 @@ POSTGRES_DB={your_database_name}
 AWS_ACCESS_KEY_ID={your_access_key_id}
 AWS_SECRET_ACCESS_KEY={your_secret_access_key}
 ```
+- Get environment variables from file provided by our team
 
-Next, run the backend server:
-```bash
-python app.py
-```
+
 
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

@@ -217,16 +217,10 @@ export async function withdrawApprovedRequest(
   });
 
   const data = await res.json();
-  console.log(data);
   return data;
 }
 
-/*     mutation withdrawPendingRequest($requestId: Int!) {
-  withdrawPendingRequest(requestId: $requestId) {
-    success
-    message
-  }
-} */
+
 export async function withdrawPendingRequest(requestId: number) {
   const isServer = typeof window === "undefined";
   const gqlString = gql`

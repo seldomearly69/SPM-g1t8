@@ -2,9 +2,6 @@ import * as motion from "framer-motion/client"
 import MySchedule from "@/components/my-schedule"
 import { getCurrentUser } from "@/lib/session";
 
-
-
-
 export default async function MySchedulePage() {
     const user = await getCurrentUser();
 

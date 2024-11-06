@@ -63,9 +63,6 @@ export default function ApplicationForm({
     // Convert FileList to array or handle it being empty
     const files: File[] = data.file ? Array.from(data.file) : [];
 
-    console.log(data);
-
-    console.log("Form Data Submitted:", { ...data, date_type: date });
 
     try {
       const response = await createRequest(
@@ -76,7 +73,6 @@ export default function ApplicationForm({
         files
       );
 
-      console.log("Response: ", response);
 
       if (response.data.createRequest.success) {
         console.log("Status Code:", response.data.createRequest.success);

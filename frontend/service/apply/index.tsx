@@ -1,5 +1,3 @@
-import { gql } from "@apollo/client";
-
 export async function createRequest(
   staffId: number,
   date_type: Array<{ date: string; type: string }>,
