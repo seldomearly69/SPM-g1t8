@@ -1,5 +1,10 @@
 FROM node:18-alpine AS base
 
+ENV NEXT_PUBLIC_REQUESTS_API_URL=http://localhost:5002/requests
+ENV NEXT_PUBLIC_SCHEDULE_API_URL=http://localhost:5002/schedule
+ENV NEXT_PUBLIC_AUTH_API_URL=http://localhost:5001/authenticate
+
+
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
