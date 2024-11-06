@@ -29,20 +29,6 @@ export async function getOwnSchedule(
   return data;
 }
 
-export async function getTeamList(
-  month: number,
-  year: number,
-  staffId: number
-) {
-  const GET_MANAGER_LIST = gql`
-    query GetManagerList($staffId: Int!) {
-      managerList(staffId: $staffId) {
-        director_name
-        manager_list
-      }
-    }
-  `;
-}
 
 export async function getManagerList(staffId: number) {
   const gqlString = `

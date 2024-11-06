@@ -6,7 +6,6 @@ import * as motion from "framer-motion/client";
 export default async function ManageEmployeeArrangementsPage() {
   const user = await getCurrentUser();
   const transferRequests = await getTransferRequests(user.staffId).then((res) => res.data.transferRequests);
-  console.log(transferRequests);
   
   return (
     <motion.div

@@ -37,7 +37,6 @@ export default function ManageEmployeeArrangements({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
-  console.log(transferRequests);
 
   const has_transferred_request = (transferRequests: TransferRequest[]) => {
     return (
@@ -129,11 +128,17 @@ export default function ManageEmployeeArrangements({
       )
     );
     const res = await revertTransferRequest(requestId);
-    console.log(res);
-    toast({
-      title: "Success",
-      description: "Request reverted successfully",
-    });
+    if (res.status === 200) {
+      toast({
+        title: "Success",
+        description: "Request reverted successfully",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to revert request",
+      });
+    }
   };
 
   return (

@@ -18,16 +18,17 @@ Tech stack:
 
 ## Getting Started
 
-First, run the development server:
+First, run the backend server:
 
 ```bash
+docker compose up --build
+```
+
+Next, run the frontend server:
+```bash
+cd frontend
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
 ```
 
 Next, set up environment variables:
@@ -40,10 +41,9 @@ AWS_ACCESS_KEY_ID={your_access_key_id}
 AWS_SECRET_ACCESS_KEY={your_secret_access_key}
 ```
 
-Next, run the backend server:
-```bash
-python app.py
-```
+
+
+
 
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

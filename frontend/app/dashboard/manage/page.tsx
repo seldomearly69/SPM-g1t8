@@ -36,7 +36,6 @@ export default async function ManageArrangements() {
           </CardContent>
         </Card>
       </motion.div>
-   
     </motion.div>
   );
 }

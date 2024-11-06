@@ -55,7 +55,6 @@ export default function OverallSchedule() {
             };
           }
         );
-        console.log(chartData);
         setChartData(chartData);
         // setDialogData(data.data.teamSchedule.teamSchedule[0].availability.concat(data.data.teamSchedule.teamSchedule[1].availability));
       } catch (error) {
@@ -71,7 +70,6 @@ export default function OverallSchedule() {
         currentMonth.getMonth() + 1,
         currentMonth.getFullYear()
       );
-      console.log(data.data.overallAvailability.overallAvailability);
 
       setSchedule(data.data.overallAvailability.overallAvailability);
     };
@@ -86,20 +84,6 @@ export default function OverallSchedule() {
           currentMonth={currentMonth}
           onCurrentMonthChange={setCurrentMonth}
         >
-          {/* <div className="ml-auto flex w-full space-x-5 sm:justify-end">
-            {user.position === "Director" && (
-              <Select onValueChange={() => {}}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a department" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectGroup></SelectGroup>
-                </SelectContent>
-              </Select>
-            )}
-            <MonthlyNav />
-          </div> */}
           <MonthlyNav />
           <MonthlyBody events={schedule} requests={[]}>
             <Dialog onOpenChange={handleDialogOpen}>

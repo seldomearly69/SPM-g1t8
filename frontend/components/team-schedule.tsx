@@ -55,7 +55,6 @@ export default function TeamSchedule({
   const [managerList] = useState<User[]>(_managerList);
   const [selectedManager, setSelectedManager] = useState<number>(0);
 
-  console.log(managerList);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -127,7 +126,6 @@ export default function TeamSchedule({
             user.staffId
           );
         }
-        console.log(data);
         setDialogData(data.data.teamSchedule.teamSchedule);
 
         const chartData = data.data.teamSchedule.teamSchedule.map(
@@ -139,7 +137,6 @@ export default function TeamSchedule({
             };
           }
         );
-        console.log(chartData);
         setChartData(chartData);
         // setDialogData(data.data.teamSchedule.teamSchedule[0].availability.concat(data.data.teamSchedule.teamSchedule[1].availability));
       } catch (error) {
