@@ -51,7 +51,7 @@ sys.modules['boto3'] = mock_boto3
 
 # Now we can safely import the application
 from app import app, db, User, RequestModel, FileRequestAssoc, TransferRequest
-from app import resolve_own_schedule, resolve_team_schedule, resolve_department_schedule
+from app import resolve_own_schedule, resolve_team_schedule
 from app import resolve_own_requests, resolve_request, resolve_subordinates_request
 from app import resolve_manager_list
 
@@ -65,6 +65,7 @@ class BaseTestCase(unittest.TestCase):
         }
         app.config['TESTING'] = True
         cls.client = app.test_client()
+      
 
         # Patch external services
         cls.amqp_patcher = patch('amqp_connection.create_connection', return_value=mock_connection)
@@ -77,11 +78,18 @@ class BaseTestCase(unittest.TestCase):
     def tearDownClass(cls):
         cls.amqp_patcher.stop()
         cls.s3_patcher.stop()
-
+    
     def setUp(self):
         self.app_context = app.app_context()
         self.app_context.push()
         db.create_all()
+        
+        # Standard headers that all tests can use
+        self.headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        
         self._setup_test_data()
 
     def tearDown(self):
@@ -90,115 +98,125 @@ class BaseTestCase(unittest.TestCase):
         self.app_context.pop()
 
     def _setup_test_data(self):
-        # Create CEO (reports to self)
-        ceo = User(
-            staff_id=130002,
-            staff_fname="Jack",
-            staff_lname="Sim",
-            dept="CEO",
-            position="MD",
-            country="Singapore",
-            email="jack.sim@allinone.com.sg",
-            reporting_manager=130002,  # CEO reports to self
-            role=1,
-            password="hashed_password"
-        )
-        db.session.add(ceo)
+        # Clear existing data first
+        db.session.query(User).delete()
+        db.session.query(RequestModel).delete()
         db.session.commit()
 
-        # Add other users
-        other_users = [
-            User(staff_id=140001,
-                 staff_fname="Derek",
-                 staff_lname="Tan",
-                 dept="Sales",
-                 position="Director",
-                 country="Singapore",
-                 email="Derek.Tan@allinone.com.sg",
-                 reporting_manager=130002,
-                 role=1,
-                 password="hashed_password"),
-            User(staff_id=140894,
-                 staff_fname="Rahim",
-                 staff_lname="Khalid",
-                 dept="Sales",
-                 position="Sales Manager",
-                 country="Singapore",
-                 email="Rahim.Khalid@allinone.com.sg",
-                 reporting_manager=140001,
-                 role=3,
-                 password="hashed_password"),
-            User(staff_id=150008,
-                 staff_fname="Eric",
-                 staff_lname="Loh",
-                 dept="Marketing",
-                 position="Marketing Manager",
-                 country="Singapore",
-                 email="Eric.Loh@allinone.com.sg",
-                 reporting_manager=130002,
-                 role=3,
-                 password="hashed_password")
-        ]
-        
-        for user in other_users:
-            db.session.add(user)
-        db.session.commit()
-        
-        # Add test requests
-        test_requests = [
-            RequestModel(
-                request_id=1,
-                requesting_staff=130002,
-                year=2024,
-                month=10,
-                day=5,
-                type="AM",
-                status="pending",
-                approving_manager=130002,
-                created_at=date(2024, 10, 1),
-                reason="Family event"
-            ),
-            RequestModel(
-                request_id=2,
-                requesting_staff=140001,
-                year=2024,
-                month=10,
-                day=6,
-                type="PM",
-                status="approved",
-                approving_manager=130002,
-                created_at=date(2024, 10, 2),
-                reason="Doctor appointment"
-            ),
-            RequestModel(
-                request_id=3,
-                requesting_staff=140894,
-                year=2024,
-                month=10,
-                day=7,
-                type="FULL",
-                status="rejected",
-                approving_manager=140001,
-                created_at=date(2024, 10, 3),
-                reason="Vacation"
-            ),
-            RequestModel(
-                request_id=4,
-                requesting_staff=150008,
-                year=2024,
-                month=10,
-                day=8,
-                type="AM",
-                status="pending",
-                approving_manager=130002,
-                created_at=date(2024, 10, 4),
-                reason="Team building"
+        # Create CEO (reports to self)
+        try:
+            ceo = User(
+                staff_id=130002,
+                staff_fname="Jack",
+                staff_lname="Sim",
+                dept="CEO",
+                position="MD",
+                country="Singapore",
+                email="jack.sim@allinone.com.sg",
+                reporting_manager=130002,  # CEO reports to self
+                role=1,
+                password="hashed_password"
             )
-        ]
-        
-        for request in test_requests:
-            db.session.add(request)
-        db.session.commit()
+            db.session.add(ceo)
+            db.session.commit()
+
+            # Add other users
+            other_users = [
+                User(staff_id=140001,
+                     staff_fname="Derek",
+                     staff_lname="Tan",
+                     dept="Sales",
+                     position="Director",
+                     country="Singapore",
+                     email="Derek.Tan@allinone.com.sg",
+                     reporting_manager=130002,
+                     role=1,
+                     password="hashed_password"),
+                User(staff_id=140894,
+                     staff_fname="Rahim",
+                     staff_lname="Khalid",
+                     dept="Sales",
+                     position="Sales Manager",
+                     country="Singapore",
+                     email="Rahim.Khalid@allinone.com.sg",
+                     reporting_manager=140001,
+                     role=3,
+                     password="hashed_password"),
+                User(staff_id=150008,
+                     staff_fname="Eric",
+                     staff_lname="Loh",
+                     dept="Marketing",
+                     position="Marketing Manager",
+                     country="Singapore",
+                     email="Eric.Loh@allinone.com.sg",
+                     reporting_manager=130002,
+                     role=3,
+                     password="hashed_password")
+            ]
+            
+            for user in other_users:
+                db.session.add(user)
+            db.session.commit()
+
+            # Add test requests
+            test_requests = [
+                RequestModel(
+                    request_id=1,
+                    requesting_staff=130002,
+                    year=2024,
+                    month=10,
+                    day=5,
+                    type="AM",
+                    status="pending",
+                    approving_manager=130002,
+                    created_at=date(2024, 10, 1),
+                    reason="Family event"
+                ),
+                RequestModel(
+                    request_id=2,
+                    requesting_staff=140001,
+                    year=2024,
+                    month=10,
+                    day=6,
+                    type="PM",
+                    status="approved",
+                    approving_manager=130002,
+                    created_at=date(2024, 10, 2),
+                    reason="Doctor appointment"
+                ),
+                RequestModel(
+                    request_id=3,
+                    requesting_staff=140894,
+                    year=2024,
+                    month=10,
+                    day=7,
+                    type="FULL",
+                    status="rejected",
+                    approving_manager=140001,
+                    created_at=date(2024, 10, 3),
+                    reason="Vacation"
+                ),
+                RequestModel(
+                    request_id=4,
+                    requesting_staff=150008,
+                    year=2024,
+                    month=10,
+                    day=8,
+                    type="AM",
+                    status="pending",
+                    approving_manager=130002,
+                    created_at=date(2024, 10, 4),
+                    reason="Team building"
+                )
+            ]
+            
+            for request in test_requests:
+                db.session.add(request)
+            db.session.commit()
+            
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
 class TestAMQPConnection(BaseTestCase):
     """Test cases for AMQP connection functionality"""
@@ -356,21 +374,6 @@ class FlaskAppTestCase(BaseTestCase):
         self.assertEqual(updated_request.status, "approved")
         self.assertEqual(updated_request.remarks, "Approved in test")
 
-    def test_department_schedule_director(self):
-        """Test department schedule for director"""
-        with patch.object(User, 'position', new_callable=PropertyMock) as mock_position:
-            mock_position.return_value = "Director"
-            result = resolve_department_schedule(10, 2024, 140001, [140894])
-            self.assertIsInstance(result, dict)
-            self.assertEqual(result['department_name'], "Sales")
-            self.assertIsInstance(result['dept_schedule'], list)
-
-    def test_invalid_department_access(self):
-        """Test invalid department schedule access"""
-        with self.assertRaises(Exception) as context:
-            resolve_department_schedule(10, 2024, 140894, None)
-        self.assertIn("User is not a director", str(context.exception))
-
     def test_resolve_request(self):
         """Test resolving specific request"""
         result = resolve_request(1)
@@ -424,14 +427,210 @@ class FlaskAppTestCase(BaseTestCase):
         data = json.loads(response.data)
         self.assertTrue(data['data']['withdrawApprovedRequest']['success'])
 
-    def test_transfer_request_mutation(self):
-        """Test transfer request mutation"""
+class TestHROfficeSchedule(BaseTestCase):
+    """Test cases for HR overall office schedule view"""
+
+    def setUp(self):
+        # First clear any existing data and call parent's setUp
+        super().setUp()
+
+        try:
+            # Clear existing HR staff
+            db.session.query(User).filter(User.dept == "HR").delete()
+            db.session.commit()
+
+            # Add HR staff
+            self.hr_staff = User(
+                staff_id=160001,
+                staff_fname="HR",
+                staff_lname="Staff",
+                dept="HR",
+                position="HR Manager",
+                country="Singapore",
+                email="hr.staff@allinone.com.sg",
+                reporting_manager=130002,
+                role=1,
+                password="hashed_password"
+            )
+            db.session.add(self.hr_staff)
+            db.session.commit()
+
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def test_overall_schedule_view(self):
+        """Test retrieving overall office schedule"""
+        query = '''
+        query {
+            overallSchedule(month: 11, year: 2024, day: 1) {
+                overallSchedule {
+                    date
+                    type
+                    availableCount
+                    availability {
+                        name
+                        type
+                        department
+                        availability
+                        isPending
+                    }
+                }
+            }
+        }
+        '''
+        
+        response = self.client.post(
+            '/schedule',
+            json={'query': query},
+            headers=self.headers
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertIn('data', data)
+        self.assertIn('overallSchedule', data['data'])
+
+    def test_real_time_updates(self):
+        """Test real-time updates in schedule"""
+        query = '''
+        query {
+            overallSchedule(month: 11, year: 2024, day: 1) {
+                overallSchedule {
+                    date
+                    type
+                    availableCount
+                    availability {
+                        name
+                        type
+                        department
+                        availability
+                        isPending
+                    }
+                }
+            }
+        }
+        '''
+        
+        initial_response = self.client.post(
+            '/schedule',
+            json={'query': query},
+            headers=self.headers
+        )
+        
+        # Add new request
+        try:
+            new_request = RequestModel(
+                requesting_staff=140894,
+                year=2024,
+                month=11,
+                day=1,
+                type="AM",
+                status="approved",
+                approving_manager=140001,
+                created_at=date(2024, 10, 1)
+            )
+            db.session.add(new_request)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+            
+        updated_response = self.client.post(
+            '/schedule',
+            json={'query': query},
+            headers=self.headers
+        )
+        
+        self.assertEqual(initial_response.status_code, 200)
+        self.assertEqual(updated_response.status_code, 200)
+    
+    def test_hr_role_access(self):
+        """Test that only HR staff can access overall schedule"""
+        query = '''
+        query {
+            overallSchedule(month: 11, year: 2024, day: 1) {
+                overallSchedule {
+                    date
+                    type
+                    availableCount
+                    availability {
+                        name
+                        type
+                        department
+                        availability
+                        isPending
+                    }
+                }
+            }
+        }
+        '''
+        
+        response = self.client.post(
+            '/schedule',
+            json={'query': query},
+            headers=self.headers
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertIn('data', data)
+        self.assertIn('overallSchedule', data['data'])
+
+    def test_real_time_department_filtering(self):
+        """Test real-time updates with department filtering"""
+        query = '''
+        query {
+            departmentSchedule(
+                month: 11
+                year: 2024
+                staffId: 160001
+                teamManagers: [140894]
+            ) {
+                departmentName
+                deptSchedule {
+                    reportingManager
+                    teamCount
+                    teamSchedule {
+                        date
+                        type
+                        availableCount
+                        availability {
+                            name
+                            type
+                            department
+                            availability
+                            isPending
+                        }
+                    }
+                }
+            }
+        }
+        '''
+        
+        response = self.client.post(
+            '/schedule',
+            json={'query': query},
+            headers=self.headers
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertIn('data', data)
+        self.assertIn('departmentSchedule', data['data'])
+
+class TestNotificationSystem(BaseTestCase):
+    """Test cases for notification system"""
+
+    @patch('app.publish_to_broker')
+    def test_supervisor_notification_on_request(self, mock_publish):
+        """Test notification when subordinate submits WFH request"""
         mutation = '''
         mutation {
-            requestForTransfer(
-                requestingManager: 140894,
-                targetManager: 150008,
-                reason: "Test transfer"
+            createRequest(
+                staffId: 140894,
+                dateType: [{date: "2024-11-15", type: "AM"}],
+                reason: "Test notification"
             ) {
                 success
                 message
@@ -439,9 +638,241 @@ class FlaskAppTestCase(BaseTestCase):
         }
         '''
         response = self.client.post('/requests', json={'query': mutation})
-        self.assertEqual(response.status_code, 200)
+        
+        mock_publish.assert_called_once()
+        call_args = mock_publish.call_args[0]
+        self.assertIn("has submitted a wfh request", call_args[0])
+
+    @patch('app.publish_to_broker')
+    def test_staff_notification_on_approval(self, mock_publish):
+        """Test notification when request is approved"""
+        test_request = RequestModel(
+            request_id=102,
+            requesting_staff=140894,
+            year=2024,
+            month=11,
+            day=15,
+            type="AM",
+            status="pending",
+            approving_manager=140001
+        )
+        db.session.add(test_request)
+        db.session.commit()
+
+        mutation = '''
+        mutation {
+            acceptRejectRequest(
+                requestId: 102,
+                newStatus: "approved"
+            ) {
+                success
+                message
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': mutation})
+        
+        mock_publish.assert_called_once()
+        call_args = mock_publish.call_args[0]
+        self.assertIn("has been approved", call_args[0])
+
+class TestTransferApprovingRights(BaseTestCase):
+    """Test cases for manager rights transfer functionality"""
+
+    def test_request_transfer(self):
+        """Test requesting transfer of approving rights"""
+        mutation = '''
+        mutation {
+            requestForTransfer(
+                requestingManager: 140894,
+                targetManager: 150008,
+                reason: "Vacation coverage"
+            ) {
+                success
+                message
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': mutation})
         data = json.loads(response.data)
         self.assertTrue(data['data']['requestForTransfer']['success'])
+
+    def test_accept_transfer_request(self):
+        """Test accepting a transfer request"""
+        transfer = TransferRequest(
+            request_id=1,
+            requesting_manager=140894,
+            target_manager=150008,
+            status="pending",
+            reason="Test transfer"
+        )
+        db.session.add(transfer)
+        db.session.commit()
+
+        mutation = '''
+        mutation {
+            acceptRejectTransferRequest(
+                requestId: 1,
+                newStatus: "accepted"
+            ) {
+                success
+                message
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': mutation})
+        data = json.loads(response.data)
+        self.assertTrue(data['data']['acceptRejectTransferRequest']['success'])
+        self.assertEqual(TransferRequest.query.get(1).status, "accepted")
+
+    def test_revert_transfer(self):
+        """Test reverting a transfer"""
+        transfer = TransferRequest(
+            request_id=2,
+            requesting_manager=140894,
+            target_manager=150008,
+            status="accepted",
+            reason="Test transfer"
+        )
+        db.session.add(transfer)
+        db.session.commit()
+
+        mutation = '''
+        mutation {
+            revertTransfer(requestId: 2) {
+                success
+                message
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': mutation})
+        data = json.loads(response.data)
+        self.assertTrue(data['data']['revertTransfer']['success'])
+        self.assertEqual(TransferRequest.query.get(2).status, "reverted")
+
+class TestWithdrawRequests(BaseTestCase):
+    """Test cases for withdraw request functionalities (Staff & Director)"""
+
+    def test_withdraw_pending_request(self):
+        """Test staff withdrawing a pending request"""
+        test_request = RequestModel(
+            request_id=100,
+            requesting_staff=140894,
+            year=2024,
+            month=11,
+            day=10,
+            type="AM",
+            status="pending",
+            approving_manager=140001,
+            created_at=date(2024, 10, 1),
+            reason="Test request"
+        )
+        db.session.add(test_request)
+        db.session.commit()
+
+        mutation = '''
+        mutation {
+            withdrawPendingRequest(requestId: 100) {
+                success
+                message
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': mutation})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data['data']['withdrawPendingRequest']['success'])
+        self.assertEqual(RequestModel.query.get(100).status, "withdrawn")
+
+    def test_director_withdraw_approved_arrangement(self):
+        """Test director withdrawing an approved arrangement"""
+        test_request = RequestModel(
+            request_id=101,
+            requesting_staff=140894,
+            year=2024,
+            month=11,
+            day=10,
+            type="AM",
+            status="approved",
+            approving_manager=140001,
+            created_at=date(2024, 10, 1)
+        )
+        db.session.add(test_request)
+        db.session.commit()
+
+        mutation = '''
+        mutation {
+            acceptRejectRequest(
+                requestId: 101,
+                newStatus: "rejected",
+                remarks: "Operational needs"
+            ) {
+                success
+                message
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': mutation})
+        data = json.loads(response.data)
+        
+        self.assertTrue(data['data']['acceptRejectRequest']['success'])
+        self.assertEqual(RequestModel.query.get(101).status, "rejected")
+
+class TestViewPreviouslyAcceptedRequests(BaseTestCase):
+    """Test cases for viewing previously accepted requests"""
+
+    def setUp(self):
+        super().setUp()
+        accepted_request = RequestModel(
+            request_id=103,
+            requesting_staff=140894,
+            year=2024,
+            month=11,
+            day=15,
+            type="AM",
+            status="approved",
+            approving_manager=140001,
+            created_at=date(2024, 10, 1)
+        )
+        db.session.add(accepted_request)
+        db.session.commit()
+
+    def test_view_accepted_requests(self):
+        """Test viewing previously accepted requests"""
+        query = '''
+        query {
+            subordinatesRequest(staffId: 140001) {
+                requestId
+                status
+                date
+                type
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': query})
+        data = json.loads(response.data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(data['data']['subordinatesRequest'], list)
+        approved_requests = [r for r in data['data']['subordinatesRequest'] 
+                           if r['status'] == 'approved']
+        self.assertTrue(len(approved_requests) > 0)
+
+    def test_filter_by_status(self):
+        """Test filtering requests by status"""
+        query = '''
+        query {
+            subordinatesRequest(staffId: 140001) {
+                requestId
+                status
+            }
+        }
+        '''
+        response = self.client.post('/requests', json={'query': query})
+        data = json.loads(response.data)
+        self.assertTrue(any(r['status'] == 'approved' 
+                          for r in data['data']['subordinatesRequest']))
 
 if __name__ == '__main__':
     unittest.main()

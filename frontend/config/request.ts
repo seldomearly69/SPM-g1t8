@@ -3,7 +3,7 @@ import {
   CrossCircledIcon,
   StopwatchIcon,
 } from "@radix-ui/react-icons";
-import { CircleIcon } from "lucide-react";
+import { CircleIcon, HouseIcon, SchoolIcon } from "lucide-react";
 
 export const request_status = [
   {
@@ -32,12 +32,12 @@ export const schedule_status = [
   {
     value: "approved",
     label: "approved",
-    icon: CrossCircledIcon,
+    icon: CheckCircledIcon,
   },
   {
     value: "rejected",
     label: "rejected",
-    icon: CheckCircledIcon,
+    icon: CrossCircledIcon,
   },
 ];
 
@@ -45,12 +45,12 @@ export const availability = [
   {
     value: "office",
     label: "Office",
-    icon: CircleIcon,
+    icon: SchoolIcon,
   },
   {
-    value: "WFH",
+    value: "wfh",
     label: "WFH",
-    icon: CircleIcon,
+    icon: HouseIcon,
   },
 ];
 
@@ -61,13 +61,33 @@ export const department = [
     icon: CircleIcon,
   },
   {
-    value: "Marketing",
-    label: "Marketing",
+    value: "Engineering",
+    label: "Engineering",
     icon: CircleIcon,
   },
   {
-    value: "Engineering",
-    label: "Engineering",
+    value: "Solutioning",
+    label: "Solutioning",
+    icon: CircleIcon,
+  },
+  {
+    value: "IT",
+    label: "IT",
+    icon: CircleIcon,
+  },
+  {
+    value: "HR",
+    label: "HR",
+    icon: CircleIcon,
+  },
+  {
+    value: "Finance",
+    label: "Finance",
+    icon: CircleIcon,
+  },
+  {
+    value: "Consultancy",
+    label: "Consultancy",
     icon: CircleIcon,
   },
 ];

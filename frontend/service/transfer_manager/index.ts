@@ -5,6 +5,7 @@ export async function requestForTransfer(
   staffId: number,
   targetManager: number
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     mutation RequestForTransfer(
       $reason: String!
@@ -21,26 +22,34 @@ export async function requestForTransfer(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: {
-        reason: reason,
-        requestingManager: staffId,
-        targetManager: targetManager,
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.REQUESTS_API_URL
+        : process.env.NEXT_PUBLIC_REQUESTS_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: {
+          reason: reason,
+          requestingManager: staffId,
+          targetManager: targetManager,
+        },
+      }),
+    }
+  );
 
   const data = await res.json();
   return data;
 }
 
 export async function getTransferRequests(staffId: number, status?: string) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query TransferRequests($staffId: Int!, $status: String) {
       transferRequests(staffId: $staffId, status: $status) {
@@ -54,16 +63,23 @@ export async function getTransferRequests(staffId: number, status?: string) {
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { staffId: staffId, status: status },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.REQUESTS_API_URL
+        : process.env.NEXT_PUBLIC_REQUESTS_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { staffId: staffId, status: status },
+      }),
+    }
+  );
 
   const data = await res.json();
   return data;
@@ -73,6 +89,7 @@ export async function acceptRejectTransferRequest(
   newStatus: string,
   requestId: number
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     mutation AcceptRejectTransferRequest(
       $newStatus: String!
@@ -87,22 +104,30 @@ export async function acceptRejectTransferRequest(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { newStatus: newStatus, requestId: requestId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.REQUESTS_API_URL
+        : process.env.NEXT_PUBLIC_REQUESTS_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { newStatus: newStatus, requestId: requestId },
+      }),
+    }
+  );
 
   const data = await res.json();
   return data;
 }
 
 export async function getTransferOptions(staffId: number) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query TransferOptions($staffId: Int!) {
       transferOptions(staffId: $staffId) {
@@ -112,22 +137,30 @@ export async function getTransferOptions(staffId: number) {
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { staffId: staffId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.REQUESTS_API_URL
+        : process.env.NEXT_PUBLIC_REQUESTS_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { staffId: staffId },
+      }),
+    }
+  );
 
   const data = await res.json();
   return data;
 }
 
 export async function revertTransferRequest(requestId: number) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     mutation RevertTransfer($requestId: Int!) {
       revertTransfer(requestId: $requestId) {
@@ -137,16 +170,23 @@ export async function revertTransferRequest(requestId: number) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { requestId: requestId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.REQUESTS_API_URL
+        : process.env.NEXT_PUBLIC_REQUESTS_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { requestId: requestId },
+      }),
+    }
+  );
 
   const data = await res.json();
   return data;

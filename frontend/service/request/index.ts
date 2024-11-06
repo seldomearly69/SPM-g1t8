@@ -1,6 +1,8 @@
 import { gql } from "@apollo/client";
 
 export async function getOwnRequest(staffId: number) {
+  const isServer = typeof window === "undefined";
+
   const gqlString = gql`
     query ownRequests($staffId: Int!) {
       ownRequests(staffId: $staffId) {
@@ -17,9 +19,11 @@ export async function getOwnRequest(staffId: number) {
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -33,7 +37,7 @@ export async function getOwnRequest(staffId: number) {
 }
 
 export async function getSubordinatesRequest(managerId: number) {
-  // Define the GraphQL query
+  const isServer = typeof window === "undefined";
   const gqlString = `
     query subordinatesRequest($staffId: Int!) {
       subordinatesRequest(staffId: $staffId) {
@@ -52,9 +56,11 @@ export async function getSubordinatesRequest(managerId: number) {
   `;
 
   // Perform the fetch request
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -74,6 +80,7 @@ export async function getSubordinatesRequest(managerId: number) {
 }
 
 export async function getFileLink(fileKey: string) {
+  const isServer = typeof window === "undefined";
   const gqlString = `
     query getFileLink($fileKey: String!) {
       fileLink(fileKey: $fileKey) {
@@ -83,9 +90,11 @@ export async function getFileLink(fileKey: string) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -116,6 +125,7 @@ export async function approveRequest(
   newStatus: string,
   remarks: string
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = `
   mutation acceptRejectRequest($requestId: Int!, $newStatus: String!, $remarks: String) {
     acceptRejectRequest(requestId: $requestId, newStatus: $newStatus, remarks: $remarks) {
@@ -125,9 +135,11 @@ export async function approveRequest(
   }
 `;
 
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -145,6 +157,7 @@ export async function approveRequest(
 }
 
 export async function getIndividualRequest(requestId: number) {
+  const isServer = typeof window === "undefined";
   const gqlString = `
     query request($requestId: Int!) {
       request(requestId: $requestId) {
@@ -159,9 +172,11 @@ export async function getIndividualRequest(requestId: number) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -178,6 +193,7 @@ export async function withdrawApprovedRequest(
   requestId: number,
   newReason: string
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = `
     mutation WithdrawApprovedRequest($requestId: Int!, $newReason: String!) {
       withdrawApprovedRequest(requestId: $requestId, newReason: $newReason) {
@@ -187,9 +203,11 @@ export async function withdrawApprovedRequest(
     }
   `;
 
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -204,6 +222,7 @@ export async function withdrawApprovedRequest(
 
 
 export async function withdrawPendingRequest(requestId: number) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     mutation AcceptRejectRequest($requestId: Int!) {
       acceptRejectRequest(newStatus: "withdrawn", requestId: $requestId) {
@@ -213,9 +232,11 @@ export async function withdrawPendingRequest(requestId: number) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const res = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -229,6 +250,7 @@ export async function withdrawPendingRequest(requestId: number) {
 }
 
 export async function fetchPendingRequests() {
+  const isServer = typeof window === "undefined";
   const query = gql`
     query {
       pendingRequests {
@@ -239,9 +261,11 @@ export async function fetchPendingRequests() {
     }
   `;
 
-  const response = await fetch("http://localhost:5002/requests", {
-    method: "POST",
-    headers: {
+  const response = await fetch(
+    `${isServer ? process.env.REQUESTS_API_URL : process.env.NEXT_PUBLIC_REQUESTS_API_URL}`,
+    {
+      method: "POST",
+      headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ query: query.loc?.source?.body }),

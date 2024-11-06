@@ -5,6 +5,7 @@ export async function getOwnSchedule(
   year: number,
   staffId: number
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query ownSchedule($month: Int!, $year: Int!, $staffId: Int!) {
       ownSchedule(month: $month, year: $year, staffId: $staffId) {
@@ -14,23 +15,46 @@ export async function getOwnSchedule(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { month: month, year: year, staffId: staffId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { month: month, year: year, staffId: staffId },
+      }),
+    }
+  );
 
   const data = await res.json();
   return data;
 }
 
+export async function getTeamList(
+  month: number,
+  year: number,
+  staffId: number
+) {
+  const isServer = typeof window === "undefined";
+  const GET_MANAGER_LIST = gql`
+    query GetManagerList($staffId: Int!) {
+      managerList(staffId: $staffId) {
+        director_name
+        manager_list
+      }
+    }
+  `;
+}
 
 export async function getManagerList(staffId: number) {
+  const isServer = typeof window === "undefined";
   const gqlString = `
     query getManagerList($staffId: Int!) {
       managerList(staffId: $staffId) {
@@ -44,16 +68,23 @@ export async function getManagerList(staffId: number) {
     }
   `;
 
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString,
-      variables: { staffId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString,
+        variables: { staffId },
+      }),
+    }
+  );
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -71,6 +102,7 @@ export async function getTeamDetails(
   year: number,
   staffId: number
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
       teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {
@@ -90,16 +122,23 @@ export async function getTeamDetails(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { day: day, month: month, year: year, staffId: staffId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { day: day, month: month, year: year, staffId: staffId },
+      }),
+    }
+  );
   const data = await res.json();
   return data;
 }
@@ -110,8 +149,7 @@ export async function getTeamSchedule(
   year: number,
   staffId: number
 ) {
-  console.log(day, month, year, staffId);
-
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query teamSchedule($day: Int!, $month: Int!, $year: Int!, $staffId: Int!) {
       teamSchedule(day: $day, month: $month, year: $year, staffId: $staffId) {
@@ -124,16 +162,25 @@ export async function getTeamSchedule(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { day: day, month: month, year: year, staffId: staffId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { day: day, month: month, year: year, staffId: staffId },
+      }),
+    }
+  );
+  console.log("this is line 151 of getTeamSchedule", res);
+
   const data = await res.json();
   return data;
 }
@@ -143,6 +190,7 @@ export async function getDepartmentSchedule(
   year: number,
   staffId: number
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query departmentSchedule($month: Int!, $year: Int!, $staffId: Int!) {
       departmentSchedule(month: $month, year: $year, staffId: $staffId) {
@@ -157,21 +205,29 @@ export async function getDepartmentSchedule(
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { month: month, year: year, staffId: staffId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { month: month, year: year, staffId: staffId },
+      }),
+    }
+  );
   const data = await res.json();
   return data;
 }
 
 export async function getOverallAvailability(month: number, year: number) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query overallAvailability($month: Int!, $year: Int!) {
       overallAvailability(month: $month, year: $year) {
@@ -179,16 +235,23 @@ export async function getOverallAvailability(month: number, year: number) {
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { month: month, year: year },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { month: month, year: year },
+      }),
+    }
+  );
   const data = await res.json();
   return data;
 }
@@ -198,6 +261,7 @@ export async function getOverallSchedule(
   year: number,
   day: number
 ) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query overallSchedule($month: Int!, $year: Int!, $day: Int!) {
       overallSchedule(month: $month, year: $year, day: $day) {
@@ -217,21 +281,29 @@ export async function getOverallSchedule(
     }
   `;
 
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { month: month, year: year, day: day },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { month: month, year: year, day: day },
+      }),
+    }
+  );
   const data = await res.json();
   return data;
 }
 
 export async function getLeaves(month: number, year: number, staffId: number) {
+  const isServer = typeof window === "undefined";
   const gqlString = gql`
     query ownLeaves($month: Int!, $year: Int!, $staffId: Int!) {
       ownLeaves(month: $month, year: $year, staffId: $staffId) {
@@ -242,16 +314,23 @@ export async function getLeaves(month: number, year: number, staffId: number) {
       }
     }
   `;
-  const res = await fetch("http://localhost:5002/schedule", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: gqlString?.loc?.source?.body,
-      variables: { month: month, year: year, staffId: staffId },
-    }),
-  });
+  const res = await fetch(
+    `${
+      isServer
+        ? process.env.SCHEDULE_API_URL
+        : process.env.NEXT_PUBLIC_SCHEDULE_API_URL
+    }`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: gqlString?.loc?.source?.body,
+        variables: { month: month, year: year, staffId: staffId },
+      }),
+    }
+  );
   const data = await res.json();
   return data;
 }

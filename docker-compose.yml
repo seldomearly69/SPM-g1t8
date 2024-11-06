@@ -6,7 +6,7 @@ services:
 #################################
   db:
     container_name: db
-    build: ./database
+    build: ./backend/database
     ports: 
       - "5432:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
 #################################
   authentication:
     container_name: authentication
-    build: ./authentication
+    build: ./backend/authentication
     ports: 
       - "5001:5001"
     environment:
@@ -38,7 +38,7 @@ services:
 #################################
   requests:
     container_name: requests
-    build: ./requests
+    build: ./backend/requests
     ports: 
       - "5002:5002"
     environment:
@@ -56,7 +56,7 @@ services:
 #################################
   rabbitmq:
     container_name: amqp
-    build: ./amqp
+    build: ./backend/amqp
     ports:
       - "15672:15672"  # Expose RabbitMQ management interface
       - "5672:5672"    # Expose RabbitMQ main port
@@ -69,22 +69,11 @@ services:
 # Emailing service
 #################################
   emailing:
-    build: ./emailing
+    build: ./backend/emailing
     ports:
       - "5003:5003"
     depends_on:
       - rabbitmq
-    environment:
-      PYTHONUNBUFFERED: 1
-    networks:
-      - internal_network
-#################################
-# Frontend
-#################################
-  frontend:
-    build: ../frontend
-    ports:
-      - "3000:3000"
     environment:
       PYTHONUNBUFFERED: 1
     networks:
