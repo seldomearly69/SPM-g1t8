@@ -3,6 +3,7 @@ import { gql } from "@apollo/client";
 export async function getOwnRequest(staffId: number) {
   const isServer = typeof window === "undefined";
 
+  
   const gqlString = gql`
     query ownRequests($staffId: Int!) {
       ownRequests(staffId: $staffId) {
@@ -30,8 +31,8 @@ export async function getOwnRequest(staffId: number) {
       query: gqlString?.loc?.source?.body,
       variables: { staffId: staffId },
     }),
-  });
-
+    });
+    
   const data = await res.json();
   return data;
 }

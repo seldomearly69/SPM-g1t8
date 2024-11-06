@@ -32,7 +32,7 @@ export async function getOwnSchedule(
       }),
     }
   );
-
+  
   const data = await res.json();
   return data;
 }

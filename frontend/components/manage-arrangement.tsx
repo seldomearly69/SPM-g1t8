@@ -28,7 +28,6 @@ export default function ManageArrangementsPage({
     };
     fetchData();
   }, [user.staffId]);
-
   const handleRowClick = (row: any) => {
     if (row?.requestId) {
       router.push(`/dashboard/manage/${row.requestId}`);
