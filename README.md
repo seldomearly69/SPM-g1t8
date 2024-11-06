@@ -15,9 +15,6 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
-    </li>
-    <li>
       <a href="#built-with">Built With</a>
       <ul>
         <li><a href="#frontend">Frontend</a></li>
@@ -26,19 +23,18 @@
       </ul>
     </li>
     <li>
+      <a href="#continuous-integration">Continuous Integration</a>
+    </li>
+    <li>
+      <a href="#deployment">Deployment</a>
+    </li>
+    <li>
+      <a href="#prerequisites">Prerequisites</a>
+    </li>
+    <li>
       <a href="#getting-started">Getting Started</a>
     </li>
-    <li><a href="#continuous-integration">Continuous Integration</a></li>
-    <li>
-        <a href="#usage">Usage</a>
-        <ul>
-            <li><a href="#access-control">Access Control</a></li>
-            <li><a href="#staff-features">Staff Features</a></li>
-            <li><a href="#hr-features">HR Features</a></li>
-            <li><a href="#manager-features">Manager Features</a></li>
-        </ul>
-    </li>
-    <li><a href="#license">License</a></li>
+  
   </ol>
 </details>
 
@@ -67,6 +63,13 @@ Found in the folder `/backend`. Built with:
 - [GraphQl] - API (https://graphql.org/)
 - [S3] - File Storage (https://aws.amazon.com/s3/)
 - [RabbitMQ] - Message Queue (https://www.rabbitmq.com/)
+
+
+## Continuous Integration
+Continuous Integration is done through Github Actions. CI pipeline is set up to run on push to main branch. 
+
+Link to CI pipeline scripts:
+https://github.com/seldomearly69/SPM-g1t8/blob/main/.github/workflows/dockerimageci.yml
 
 ## Deployment
 
