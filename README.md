@@ -59,7 +59,7 @@ Found in the folder `/app`. Built with:
 Found in the folder `/backend`. Built with:
 
 - [Flask] - Python Framework (https://flask.palletsprojects.com/en/stable/)
-- [SQLAlchemy](https://www.sqlalchemy.org/)
+- [SQLAlchemy] - ORM (https://www.sqlalchemy.org/)
 - [GraphQl] - API (https://graphql.org/)
 - [S3] - File Storage (https://aws.amazon.com/s3/)
 - [RabbitMQ] - Message Queue (https://www.rabbitmq.com/)
