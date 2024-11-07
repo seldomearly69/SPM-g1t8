@@ -64,7 +64,7 @@ def check_amqp_connection():
         connection = create_connection()
         channel = connection.channel()
     return
-    
+
 from models import *
 # Custom Scalar for JSON
 class JSON(graphene.Scalar):
@@ -187,10 +187,6 @@ class Query1(graphene.ObjectType):
         month = graphene.Int(),
         year = graphene.Int()
     )
-
-    # Add resolver for department schedule (Shawn)
-    def resolve_department_schedule(self, info, month, year, staff_id, team_managers=None):
-        return resolve_department_schedule(month, year, staff_id, team_managers)
     
     def resolve_own_schedule(self, info, month, year, staff_id):
         # Extract the staff_id from the request context (if the user is authenticated and it's available)
