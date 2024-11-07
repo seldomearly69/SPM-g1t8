@@ -49,7 +49,7 @@ https://github.com/seldomearly69/SPM-g1t8
 
 ### Frontend
 
-Found in the folder `/app`. Built with:
+Found in the folder `/frontend`. Built with:
 
 - [Next.js] - React Framework (https://nextjs.org/)
 - [Tailwind CSS] - Styling (https://tailwindcss.com/)
